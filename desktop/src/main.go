@@ -32,6 +32,9 @@ type App struct {
 	mu             sync.Mutex
 	quitting       bool
 
+	windowReady     chan struct{}
+	windowReadyOnce sync.Once
+
 	trayClickMu    sync.Mutex
 	lastTrayClick  time.Time
 	trayClickTimer *time.Timer
@@ -195,11 +198,42 @@ func (a *App) boot() {
 	a.showDashboard(base)
 }
 
+// markWindowReady records that the shell webview finished its first
+// navigation. SetURL during WebView2 embed init panics on a nil controller,
+// so steering to the dashboard must wait for this signal.
+func (a *App) markWindowReady() {
+	a.windowReadyOnce.Do(func() {
+		if a.windowReady != nil {
+			close(a.windowReady)
+		}
+	})
+}
+
+func (a *App) isWindowReady() bool {
+	if a.windowReady == nil {
+		return true
+	}
+	select {
+	case <-a.windowReady:
+		return true
+	default:
+		return false
+	}
+}
+
 func (a *App) showDashboard(base string) {
 	if a.window == nil {
 		return
 	}
-	a.window.SetURL(base)
+	go func() {
+		if a.windowReady != nil {
+			select {
+			case <-a.windowReady:
+			case <-time.After(10 * time.Second):
+			}
+		}
+		a.window.SetURL(base)
+	}()
 	a.scheduleDragOverlay()
 	s := a.store.get()
 	go func() {
@@ -271,6 +305,9 @@ func (a *App) scheduleDragOverlay() {
 	go func() {
 		for range 40 {
 			time.Sleep(250 * time.Millisecond)
+			if !a.isWindowReady() {
+				continue
+			}
 			a.installDragOverlay()
 			a.installExternalLinks()
 		}
@@ -289,8 +326,9 @@ func (a *App) requestQuit() {
 func main() {
 	store := &settingsStore{cur: loadSettings()}
 	api := &App{
-		store: store,
-		sleep: &sleepGuard{},
+		store:       store,
+		sleep:       &sleepGuard{},
+		windowReady: make(chan struct{}),
 	}
 
 	app := application.New(application.Options{
@@ -337,7 +375,10 @@ func main() {
 	app.Event.On("desktop:close", func(_ *application.CustomEvent) {
 		api.hideToTray()
 	})
-	installDragOverlay := func(_ *application.WindowEvent) { api.scheduleDragOverlay() }
+	installDragOverlay := func(_ *application.WindowEvent) {
+		api.markWindowReady()
+		api.scheduleDragOverlay()
+	}
 	win.OnWindowEvent(events.Mac.WebViewDidFinishNavigation, installDragOverlay)
 	win.OnWindowEvent(events.Windows.WebViewNavigationCompleted, installDragOverlay)
 	win.OnWindowEvent(events.Linux.WindowLoadFinished, installDragOverlay)
