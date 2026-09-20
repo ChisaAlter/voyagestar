@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.setup.password_file import (
+from voyagestar.infra.setup.password_file import (
     WIZARD_FILE_NAME,
     boot_self_heal,
     ensure_password,

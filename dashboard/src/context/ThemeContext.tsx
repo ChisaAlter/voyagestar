@@ -116,10 +116,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (palette !== "custom") return;
     const el =
-      document.getElementById("octop-custom-palette") ??
+      document.getElementById("voyagestar-custom-palette") ??
       (() => {
         const node = document.createElement("style");
-        node.id = "octop-custom-palette";
+        node.id = "voyagestar-custom-palette";
         document.head.appendChild(node);
         return node;
       })();

@@ -1,7 +1,7 @@
 {
     ".url": {
-        "octop.Application": {
-            "title": "OCTOP",
+        "voyagestar.Application": {
+            "title": "VOYAGESTAR",
             "icon": "images/icon_{0}.png",
             "type": "iframe",
             "protocol": "http",

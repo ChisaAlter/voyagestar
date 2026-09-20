@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from octop.infra.agents.plugins.bundled import default_bundled_plugins_root
-from octop.infra.agents.plugins.seed import seed_bundled_plugins
+from voyagestar.infra.agents.plugins.bundled import default_bundled_plugins_root
+from voyagestar.infra.agents.plugins.seed import seed_bundled_plugins
 
 _EXPECTED = frozenset(
     {

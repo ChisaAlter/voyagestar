@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from octop.infra.utils.ssrf_guard import (
+from voyagestar.infra.utils.ssrf_guard import (
     UnsafeOutboundUrl,
     host_allowed_for_issuer,
     issuer_base_domain,

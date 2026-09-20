@@ -4,46 +4,50 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import DatabaseConfig, OctopConfig
-from octop.infra.agents.memory_backend import memory_backend_from_agent_config, open_memory_kwargs
-from octop.infra.errors import OctopError
+from voyagestar.config import DatabaseConfig, VoyagestarConfig
+from voyagestar.infra.agents.memory_backend import (
+    memory_backend_from_agent_config,
+    open_memory_kwargs,
+)
+from voyagestar.infra.errors import VoyagestarError
 
 
 def test_default_memory_backend_empty_on_sqlite_control_plane() -> None:
-    assert memory_backend_from_agent_config({}, octop_config=OctopConfig()) == {}
+    assert memory_backend_from_agent_config({}, voyagestar_config=VoyagestarConfig()) == {}
 
 
 def test_default_memory_backend_follows_postgresql_control_plane() -> None:
-    cfg = OctopConfig(
+    cfg = VoyagestarConfig(
         database=DatabaseConfig(
             driver="postgresql",
             host="127.0.0.1",
-            database="octop",
-            user="octop",
+            database="voyagestar",
+            user="voyagestar",
             password="x",
         )
     )
-    out = memory_backend_from_agent_config({}, octop_config=cfg)
+    out = memory_backend_from_agent_config({}, voyagestar_config=cfg)
     assert out["memory_backend"]["type"] == "postgres"
     assert "127.0.0.1" in out["memory_backend"]["dsn"]
     assert (
-        out["memory_backend"]["dsn"].endswith("/octop") or "/octop" in out["memory_backend"]["dsn"]
+        out["memory_backend"]["dsn"].endswith("/voyagestar")
+        or "/voyagestar" in out["memory_backend"]["dsn"]
     )
 
 
 def test_explicit_sqlite_overrides_postgresql_control_plane() -> None:
-    cfg = OctopConfig(
+    cfg = VoyagestarConfig(
         database=DatabaseConfig(
             driver="postgresql",
             host="127.0.0.1",
-            database="octop",
-            user="octop",
+            database="voyagestar",
+            user="voyagestar",
             password="x",
         )
     )
     out = memory_backend_from_agent_config(
         {"memory": {"backend": {"type": "sqlite"}}},
-        octop_config=cfg,
+        voyagestar_config=cfg,
         workspace_dir=Path("/tmp/ws"),
     )
     assert out["memory_backend"]["type"] == "sqlite"
@@ -54,62 +58,62 @@ def test_explicit_sqlite_overrides_postgresql_control_plane() -> None:
 
 def test_sqlite_explicit_uses_system_files_path(tmp_path: Path) -> None:
     out = memory_backend_from_agent_config(
-        {"memory": {"backend": {"type": "sqlite"}}, "system_files_path": ".octop"},
-        octop_config=OctopConfig(),
+        {"memory": {"backend": {"type": "sqlite"}}, "system_files_path": ".voyagestar"},
+        voyagestar_config=VoyagestarConfig(),
         workspace_dir=tmp_path,
     )
-    assert Path(out["memory_backend"]["db_path"]) == tmp_path / ".octop" / "memory.sqlite"
+    assert Path(out["memory_backend"]["db_path"]) == tmp_path / ".voyagestar" / "memory.sqlite"
 
 
 def test_postgres_explicit_dsn() -> None:
     out = memory_backend_from_agent_config(
         {"memory": {"backend": {"type": "postgres", "dsn": "postgresql://a@b/c"}}},
-        octop_config=OctopConfig(),
+        voyagestar_config=VoyagestarConfig(),
     )
     assert out["memory_backend"] == {"type": "postgres", "dsn": "postgresql://a@b/c"}
 
 
 def test_postgres_use_control_plane_dsn() -> None:
-    cfg = OctopConfig(
+    cfg = VoyagestarConfig(
         database=DatabaseConfig(
             driver="postgresql",
             host="127.0.0.1",
-            database="octop",
-            user="octop",
+            database="voyagestar",
+            user="voyagestar",
             password="x",
-            url="postgresql://octop:x@127.0.0.1:5432/octop?sslmode=require",
+            url="postgresql://voyagestar:x@127.0.0.1:5432/voyagestar?sslmode=require",
         )
     )
     out = memory_backend_from_agent_config(
         {"memory": {"backend": {"type": "postgres", "use_control_plane_dsn": True}}},
-        octop_config=cfg,
+        voyagestar_config=cfg,
     )
     assert out["memory_backend"]["type"] == "postgres"
     assert "sslmode=require" in out["memory_backend"]["dsn"]
 
 
 def test_use_control_plane_dsn_requires_postgresql() -> None:
-    with pytest.raises(OctopError, match="control plane"):
+    with pytest.raises(VoyagestarError, match="control plane"):
         memory_backend_from_agent_config(
             {"memory": {"backend": {"type": "postgres", "use_control_plane_dsn": True}}},
-            octop_config=OctopConfig(),
+            voyagestar_config=VoyagestarConfig(),
         )
 
 
 def test_open_memory_kwargs_follows_postgresql_control_plane(tmp_path: Path) -> None:
-    cfg = OctopConfig(
+    cfg = VoyagestarConfig(
         database=DatabaseConfig(
             driver="postgresql",
             host="127.0.0.1",
-            database="octop",
-            user="octop",
+            database="voyagestar",
+            user="voyagestar",
             password="x",
         )
     )
     ns, backend, backend_config = open_memory_kwargs(
         agent_id="a1",
         cfg={},
-        octop_config=cfg,
+        voyagestar_config=cfg,
         workspace_dir=tmp_path,
     )
     assert ns == "agent_a1"
@@ -119,16 +123,16 @@ def test_open_memory_kwargs_follows_postgresql_control_plane(tmp_path: Path) -> 
 
 
 def test_memory_db_path_prefers_existing_nested(tmp_path: Path) -> None:
-    from octop.api.common.memory_client import memory_db_path
+    from voyagestar.api.common.memory_client import memory_db_path
 
-    nested = tmp_path / ".octop" / "memory.sqlite"
+    nested = tmp_path / ".voyagestar" / "memory.sqlite"
     nested.parent.mkdir(parents=True)
     nested.write_text("", encoding="utf-8")
     assert memory_db_path(tmp_path) == nested
 
 
 def test_memory_db_path_legacy_when_only_root_exists(tmp_path: Path) -> None:
-    from octop.api.common.memory_client import memory_db_path
+    from voyagestar.api.common.memory_client import memory_db_path
 
     root = tmp_path / "memory.sqlite"
     root.write_text("", encoding="utf-8")
@@ -136,14 +140,14 @@ def test_memory_db_path_legacy_when_only_root_exists(tmp_path: Path) -> None:
 
 
 def test_memory_db_path_new_layout_signal_without_sqlite_yet(tmp_path: Path) -> None:
-    from octop.api.common.memory_client import memory_db_path
+    from voyagestar.api.common.memory_client import memory_db_path
 
-    (tmp_path / ".octop" / "_builtin_skills").mkdir(parents=True)
-    assert memory_db_path(tmp_path) == tmp_path / ".octop" / "memory.sqlite"
+    (tmp_path / ".voyagestar" / "_builtin_skills").mkdir(parents=True)
+    assert memory_db_path(tmp_path) == tmp_path / ".voyagestar" / "memory.sqlite"
 
 
-def test_memory_db_path_empty_octop_dir_stays_legacy(tmp_path: Path) -> None:
-    from octop.api.common.memory_client import memory_db_path
+def test_memory_db_path_empty_voyagestar_dir_stays_legacy(tmp_path: Path) -> None:
+    from voyagestar.api.common.memory_client import memory_db_path
 
-    (tmp_path / ".octop").mkdir()
+    (tmp_path / ".voyagestar").mkdir()
     assert memory_db_path(tmp_path) == tmp_path / "memory.sqlite"

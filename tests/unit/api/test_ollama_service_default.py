@@ -5,7 +5,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from octop.api.routers import ollama_models
+from voyagestar.api.routers import ollama_models
 
 
 def test_ollama_service_defaults_to_disabled_when_unset() -> None:

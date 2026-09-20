@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.users.preferences import (
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.users.preferences import (
     ModelReasoningPreference,
     get_model_reasoning_from_json,
     get_preferred_model_from_json,
@@ -44,7 +44,7 @@ def test_validate_title_fallback_to_hostname() -> None:
 
 def test_validate_rejects_over_limit() -> None:
     items = [{"url": f"https://site{i}.test", "title": f"S{i}"} for i in range(13)]
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         validate_remote_browser_bookmarks(items)
     assert ei.value.code is ErrorCode.SLASH_BAD_ARGS
 

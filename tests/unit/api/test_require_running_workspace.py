@@ -7,8 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from octop.api.common.workspace import require_running_workspace
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.api.common.workspace import require_running_workspace
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 
 def _server(
@@ -41,7 +41,7 @@ async def test_require_running_workspace_falls_back_during_rebuild() -> None:
     user = SimpleNamespace(id=1, is_admin=False)
     server = _server(
         row=row,
-        get_agent=OctopError(ErrorCode.AGENT_NOT_RUNNING, "agent 'A1' not running"),
+        get_agent=VoyagestarError(ErrorCode.AGENT_NOT_RUNNING, "agent 'A1' not running"),
         workspace_for_agent=fallback_ws,
     )
 
@@ -56,11 +56,11 @@ async def test_require_running_workspace_still_raises_when_stopped() -> None:
     user = SimpleNamespace(id=1, is_admin=False)
     server = _server(
         row=row,
-        get_agent=OctopError(ErrorCode.AGENT_NOT_RUNNING, "agent 'A1' not running"),
+        get_agent=VoyagestarError(ErrorCode.AGENT_NOT_RUNNING, "agent 'A1' not running"),
         workspace_for_agent=object(),
     )
 
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await require_running_workspace("A1", user=user, as_user=None, server=server)
     assert ei.value.code is ErrorCode.AGENT_NOT_RUNNING
     server.app_runtime.agent_registry.workspace_for_agent.assert_not_called()
@@ -72,11 +72,11 @@ async def test_require_running_workspace_reraises_when_fallback_missing() -> Non
     user = SimpleNamespace(id=1, is_admin=False)
     server = _server(
         row=row,
-        get_agent=OctopError(ErrorCode.AGENT_NOT_RUNNING, "agent 'A1' not running"),
+        get_agent=VoyagestarError(ErrorCode.AGENT_NOT_RUNNING, "agent 'A1' not running"),
         workspace_for_agent=None,
     )
 
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await require_running_workspace("A1", user=user, as_user=None, server=server)
     assert ei.value.code is ErrorCode.AGENT_NOT_RUNNING
     server.app_runtime.agent_registry.workspace_for_agent.assert_called_once_with("A1")
@@ -88,11 +88,11 @@ async def test_require_running_workspace_does_not_mask_failed_agent() -> None:
     user = SimpleNamespace(id=1, is_admin=False)
     server = _server(
         row=row,
-        get_agent=OctopError(ErrorCode.AGENT_FAILED, "agent 'A1' failed to start"),
+        get_agent=VoyagestarError(ErrorCode.AGENT_FAILED, "agent 'A1' failed to start"),
         workspace_for_agent=object(),
     )
 
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await require_running_workspace("A1", user=user, as_user=None, server=server)
     assert ei.value.code is ErrorCode.AGENT_FAILED
     server.app_runtime.agent_registry.workspace_for_agent.assert_not_called()

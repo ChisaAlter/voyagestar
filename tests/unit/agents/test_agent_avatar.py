@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from harness_agent.backends.utils import BackendOperationNotSupportedError
 
-from octop.infra.agents.avatar import (
+from voyagestar.infra.agents.avatar import (
     MAX_AVATAR_BYTES,
     agent_avatar_api_path,
     delete_workspace_avatar,
@@ -17,7 +17,7 @@ from octop.infra.agents.avatar import (
     sniff_avatar_media_type,
     write_workspace_avatar,
 )
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 8
 JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 8
@@ -40,13 +40,13 @@ class _MemoryWorkspace:
 def test_sniff_and_reject() -> None:
     assert sniff_avatar_media_type(PNG) == "image/png"
     assert sniff_avatar_media_type(JPEG) == "image/jpeg"
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         sniff_avatar_media_type(b"")
     assert raised.value.code is ErrorCode.AVATAR_INVALID
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         sniff_avatar_media_type(b"not-an-image")
     assert raised.value.code is ErrorCode.AVATAR_INVALID
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         sniff_avatar_media_type(b"\x89PNG\r\n\x1a\n" + b"x" * (MAX_AVATAR_BYTES + 1))
     assert raised.value.code is ErrorCode.AVATAR_TOO_LARGE
 
@@ -54,16 +54,16 @@ def test_sniff_and_reject() -> None:
 @pytest.mark.asyncio
 async def test_write_read_delete_roundtrip() -> None:
     workspace = _MemoryWorkspace()
-    assert await write_workspace_avatar(workspace, JPEG) == ".octop/avatar.jpg"
+    assert await write_workspace_avatar(workspace, JPEG) == ".voyagestar/avatar.jpg"
     found = await read_workspace_avatar(workspace)
     assert found is not None
     data, media_type = found
     assert media_type == "image/jpeg"
     assert data == JPEG
-    assert workspace.files == {".octop/avatar.jpg": JPEG}
+    assert workspace.files == {".voyagestar/avatar.jpg": JPEG}
     assert agent_avatar_api_path("agent01") == "/api/agents/agent01/avatar"
     await write_workspace_avatar(workspace, PNG)
-    assert set(workspace.files) == {".octop/avatar.png"}
+    assert set(workspace.files) == {".voyagestar/avatar.png"}
     await delete_workspace_avatar(workspace)
     assert await read_workspace_avatar(workspace) is None
 
@@ -75,8 +75,8 @@ async def test_write_skips_unsupported_mkdir() -> None:
             raise BackendOperationNotSupportedError("mkdir", "CosBackend")
 
     workspace = _NoMkdir()
-    assert await write_workspace_avatar(workspace, PNG) == ".octop/avatar.png"
-    assert workspace.files[".octop/avatar.png"] == PNG
+    assert await write_workspace_avatar(workspace, PNG) == ".voyagestar/avatar.png"
+    assert workspace.files[".voyagestar/avatar.png"] == PNG
 
 
 @pytest.mark.asyncio
@@ -107,7 +107,7 @@ def test_read_snapshot_avatar_and_display_url(tmp_path) -> None:
         is None
     )
 
-    avatar = tmp_path / ".octop" / "avatar.png"
+    avatar = tmp_path / ".voyagestar" / "avatar.png"
     avatar.parent.mkdir(parents=True)
     avatar.write_bytes(PNG)
     found = read_snapshot_avatar(tmp_path)
@@ -159,7 +159,7 @@ async def test_materialize_remote_icon_url_writes_workspace_avatar(
         "https://cdn.example.com/a.png",
     )
     assert ok is True
-    assert workspace.files[".octop/avatar.png"] == PNG
+    assert workspace.files[".voyagestar/avatar.png"] == PNG
     assert registry.icon_url == "/api/agents/agt1/avatar"
 
     assert (

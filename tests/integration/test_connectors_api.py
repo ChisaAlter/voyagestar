@@ -7,12 +7,12 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from octop.infra.connectors.custom_mcp import CUSTOM_MCP_KIND
-from octop.infra.connectors.oauth.registry import save_oauth_ctx
-from octop.infra.utils.ulid import new_ulid
-from tests.support.app import octop_client, write_octop_config
+from tests.support.app import voyagestar_client, write_voyagestar_config
 from tests.support.auth import auth_header, bootstrap_admin, create_user, resolve_user_id
 from tests.support.http import ws_chat_turn
+from voyagestar.infra.connectors.custom_mcp import CUSTOM_MCP_KIND
+from voyagestar.infra.connectors.oauth.registry import save_oauth_ctx
+from voyagestar.infra.utils.ulid import new_ulid
 
 
 @pytest.fixture
@@ -316,7 +316,7 @@ async def test_create_and_edit_instance_description(env):
 
 async def test_probe_returns_tools(env, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.qq_mail.probe_credentials",
+        "voyagestar.infra.connectors.gateway.adapters.qq_mail.probe_credentials",
         lambda _creds: None,
     )
     c, _, auth, _ = env
@@ -338,7 +338,7 @@ async def test_probe_returns_tools(env, monkeypatch: pytest.MonkeyPatch):
 
 async def test_internal_mcp_tools_list(env, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.qq_mail.probe_credentials",
+        "voyagestar.infra.connectors.gateway.adapters.qq_mail.probe_credentials",
         lambda _creds: None,
     )
     c, _, auth, _ = env
@@ -370,13 +370,13 @@ async def test_auth_info(env):
     assert data["auth_hint"]
 
 
-async def test_oauth_start_public_http_notion_error_is_actionable(tmp_octop_home: Path):
-    write_octop_config(tmp_octop_home)
-    async with octop_client(tmp_octop_home) as (c, _srv):
-        await bootstrap_admin(c, tmp_octop_home)
+async def test_oauth_start_public_http_notion_error_is_actionable(tmp_voyagestar_home: Path):
+    write_voyagestar_config(tmp_voyagestar_home)
+    async with voyagestar_client(tmp_voyagestar_home) as (c, _srv):
+        await bootstrap_admin(c, tmp_voyagestar_home)
         auth = await auth_header(c)
         mocked_start = AsyncMock()
-        with patch("octop.api.routers.connectors.start_oauth_for_target", mocked_start):
+        with patch("voyagestar.api.routers.connectors.start_oauth_for_target", mocked_start):
             r = await c.post(
                 "/api/connectors/oauth/notion/start",
                 headers={**auth, "host": "58.87.70.170"},
@@ -449,7 +449,7 @@ async def test_install_cli_admin_ok_mocked(env, monkeypatch: pytest.MonkeyPatch)
         }
 
     monkeypatch.setattr(
-        "octop.api.routers.connectors.install_connector_cli",
+        "voyagestar.api.routers.connectors.install_connector_cli",
         _fake_install,
     )
     r = await c.post("/api/connectors/feishu-cli/install-cli", headers=auth)
@@ -463,7 +463,7 @@ async def test_cli_status_available_to_non_admin(env, monkeypatch: pytest.Monkey
     c, _, admin_auth, _ = env
     user_auth = await create_user(c, admin_auth, username="cli_status_user")
     monkeypatch.setattr(
-        "octop.api.routers.connectors.cli_install_status",
+        "voyagestar.api.routers.connectors.cli_install_status",
         lambda kind: {
             "ok": True,
             "kind": kind,
@@ -596,7 +596,7 @@ async def test_custom_mcp_oauth_callback_applies_tokens(env):
     )
 
     with patch(
-        "octop.api.routers.connectors.exchange_oauth_code",
+        "voyagestar.api.routers.connectors.exchange_oauth_code",
         new_callable=AsyncMock,
         return_value={
             "access_token": "new-access-token",
@@ -609,7 +609,7 @@ async def test_custom_mcp_oauth_callback_applies_tokens(env):
             follow_redirects=False,
         )
     assert callback.status_code == 200
-    assert "octop:connector-oauth" in callback.text
+    assert "voyagestar:connector-oauth" in callback.text
 
     stored = await c.get("/api/connectors/custom-mcp", headers=auth)
     assert stored.status_code == 200
@@ -646,8 +646,8 @@ async def test_custom_mcp_oauth_start_unified(env):
         )
     )
     with (
-        patch("octop.api.routers.connectors._is_public_http_uri", return_value=False),
-        patch("octop.api.routers.connectors.start_oauth_for_target", mocked_start),
+        patch("voyagestar.api.routers.connectors._is_public_http_uri", return_value=False),
+        patch("voyagestar.api.routers.connectors.start_oauth_for_target", mocked_start),
     ):
         r = await c.post(
             "/api/connectors/oauth/start",

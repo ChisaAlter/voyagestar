@@ -7,13 +7,13 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import load_config
-from octop.infra.db.factory import open_database, should_defer_control_plane_db
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import load_config
+from voyagestar.infra.db.factory import open_database, should_defer_control_plane_db
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def test_legacy_config_without_database_uses_paths_db(tmp_path: Path):
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(json.dumps({"port": 9000}))
     paths = PathLayout(root)
@@ -24,7 +24,7 @@ def test_legacy_config_without_database_uses_paths_db(tmp_path: Path):
 
 
 def test_should_defer_when_sqlite_file_missing(tmp_path: Path):
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(json.dumps({"port": 8088}))
     paths = PathLayout(root)
@@ -33,27 +33,27 @@ def test_should_defer_when_sqlite_file_missing(tmp_path: Path):
 
 
 def test_should_not_defer_when_sqlite_exists(tmp_path: Path):
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(json.dumps({"port": 8088}))
-    (root / "octop.db").write_bytes(b"")
+    (root / "voyagestar.db").write_bytes(b"")
     paths = PathLayout(root)
     cfg = load_config(paths.config)
     assert should_defer_control_plane_db(cfg, paths) is False
 
 
 def test_should_not_defer_when_database_env_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(json.dumps({"port": 8088}))
-    monkeypatch.setenv("OCTOP_DATABASE_SQLITE_PATH", str(root / "env.db"))
+    monkeypatch.setenv("VOYAGESTAR_DATABASE_SQLITE_PATH", str(root / "env.db"))
     paths = PathLayout(root)
     cfg = load_config(paths.config)
     assert should_defer_control_plane_db(cfg, paths) is False
 
 
 def test_should_not_defer_postgresql(tmp_path: Path):
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(
         json.dumps(
@@ -61,8 +61,8 @@ def test_should_not_defer_postgresql(tmp_path: Path):
                 "database": {
                     "driver": "postgresql",
                     "host": "localhost",
-                    "database": "octop",
-                    "user": "octop",
+                    "database": "voyagestar",
+                    "user": "voyagestar",
                     "password": "x",
                 }
             }
@@ -74,10 +74,10 @@ def test_should_not_defer_postgresql(tmp_path: Path):
 
 
 def test_sqlite_probe_does_not_create_missing_file(tmp_path: Path):
-    from octop.config import DatabaseConfig
-    from octop.infra.db.probe import probe_database
+    from voyagestar.config import DatabaseConfig
+    from voyagestar.infra.db.probe import probe_database
 
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     paths = PathLayout(root)
     target = root / "data" / "fresh.db"
@@ -91,7 +91,7 @@ def test_sqlite_probe_does_not_create_missing_file(tmp_path: Path):
 
 
 def test_config_with_database_section_uses_sqlite_path(tmp_path: Path):
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(
         json.dumps({"database": {"driver": "sqlite", "sqlite_path": "data/app.db"}})
@@ -104,10 +104,10 @@ def test_config_with_database_section_uses_sqlite_path(tmp_path: Path):
 
 
 def test_env_sqlite_path_without_database_section(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(json.dumps({"port": 8088}))
-    monkeypatch.setenv("OCTOP_DATABASE_SQLITE_PATH", "/tmp/custom-octop.db")
+    monkeypatch.setenv("VOYAGESTAR_DATABASE_SQLITE_PATH", "/tmp/custom-voyagestar.db")
     paths = PathLayout(root)
     cfg = load_config(paths.config)
     assert cfg.database_in_file is False
@@ -117,8 +117,8 @@ def test_env_sqlite_path_without_database_section(tmp_path: Path, monkeypatch: p
 
 def test_postgresql_returns_postgres_pool(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     # Unit test without live server: monkeypatch PostgresPool.__init__ to no-op pool.
-    from octop.infra.db import factory as factory_mod
-    from octop.infra.db.pool import PostgresPool
+    from voyagestar.infra.db import factory as factory_mod
+    from voyagestar.infra.db.pool import PostgresPool
 
     created: dict[str, str] = {}
 
@@ -132,7 +132,7 @@ def test_postgresql_returns_postgres_pool(tmp_path: Path, monkeypatch: pytest.Mo
 
     monkeypatch.setattr(factory_mod, "PostgresPool", FakePool)
 
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     (root / "config.json").write_text(
         json.dumps(
@@ -140,8 +140,8 @@ def test_postgresql_returns_postgres_pool(tmp_path: Path, monkeypatch: pytest.Mo
                 "database": {
                     "driver": "postgresql",
                     "host": "localhost",
-                    "database": "octop",
-                    "user": "octop",
+                    "database": "voyagestar",
+                    "user": "voyagestar",
                     "password": "x",
                 }
             }
@@ -151,4 +151,4 @@ def test_postgresql_returns_postgres_pool(tmp_path: Path, monkeypatch: pytest.Mo
     cfg = load_config(paths.config)
     pool = open_database(cfg, paths)
     assert pool.dialect == "postgresql"
-    assert "octop" in created["conninfo"]
+    assert "voyagestar" in created["conninfo"]

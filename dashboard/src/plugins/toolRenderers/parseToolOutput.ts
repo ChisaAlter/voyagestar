@@ -1,6 +1,6 @@
-import type { OctopUiHint, ParsedToolOutput } from "./types";
+import type { VoyagestarUiHint, ParsedToolOutput } from "./types";
 
-function asOctopUi(value: unknown): OctopUiHint | undefined {
+function asVoyagestarUi(value: unknown): VoyagestarUiHint | undefined {
   if (!value || typeof value !== "object") return undefined;
   const obj = value as Record<string, unknown>;
   const renderer = typeof obj.renderer === "string" ? obj.renderer.trim() : "";
@@ -13,10 +13,10 @@ function asOctopUi(value: unknown): OctopUiHint | undefined {
 }
 
 /**
- * Parse tool ``output`` for the ``octop_ui`` envelope.
+ * Parse tool ``output`` for the ``voyagestar_ui`` envelope.
  * Accepts a JSON string or an already-parsed object.
  */
-export function parseOctopToolOutput(output: unknown): ParsedToolOutput {
+export function parseVoyagestarToolOutput(output: unknown): ParsedToolOutput {
   if (output === undefined || output === null || output === "") {
     return {
       isJson: false,
@@ -33,7 +33,7 @@ export function parseOctopToolOutput(output: unknown): ParsedToolOutput {
     return {
       isJson: true,
       raw: output,
-      octopUi: asOctopUi(obj.octop_ui),
+      voyagestarUi: asVoyagestarUi(obj.voyagestar_ui),
       data: "data" in obj ? obj.data : undefined,
       text: typeof obj.text === "string" ? obj.text : undefined,
     };
@@ -53,10 +53,10 @@ export function parseOctopToolOutput(output: unknown): ParsedToolOutput {
       };
     }
     const obj = raw as Record<string, unknown>;
-    const octopUi = asOctopUi(obj.octop_ui);
+    const voyagestarUi = asVoyagestarUi(obj.voyagestar_ui);
     const text = typeof obj.text === "string" ? obj.text : undefined;
     const data = "data" in obj ? obj.data : undefined;
-    return { isJson: true, raw, octopUi, data, text };
+    return { isJson: true, raw, voyagestarUi, data, text };
   } catch {
     return { isJson: false, raw: output, text: output };
   }
@@ -67,7 +67,7 @@ export function mergePatchedToolOutput(
   previousOutput: string | undefined,
   nextData: unknown,
 ): string {
-  const parsed = parseOctopToolOutput(previousOutput);
+  const parsed = parseVoyagestarToolOutput(previousOutput);
   if (parsed.isJson && parsed.raw && typeof parsed.raw === "object") {
     const base = { ...(parsed.raw as Record<string, unknown>) };
     base.data = nextData;

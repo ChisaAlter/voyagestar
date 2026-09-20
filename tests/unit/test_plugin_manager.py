@@ -1,4 +1,4 @@
-"""Unit tests for Octop plugin manager."""
+"""Unit tests for Voyagestar plugin manager."""
 
 from __future__ import annotations
 
@@ -11,13 +11,13 @@ from typing import Any
 import pytest
 from harness_agent.plugins import PluginRegistry
 
-from octop.infra.agents.plugins.manager import (
+from voyagestar.infra.agents.plugins.manager import (
     PluginManager,
     normalize_plugin_download_url,
     parse_plugin_icon,
     parse_plugin_ui_meta,
 )
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 _FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "plugins" / "echo-tool"
 
@@ -109,10 +109,10 @@ def test_install_url_rejects_non_zip(tmp_path: Path, monkeypatch: pytest.MonkeyP
         return (str(filename), None)
 
     monkeypatch.setattr(
-        "octop.infra.agents.plugins.manager.urllib.request.urlretrieve",
+        "voyagestar.infra.agents.plugins.manager.urllib.request.urlretrieve",
         fake_retrieve,
     )
-    with pytest.raises(OctopError) as excinfo:
+    with pytest.raises(VoyagestarError) as excinfo:
         mgr.install_url("https://example.com/not-a-plugin.zip")
     assert excinfo.value.code is ErrorCode.PLUGIN_INVALID_ARCHIVE
     assert excinfo.value.status == 400
@@ -136,7 +136,7 @@ def test_install_url_accepts_valid_zip(tmp_path: Path, monkeypatch: pytest.Monke
         return (str(filename), None)
 
     monkeypatch.setattr(
-        "octop.infra.agents.plugins.manager.urllib.request.urlretrieve",
+        "voyagestar.infra.agents.plugins.manager.urllib.request.urlretrieve",
         fake_retrieve,
     )
     loaded = mgr.install_url("https://example.com/echo-tool.zip", force=True)
@@ -161,7 +161,7 @@ def test_install_archive_rejects_non_zip(tmp_path: Path) -> None:
     mgr = PluginManager(plugins_dir=tmp_path / "plugins", config_path=config_path)
     archive = tmp_path / "not-a-zip.zip"
     archive.write_text("not a zip", encoding="utf-8")
-    with pytest.raises(OctopError) as excinfo:
+    with pytest.raises(VoyagestarError) as excinfo:
         mgr.install_archive(archive)
     assert excinfo.value.code is ErrorCode.PLUGIN_INVALID_ARCHIVE
     assert excinfo.value.status == 400
@@ -172,7 +172,7 @@ def test_install_path_already_exists(tmp_path: Path) -> None:
     config_path.write_text("{}", encoding="utf-8")
     mgr = PluginManager(plugins_dir=tmp_path / "plugins", config_path=config_path)
     mgr.install_path(_FIXTURE, force=True)
-    with pytest.raises(OctopError) as excinfo:
+    with pytest.raises(VoyagestarError) as excinfo:
         mgr.install_path(_FIXTURE, force=False)
     assert excinfo.value.code is ErrorCode.PLUGIN_ALREADY_EXISTS
     assert excinfo.value.status == 409
@@ -223,7 +223,7 @@ def test_parse_plugin_ui_meta_and_list(tmp_path: Path) -> None:
     }
     resolved = mgr.resolve_ui_file("with-ui", "dist/index.js")
     assert resolved.name == "index.js"
-    with pytest.raises(OctopError) as excinfo:
+    with pytest.raises(VoyagestarError) as excinfo:
         mgr.resolve_ui_file("with-ui", "../plugin.yaml")
     assert excinfo.value.code is ErrorCode.NOT_FOUND
 
@@ -300,7 +300,7 @@ def test_set_enabled_refuses_corrupt_config_and_preserves_bytes(tmp_path: Path) 
 
     corrupt = '{"bind_host": "0.0.0.0", "database": {"driver": "postgresql"},}'
     config_path.write_text(corrupt, encoding="utf-8")
-    with pytest.raises(OctopError) as excinfo:
+    with pytest.raises(VoyagestarError) as excinfo:
         mgr.set_enabled("echo-tool", False)
     assert excinfo.value.code is ErrorCode.CONFIG_FILE_CORRUPT
     assert config_path.read_text(encoding="utf-8") == corrupt

@@ -7,8 +7,8 @@ import urllib.error
 import urllib.request
 from unittest import mock
 
-from octop.infra.providers.codex_apply import CODEX_MODELS, CODEX_PROVIDER_NAME
-from octop.infra.providers.codex_oauth import (
+from voyagestar.infra.providers.codex_apply import CODEX_MODELS, CODEX_PROVIDER_NAME
+from voyagestar.infra.providers.codex_oauth import (
     build_codex_headers,
     exchange_device_code,
     poll_device_token,

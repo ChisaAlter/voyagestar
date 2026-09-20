@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`octop.infra.agents.manager` internals."""
+"""Unit tests for :mod:`voyagestar.infra.agents.manager` internals."""
 
 from __future__ import annotations
 
@@ -12,17 +12,17 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.i18n.domains.agents import NO_MODELS_CONFIGURED, format_agent_start_error
-from octop.infra.agents.experts.catalog import default_library_root
-from octop.infra.agents.manager import AgentManager, _memory_extract_settings
-from octop.infra.backend.resolver import default_agent_backend_spec
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRow
-from octop.infra.db.services import build_shared_services
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.i18n.domains.agents import NO_MODELS_CONFIGURED, format_agent_start_error
+from voyagestar.infra.agents.experts.catalog import default_library_root
+from voyagestar.infra.agents.manager import AgentManager, _memory_extract_settings
+from voyagestar.infra.backend.resolver import default_agent_backend_spec
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRow
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.utils.paths import PathLayout
 
 # Real HarnessAgentManager starts memory maintenance (GC/vacuum) on a daemon
 # thread. Closing the agent while that tick holds the SQLite handle races on
@@ -36,7 +36,7 @@ async def _collect_async(iterator: AsyncIterator[Any]) -> list[Any]:
 
 
 def _expected_default_backend(manager: AgentManager, agent_id: str) -> dict[str, Any]:
-    from octop.infra.agents.execute_env import inject_agent_execute_env
+    from voyagestar.infra.agents.execute_env import inject_agent_execute_env
 
     ws = manager._paths.ensure_agent_workspace(agent_id)
     return inject_agent_execute_env(
@@ -49,11 +49,11 @@ def _expected_default_backend(manager: AgentManager, agent_id: str) -> dict[str,
 
 @pytest.fixture
 def manager(tmp_path: Path) -> AgentManager:
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     return AgentManager(repos=services.repos, paths=services.paths)
 
 
@@ -206,11 +206,11 @@ def test_build_harness_config_includes_cronjob_tools_when_cron_manager_set(
 ) -> None:
     from unittest.mock import MagicMock
 
-    from octop.infra.cron.manager import CronManager
+    from voyagestar.infra.cron.manager import CronManager
 
     gw = MagicMock()
     gw.thread_registry = MagicMock()
-    from octop.infra.cron.delivery import CronDeliveryService
+    from voyagestar.infra.cron.delivery import CronDeliveryService
 
     cron_mgr = CronManager(
         gateway=gw,
@@ -242,7 +242,7 @@ def test_build_harness_config_includes_cronjob_tools_when_cron_manager_set(
 def test_build_harness_config_includes_search_knowledge_without_cron(
     manager: AgentManager,
 ) -> None:
-    from octop.infra.knowledge.hint import KnowledgeSearchHintMiddleware
+    from voyagestar.infra.knowledge.hint import KnowledgeSearchHintMiddleware
 
     cfg = manager._build_harness_config(_row(agent_id="AGT001"))
     assert cfg.tools is not None
@@ -387,7 +387,7 @@ async def test_delete_thread_checkpoint_returns_false_when_agent_not_running(
     manager: AgentManager,
 ) -> None:
     # Fresh fixture has no _harness_manager wired up — get_agent raises
-    # OctopError, which must be swallowed (checkpoint cleanup is best-effort).
+    # VoyagestarError, which must be swallowed (checkpoint cleanup is best-effort).
     result = await manager.delete_thread_checkpoint("NOPE", "thr_1")
     assert result is False
 
@@ -681,7 +681,7 @@ def test_build_harness_config_keeps_fs_permissions_for_local_shell_guard(
 ) -> None:
     """local_shell keeps permissions on config; harness mounts FilesystemGuard.
 
-    Octop must not re-mount the guard (or ModelSettings) via cfg.middleware.
+    Voyagestar must not re-mount the guard (or ModelSettings) via cfg.middleware.
     """
     from harness_agent.middleware.filesystem_guard import FilesystemGuardMiddleware
     from harness_agent.middleware.model_settings import ModelSettingsMiddleware
@@ -795,7 +795,7 @@ def test_build_harness_config_passes_default_model_without_embedded_providers(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """default_model is forwarded; providers stay on HarnessAgentManager, not per-agent config."""
-    from octop.infra.agents import manager as mgr_mod
+    from voyagestar.infra.agents import manager as mgr_mod
 
     captured: list[dict] = []
 
@@ -870,7 +870,7 @@ async def test_stop_and_start_round_trip(manager: AgentManager) -> None:
     await manager.stop("STOP01")
     assert manager.get_row("STOP01") is not None
     assert manager.get_row("STOP01").last_state == "stopped"
-    with pytest.raises(OctopError, match="not running") as stopped_exc:
+    with pytest.raises(VoyagestarError, match="not running") as stopped_exc:
         manager.get_agent("STOP01")
     assert stopped_exc.value.code is ErrorCode.AGENT_NOT_RUNNING
 
@@ -934,7 +934,7 @@ async def test_reload_skips_stopped_agent(manager: AgentManager) -> None:
     await manager.reload("SKIP01")
     assert manager.get_row("SKIP01") is not None
     assert manager.get_row("SKIP01").last_state == "stopped"
-    with pytest.raises(OctopError, match="not running") as skipped_exc:
+    with pytest.raises(VoyagestarError, match="not running") as skipped_exc:
         manager.get_agent("SKIP01")
     assert skipped_exc.value.code is ErrorCode.AGENT_NOT_RUNNING
 
@@ -946,7 +946,7 @@ async def test_create_seeds_bootstrap_files(manager: AgentManager) -> None:
     """create() must seed harness workspace (BOOTSTRAP.md, AGENTS.md, …) before start."""
     from harness_agent import HarnessAgentManager
 
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     _seed_test_provider(manager)
     manager._harness_manager = HarnessAgentManager(
@@ -961,11 +961,11 @@ async def test_create_seeds_bootstrap_files(manager: AgentManager) -> None:
     assert cfg.get("workspace_dir") == str(
         manager.paths.ensure_agent_workspace(row.agent_id).resolve()
     )
-    assert cfg.get("system_files_path") == ".octop"
+    assert cfg.get("system_files_path") == ".voyagestar"
     ws = manager.resolve_workspace_dir(row.agent_id)
     assert cfg.get("workspace_dir") == str(ws)
     assert (ws / "AGENTS.md").is_file()
-    assert (ws / ".octop" / "_builtin_skills").is_dir() or agent.workspace.exists(
+    assert (ws / ".voyagestar" / "_builtin_skills").is_dir() or agent.workspace.exists(
         "_builtin_skills/skill-manager/SKILL.md"
     )
     assert not (ws / "_builtin_skills").exists()
@@ -980,7 +980,7 @@ async def test_create_keeps_user_workspace_dir(
     """Explicit config.workspace_dir must not be replaced by the scoped default."""
     from harness_agent import HarnessAgentManager
 
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     _seed_test_provider(manager)
     manager._harness_manager = HarnessAgentManager(
@@ -1019,7 +1019,7 @@ async def test_create_persists_rootfs_workspace_under_scoped_root(
     """Non-host root_dir → config.workspace_dir is rootfs-absolute under that root."""
     from harness_agent import HarnessAgentManager
 
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     _seed_test_provider(manager)
     manager._harness_manager = HarnessAgentManager(
@@ -1027,7 +1027,7 @@ async def test_create_persists_rootfs_workspace_under_scoped_root(
         log_dir=str(manager.paths.logs_dir),
     )
     try:
-        # manager fixture uses ``{tmp_path}/.octop`` as OCTOP_HOME, so scoping
+        # manager fixture uses ``{tmp_path}/.voyagestar`` as VOYAGESTAR_HOME, so scoping
         # root_dir to tmp_path places the default workspace inside the rootfs.
         row = await manager.create(
             AgentCreateSpec(
@@ -1043,19 +1043,19 @@ async def test_create_persists_rootfs_workspace_under_scoped_root(
             )
         )
         cfg = manager.get_config(row.agent_id)
-        assert cfg["workspace_dir"] == f"/.octop/workspaces/{row.agent_id}"
+        assert cfg["workspace_dir"] == f"/.voyagestar/workspaces/{row.agent_id}"
         host = manager.resolve_workspace_dir(row.agent_id)
-        assert host == (tmp_path / ".octop" / "workspaces" / row.agent_id).resolve()
+        assert host == (tmp_path / ".voyagestar" / "workspaces" / row.agent_id).resolve()
         assert host.is_dir()
         assert (host / "AGENTS.md").is_file()
         harness_cfg = manager._build_harness_config(row)
         # POSIX hands harness the persisted agent-facing path — not the host join.
         # Windows cannot express it as absolute, so harness gets the host mapping.
         expected_harness_ws = (
-            Path(f"/.octop/workspaces/{row.agent_id}") if os.name == "posix" else host
+            Path(f"/.voyagestar/workspaces/{row.agent_id}") if os.name == "posix" else host
         )
         assert Path(harness_cfg.workspace_dir) == expected_harness_ws
-        assert not (tmp_path / ".octop" / "agents" / row.agent_id).exists()
+        assert not (tmp_path / ".voyagestar" / "agents" / row.agent_id).exists()
     finally:
         manager._harness_manager.close()
 
@@ -1089,8 +1089,8 @@ async def test_templated_agent_keeps_expert_soul_on_reload(manager: AgentManager
     """Reload must not overwrite expert template SOUL.md with persona defaults."""
     from harness_agent import HarnessAgentManager
 
-    from octop.infra.agents.experts.catalog import ExpertCatalog
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.experts.catalog import ExpertCatalog
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     catalog = ExpertCatalog(default_library_root())
     catalog.refresh()
@@ -1128,7 +1128,7 @@ async def test_templated_agent_keeps_expert_soul_on_reload(manager: AgentManager
 async def test_seed_expert_template_writes_workspace_files(
     manager: AgentManager, tmp_path: Path
 ) -> None:
-    from octop.infra.agents.experts.catalog import Expert, ExpertCatalog, ExpertSummary
+    from voyagestar.infra.agents.experts.catalog import Expert, ExpertCatalog, ExpertSummary
 
     expert_dir = tmp_path / "demo"
     expert_dir.mkdir()
@@ -1170,7 +1170,7 @@ async def test_seed_expert_template_writes_workspace_files(
 
     ws = manager._paths.ensure_agent_workspace("AGT1")
     assert (ws / "SOUL.md").read_text(encoding="utf-8") == "# Soul"
-    manifest = json.loads((ws / ".octop" / "manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((ws / ".voyagestar" / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["id"] == "demo"
     assert manifest["welcome_message"]["zh"] == "欢迎"
 
@@ -1180,7 +1180,7 @@ async def test_persist_skills_disabled_does_not_schedule_reload(
     manager: AgentManager, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """skills_disabled is hot-synced; must not tear down the running agent."""
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     fake_agent = MagicMock()
     fake_hm = MagicMock()
@@ -1206,7 +1206,7 @@ async def test_persist_tools_disabled_strips_critical_and_hot_syncs(
     manager: AgentManager, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """tools_disabled is hot-synced; critical names are dropped."""
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     fake_agent = MagicMock()
     fake_hm = MagicMock()
@@ -1231,7 +1231,7 @@ async def test_persist_tools_disabled_strips_critical_and_hot_syncs(
 async def test_update_config_json_still_schedules_reload(
     manager: AgentManager, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     fake_agent = MagicMock()
     fake_hm = MagicMock()
@@ -1253,20 +1253,20 @@ async def test_update_config_json_cannot_change_system_files_path(
     manager: AgentManager, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """``system_files_path`` is an internal layout knob; user updates must not mutate it."""
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     # Avoid starting harness runtime in this unit-test context.
     row = await manager.create(AgentCreateSpec(name="sysfiles-fixed"), defer_bootstrap=True)
     monkeypatch.setattr(manager, "_schedule_reload", lambda _aid: None)
 
-    assert manager.get_config(row.agent_id).get("system_files_path") == ".octop"
+    assert manager.get_config(row.agent_id).get("system_files_path") == ".voyagestar"
 
     await manager.update_config_json(
         row.agent_id,
         json.dumps({"system_files_path": "", "foo": 1}),
     )
 
-    assert manager.get_config(row.agent_id).get("system_files_path") == ".octop"
+    assert manager.get_config(row.agent_id).get("system_files_path") == ".voyagestar"
 
 
 @pytest.mark.asyncio
@@ -1278,13 +1278,13 @@ async def test_reload_agent_does_not_block_event_loop(
     import time
     from unittest.mock import MagicMock
 
-    from octop.infra.agents.manager import AgentCreateSpec, AgentManager
+    from voyagestar.infra.agents.manager import AgentCreateSpec, AgentManager
 
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     registry = AgentManager(repos=services.repos, paths=services.paths)
 
     fake_hm = MagicMock()
@@ -1330,9 +1330,9 @@ async def test_reload_agent_does_not_block_event_loop(
 
 def test_build_mcp_configs_registers_gateway_without_transport(manager: AgentManager) -> None:
     """Gateway connectors register a name-only placeholder; tools inject in-process."""
-    from octop.infra.connectors.builder import mcp_server_name
-    from octop.infra.connectors.crypto import encrypt_credentials
-    from octop.infra.utils.ulid import new_ulid
+    from voyagestar.infra.connectors.builder import mcp_server_name
+    from voyagestar.infra.connectors.crypto import encrypt_credentials
+    from voyagestar.infra.utils.ulid import new_ulid
 
     with manager._repos.db.transaction() as conn:
         conn.execute(
@@ -1363,9 +1363,9 @@ def test_build_mcp_configs_registers_gateway_without_transport(manager: AgentMan
 
 def test_build_mcp_configs_shared_agent_uses_connector_user_override(manager: AgentManager) -> None:
     """Shared agents (user_id=NULL) need connector_user_override to resolve connectors."""
-    from octop.infra.connectors.builder import mcp_server_name
-    from octop.infra.connectors.crypto import encrypt_credentials
-    from octop.infra.utils.ulid import new_ulid
+    from voyagestar.infra.connectors.builder import mcp_server_name
+    from voyagestar.infra.connectors.crypto import encrypt_credentials
+    from voyagestar.infra.utils.ulid import new_ulid
 
     with manager._repos.db.transaction() as conn:
         conn.execute(
@@ -1465,8 +1465,8 @@ def test_peer_manifest_metadata_missing_file(manager: AgentManager) -> None:
 def test_peer_manifest_metadata_bad_json(manager: AgentManager) -> None:
     manager._repos.agent_repo.create(agent_id="AGT1", user_id=None, name="demo")
     ws = manager._paths.ensure_agent_workspace("AGT1")
-    (ws / ".octop").mkdir(parents=True, exist_ok=True)
-    (ws / ".octop" / "manifest.json").write_text("{", encoding="utf-8")
+    (ws / ".voyagestar").mkdir(parents=True, exist_ok=True)
+    (ws / ".voyagestar" / "manifest.json").write_text("{", encoding="utf-8")
     assert manager._peer_manifest_metadata("AGT1", "row") == {}
 
 
@@ -1475,8 +1475,8 @@ def test_peer_manifest_metadata_reads_cards(manager: AgentManager) -> None:
         agent_id="AGT1", user_id=None, name="demo", description="from-db"
     )
     ws = manager._paths.ensure_agent_workspace("AGT1")
-    (ws / ".octop").mkdir(parents=True, exist_ok=True)
-    (ws / ".octop" / "manifest.json").write_text(
+    (ws / ".voyagestar").mkdir(parents=True, exist_ok=True)
+    (ws / ".voyagestar" / "manifest.json").write_text(
         json.dumps(
             {
                 "description": {"zh": "manifest-only", "en": "manifest-only"},
@@ -1501,8 +1501,8 @@ def test_refresh_peer_entry_picks_up_manifest_edits(manager: AgentManager) -> No
         agent_id="AGT1", user_id=None, name="demo", description="from-db"
     )
     ws = manager._paths.ensure_agent_workspace("AGT1")
-    (ws / ".octop").mkdir(parents=True, exist_ok=True)
-    (ws / ".octop" / "manifest.json").write_text(
+    (ws / ".voyagestar").mkdir(parents=True, exist_ok=True)
+    (ws / ".voyagestar" / "manifest.json").write_text(
         json.dumps(
             {
                 "quick_prompts": [
@@ -1529,8 +1529,8 @@ def test_refresh_peer_entry_picks_up_manifest_edits(manager: AgentManager) -> No
 def test_refresh_peer_entry_clears_empty_cards(manager: AgentManager) -> None:
     manager._repos.agent_repo.create(agent_id="AGT1", user_id=None, name="demo")
     ws = manager._paths.ensure_agent_workspace("AGT1")
-    (ws / ".octop").mkdir(parents=True, exist_ok=True)
-    (ws / ".octop" / "manifest.json").write_text(
+    (ws / ".voyagestar").mkdir(parents=True, exist_ok=True)
+    (ws / ".voyagestar" / "manifest.json").write_text(
         json.dumps({"quick_prompts": []}),
         encoding="utf-8",
     )

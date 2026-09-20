@@ -9,14 +9,14 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
-from octop.infra.agents.thread_fork import (
+from voyagestar.infra.agents.thread_fork import (
     _fork_title,
     find_assistant_fork_index,
     fork_dashboard_thread,
     write_checkpoint_messages,
 )
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.gateway.threads import ThreadRegistry
 
 
 def test_fork_title_suffix() -> None:
@@ -85,7 +85,7 @@ def test_find_assistant_fork_index_by_content_fallback() -> None:
 
 def test_find_assistant_fork_index_missing_raises() -> None:
     messages = [HumanMessage(content="only user", id="h1")]
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         find_assistant_fork_index(messages, message_id="a1")
     assert exc.value.code is ErrorCode.NOT_FOUND
 

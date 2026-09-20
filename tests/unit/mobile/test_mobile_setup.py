@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from octop.config import CapabilitiesConfig, MobileCapabilities, OctopConfig
-from octop.infra.mobile.setup import mobile_status
+from voyagestar.config import CapabilitiesConfig, MobileCapabilities, VoyagestarConfig
+from voyagestar.infra.mobile.setup import mobile_status
 
 
-def _cfg(**mobile: object) -> OctopConfig:
-    return OctopConfig(
+def _cfg(**mobile: object) -> VoyagestarConfig:
+    return VoyagestarConfig(
         capabilities=CapabilitiesConfig(
             mobile=MobileCapabilities(**mobile)  # type: ignore[arg-type]
         )
@@ -24,8 +24,8 @@ def test_mobile_status_disabled() -> None:
 
 def test_mobile_status_physical_ready() -> None:
     with (
-        patch("octop.infra.mobile.setup.find_adb", return_value="/adb"),
-        patch("octop.infra.mobile.setup.list_devices", return_value=["emulator-5554"]),
+        patch("voyagestar.infra.mobile.setup.find_adb", return_value="/adb"),
+        patch("voyagestar.infra.mobile.setup.list_devices", return_value=["emulator-5554"]),
     ):
         status = mobile_status(_cfg(enabled=True, backend="physical"))
     assert status.setup_state == "ready"
@@ -34,8 +34,8 @@ def test_mobile_status_physical_ready() -> None:
 
 def test_mobile_status_physical_needs_device() -> None:
     with (
-        patch("octop.infra.mobile.setup.find_adb", return_value="/adb"),
-        patch("octop.infra.mobile.setup.list_devices", return_value=[]),
+        patch("voyagestar.infra.mobile.setup.find_adb", return_value="/adb"),
+        patch("voyagestar.infra.mobile.setup.list_devices", return_value=[]),
     ):
         status = mobile_status(_cfg(enabled=True, backend="physical"))
     assert status.setup_state == "needs_device"
@@ -43,13 +43,13 @@ def test_mobile_status_physical_needs_device() -> None:
 
 def test_mobile_status_container_reconnects_adb() -> None:
     with (
-        patch("octop.infra.mobile.setup.find_adb", return_value="/adb"),
-        patch("octop.infra.mobile.setup._container_running", return_value=True),
+        patch("voyagestar.infra.mobile.setup.find_adb", return_value="/adb"),
+        patch("voyagestar.infra.mobile.setup._container_running", return_value=True),
         patch(
-            "octop.infra.mobile.setup.list_devices",
+            "voyagestar.infra.mobile.setup.list_devices",
             side_effect=[[], ["127.0.0.1:5555"]],
         ),
-        patch("octop.infra.mobile.setup.adb_connect", return_value=True) as connect,
+        patch("voyagestar.infra.mobile.setup.adb_connect", return_value=True) as connect,
     ):
         status = mobile_status(_cfg(enabled=True, backend="redroid"))
     connect.assert_called_once_with("127.0.0.1:5555", adb="/adb")
@@ -59,9 +59,9 @@ def test_mobile_status_container_reconnects_adb() -> None:
 
 def test_mobile_status_container_missing_adb_binary() -> None:
     with (
-        patch("octop.infra.mobile.setup.find_adb", return_value=None),
-        patch("octop.infra.mobile.setup._container_running", return_value=True),
-        patch("octop.infra.mobile.setup.list_devices", return_value=[]),
+        patch("voyagestar.infra.mobile.setup.find_adb", return_value=None),
+        patch("voyagestar.infra.mobile.setup._container_running", return_value=True),
+        patch("voyagestar.infra.mobile.setup.list_devices", return_value=[]),
     ):
         status = mobile_status(_cfg(enabled=True, backend="redroid"), locale="en")
     assert status.setup_state == "needs_device"

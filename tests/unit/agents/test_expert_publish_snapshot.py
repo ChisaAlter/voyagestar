@@ -10,22 +10,22 @@ import pytest
 from deepagents.backends.local_shell import LocalShellBackend
 from harness_agent.backends.workspace import BackendWorkspace
 
-from octop.infra.agents.builtin_skills import OCTOP_BUILTIN_SKILLS_ROOT
-from octop.infra.agents.experts.catalog import (
+from voyagestar.infra.agents.builtin_skills import VOYAGESTAR_BUILTIN_SKILLS_ROOT
+from voyagestar.infra.agents.experts.catalog import (
     MANIFEST_FILENAME,
     WORKSPACE_MANIFEST_PATH,
     seed_expert_directory,
 )
-from octop.infra.agents.experts.publish import (
+from voyagestar.infra.agents.experts.publish import (
     PublishedExpertSnapshotMeta,
     assert_can_mutate_published,
     export_agent_workspace_to_dir,
     resolve_published_expert_slug,
 )
-from octop.infra.db.repos.published_experts import PublishedExpertRow
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.users.identity import Role, User
-from octop.infra.utils.paths import PathLayout
+from voyagestar.infra.db.repos.published_experts import PublishedExpertRow
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.users.identity import Role, User
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _workspace(root: Path) -> BackendWorkspace:
@@ -56,7 +56,7 @@ def test_only_creator_or_admin_can_mutate_published_expert() -> None:
 
     assert_can_mutate_published(row, owner)
     assert_can_mutate_published(row, admin)
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         assert_can_mutate_published(row, other)
     assert exc.value.code is ErrorCode.FORBIDDEN
 
@@ -74,7 +74,7 @@ def test_resolve_published_expert_slug_retries_derived_name_and_rejects_taken_ex
     repo = Repo()
 
     assert resolve_published_expert_slug(repo=repo, name="Source Expert") == "source-expert-2"
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         resolve_published_expert_slug(repo=repo, name="Other", slug="chosen-slug")
     assert exc.value.code is ErrorCode.PUBLISHED_EXPERT_SLUG_TAKEN
 
@@ -100,7 +100,7 @@ async def test_export_snapshot_writes_manifest_and_seed_files(tmp_path: Path) ->
             ("inbound/note.txt", b"user upload"),
             ("daily/2026-01-01.md", b"journal"),
             ("uploads/tmp.bin", b"binary"),
-            (".octop/avatar.png", b"\x89PNG\r\n\x1a\n" + b"\x00" * 8),
+            (".voyagestar/avatar.png", b"\x89PNG\r\n\x1a\n" + b"\x00" * 8),
         ]
     )
 
@@ -111,7 +111,7 @@ async def test_export_snapshot_writes_manifest_and_seed_files(tmp_path: Path) ->
         MANIFEST_FILENAME,
         "SOUL.md",
         "skills/research/SKILL.md",
-        ".octop/avatar.png",
+        ".voyagestar/avatar.png",
     }
     assert json.loads((destination / MANIFEST_FILENAME).read_text(encoding="utf-8")) == manifest
     assert (destination / "SOUL.md").read_text(encoding="utf-8") == "# Source soul"
@@ -132,12 +132,14 @@ async def test_export_snapshot_writes_manifest_and_seed_files(tmp_path: Path) ->
     )
 
     assert copied == 4
-    assert (installed_dir / ".octop" / "manifest.json").read_text(encoding="utf-8") == json.dumps(
+    assert (installed_dir / ".voyagestar" / "manifest.json").read_text(
+        encoding="utf-8"
+    ) == json.dumps(
         manifest,
         ensure_ascii=False,
     )
     assert (installed_dir / "skills" / "research" / "SKILL.md").read_bytes() == b"# Research"
-    assert (installed_dir / ".octop" / "avatar.png").read_bytes().startswith(b"\x89PNG")
+    assert (installed_dir / ".voyagestar" / "avatar.png").read_bytes().startswith(b"\x89PNG")
     assert not (installed_dir / "MEMORY.md").exists()
 
 
@@ -193,7 +195,7 @@ async def test_export_snapshot_excludes_runtime_workspace_dirs(tmp_path: Path) -
         [
             (MANIFEST_FILENAME, json.dumps(manifest, ensure_ascii=False).encode()),
             ("SOUL.md", b"# Source soul"),
-            (f"{OCTOP_BUILTIN_SKILLS_ROOT}/skill-manager/SKILL.md", b"# Builtin"),
+            (f"{VOYAGESTAR_BUILTIN_SKILLS_ROOT}/skill-manager/SKILL.md", b"# Builtin"),
             ("logs/agent.log", b"runtime log line"),
         ]
     )
@@ -216,7 +218,7 @@ async def test_export_snapshot_excludes_runtime_workspace_dirs(tmp_path: Path) -
     )
 
     assert set(exported) == {MANIFEST_FILENAME, "SOUL.md"}
-    assert not (destination / OCTOP_BUILTIN_SKILLS_ROOT).exists()
+    assert not (destination / VOYAGESTAR_BUILTIN_SKILLS_ROOT).exists()
     assert not (destination / "logs").exists()
     merged = json.loads((destination / MANIFEST_FILENAME).read_text(encoding="utf-8"))
     assert merged["id"] == "published-expert"

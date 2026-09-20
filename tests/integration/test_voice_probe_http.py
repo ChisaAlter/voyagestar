@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 import pytest
 
-import octop.infra.voice.adapters as voice_adapters
+import voyagestar.infra.voice.adapters as voice_adapters
 
 TENCENT_EXTRA = {"secret_id": "sid", "secret_key": "sk", "region": "ap-guangzhou"}
 
@@ -51,7 +51,7 @@ async def test_probe_stt_reports_provider_error_over_http(
 async def test_probe_stt_success_over_http(
     env: tuple[httpx.AsyncClient, Any, dict[str, str]], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from octop.infra.voice.adapters import STTResult
+    from voyagestar.infra.voice.adapters import STTResult
 
     async def fake(row: Any, audio: bytes, *, mime: str, language: str) -> STTResult:
         assert mime == "audio/wav"

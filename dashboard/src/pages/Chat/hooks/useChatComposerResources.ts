@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { connectorsApi } from "../../../api/modules/connectors";
 import { providerApi } from "../../../api/modules/provider";
 import { preferencesApi } from "../../../api/modules/preferences";
-import { octopThreadsApi } from "../../../api/modules/octopThreads";
+import { voyagestarThreadsApi } from "../../../api/modules/voyagestarThreads";
 import { request } from "../../../api/request";
 import {
   knowledgeBasesApi,
@@ -356,7 +356,7 @@ export function useChatComposerResources(
         activeThreadId &&
         !isPendingThread(activeThreadId)
       ) {
-        void octopThreadsApi.patch(resolvedAgentId, activeThreadId, {
+        void voyagestarThreadsApi.patch(resolvedAgentId, activeThreadId, {
           model_ref: model,
           reasoning_mode: nextMode,
           reasoning_effort: nextEffort,
@@ -385,7 +385,7 @@ export function useChatComposerResources(
         activeThreadId &&
         !isPendingThread(activeThreadId)
       ) {
-        void octopThreadsApi.patch(resolvedAgentId, activeThreadId, {
+        void voyagestarThreadsApi.patch(resolvedAgentId, activeThreadId, {
           reasoning_mode: mode,
           reasoning_effort: effort,
         });

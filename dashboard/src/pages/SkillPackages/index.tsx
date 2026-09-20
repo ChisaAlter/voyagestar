@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { authApi, type OctopUser } from "../../api/modules/auth";
+import { authApi, type VoyagestarUser } from "../../api/modules/auth";
 import { skillPackagesApi } from "../../api/modules/skillPackages";
 import type {
   SkillPackage,
@@ -47,7 +47,7 @@ import type {
 } from "../../api/types/skillPackage";
 import { CardSkeleton } from "../../components/Skeleton";
 import { CopyableResourceId } from "../../components/CopyableResourceId";
-import { EmptyState, OctopEmptyMascot } from "../../components/EmptyState";
+import { EmptyState, VoyagestarEmptyMascot } from "../../components/EmptyState";
 import StreamSetupGuide from "../../components/StreamSetupGuide/StreamSetupGuide";
 import { useCardTableView } from "../../hooks/useCardTableView";
 import { useHorizontalResize } from "../../hooks/useHorizontalResize";
@@ -99,7 +99,7 @@ const SKILL_URL_PREFIXES = [
 
 function canMutatePackage(
   item: Pick<SkillPackage, "created_by" | "can_write">,
-  user: OctopUser | null,
+  user: VoyagestarUser | null,
 ): boolean {
   if (typeof item.can_write === "boolean") {
     return item.can_write;
@@ -163,7 +163,7 @@ export default function SkillPackagesPage() {
   const [selected, setSelected] = useState<SkillPackageDetail | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobilePane, setMobilePane] = useState<"list" | "detail">("list");
-  const [user, setUser] = useState<OctopUser | null>(null);
+  const [user, setUser] = useState<VoyagestarUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -191,10 +191,10 @@ export default function SkillPackagesPage() {
     min: 200,
     max: 480,
     defaultSize: 280,
-    storageKey: "octop:skill-packages:sidebar-width",
+    storageKey: "voyagestar:skill-packages:sidebar-width",
   });
   const { collapsed: listPanelCollapsed, toggle: toggleListPanel } =
-    useListPanelCollapsed("octop:skill-packages:list-collapsed");
+    useListPanelCollapsed("voyagestar:skill-packages:list-collapsed");
 
   const loadPackages = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -601,7 +601,7 @@ export default function SkillPackagesPage() {
             className={styles.emptyGuide}
             wide
             icon={
-              <OctopEmptyMascot size={120} className={styles.setupMascot} />
+              <VoyagestarEmptyMascot size={120} className={styles.setupMascot} />
             }
             title={t("skillPackages.emptyGuideTitle")}
             description={t("skillPackages.emptyGuideDesc")}
@@ -796,7 +796,7 @@ export default function SkillPackagesPage() {
               ) : null}
               {!selected && !detailLoading ? (
                 <div className={styles.emptyDetail}>
-                  <OctopEmptyMascot size={180} />
+                  <VoyagestarEmptyMascot size={180} />
                   <p className={styles.emptyDetailText}>
                     {t("skillPackages.selectPackage")}
                   </p>

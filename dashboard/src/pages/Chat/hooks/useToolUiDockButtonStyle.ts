@@ -12,8 +12,8 @@ const DOCK_BTN_INSET = 8;
 
 function findToolUiCard(root: HTMLElement): HTMLElement | null {
   return (
-    root.querySelector<HTMLElement>("[data-octop-plugin-ui]") ??
-    root.querySelector<HTMLElement>(".octop-builtin-ui-fallback") ??
+    root.querySelector<HTMLElement>("[data-voyagestar-plugin-ui]") ??
+    root.querySelector<HTMLElement>(".voyagestar-builtin-ui-fallback") ??
     null
   );
 }

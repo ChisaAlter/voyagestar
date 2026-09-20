@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from octop.infra.gateway.slash.catalog import list_specs, spec_for
-from octop.infra.gateway.slash.dispatcher import build_default_dispatcher
+from voyagestar.infra.gateway.slash.catalog import list_specs, spec_for
+from voyagestar.infra.gateway.slash.dispatcher import build_default_dispatcher
 
 
 def test_catalog_lists_primary_names():

@@ -1,4 +1,4 @@
-# Makefile for Octop
+# Makefile for Voyagestar
 # Usage:
 #   make              - Show this help
 #   make all          - format (BE+FE) + backend lint + typecheck + test (ship bar)
@@ -16,7 +16,7 @@ SHELL := /bin/bash
 
 REPO_ROOT     := $(shell pwd)
 DASHBOARD_DIR := $(REPO_ROOT)/dashboard
-DASHBOARD_DEST := $(REPO_ROOT)/src/octop/dashboard
+DASHBOARD_DEST := $(REPO_ROOT)/src/voyagestar/dashboard
 DIST_DIR      := $(REPO_ROOT)/dist
 
 # PyPI repository (override: make publish PYPI_REPO=testpypi)
@@ -35,7 +35,7 @@ PYTEST_JOBS ?= auto
 
 .PHONY: help
 help:
-	@echo "Octop Build System"
+	@echo "Voyagestar Build System"
 	@echo ""
 	@echo "Usage: make <target>"
 	@echo ""
@@ -51,19 +51,19 @@ help:
 	@echo "Development targets:"
 	@echo "  dev              Start frontend + backend dev servers"
 	@echo "  dev-frontend     Start Vite dev server only"
-	@echo "  dev-backend      Start octop run only"
+	@echo "  dev-backend      Start voyagestar run only"
 	@echo ""
-	@echo "Online-deps targets (local Octop source + PyPI harness components):"
-	@echo "  install-online   Create .venv-online: Octop editable + harness-* from PyPI"
+	@echo "Online-deps targets (local Voyagestar source + PyPI harness components):"
+	@echo "  install-online   Create .venv-online: Voyagestar editable + harness-* from PyPI"
 	@echo "  test-online      pytest against .venv-online (not live)"
-	@echo "  run-online       Start octop run from .venv-online"
+	@echo "  run-online       Start voyagestar run from .venv-online"
 	@echo ""
 	@echo "Quality targets (ship bar):"
 	@echo "  all              format-all + lint + typecheck + test (backend lint/typecheck/test)"
 	@echo "  precommit        fast change-aware gate for the git pre-commit hook (testmon-scoped tests)"
 	@echo "  lint             Ruff check + format check (src, tests)"
 	@echo "  format           Ruff auto-fix + format (src, tests)"
-	@echo "  typecheck        mypy --strict src/octop"
+	@echo "  typecheck        mypy --strict src/voyagestar"
 	@echo "  test             pytest -m \"not live\""
 	@echo "  test-live        pytest -m live"
 	@echo ""
@@ -161,7 +161,7 @@ dev:
 	@echo "[dev] Starting frontend and backend dev servers (Ctrl-C to stop both)..."
 	@trap 'kill 0' SIGINT; \
 	(cd $(DASHBOARD_DIR) && npm run dev) & \
-	($(RUN) octop run) & \
+	($(RUN) voyagestar run) & \
 	wait
 
 .PHONY: dev-frontend
@@ -170,10 +170,10 @@ dev-frontend:
 
 .PHONY: dev-backend
 dev-backend:
-	$(RUN) octop run
+	$(RUN) voyagestar run
 
-# ─── Online-deps dev (local Octop source + PyPI harness components) ───────────
-# Keeps a dedicated .venv-online alongside .venv. Octop itself is installed
+# ─── Online-deps dev (local Voyagestar source + PyPI harness components) ───────────
+# Keeps a dedicated .venv-online alongside .venv. Voyagestar itself is installed
 # editable (-e) so source edits are live; the harness-* siblings are pulled
 # from PyPI (--no-sources ignores the editable local paths in uv.lock).
 # Re-run install-online only when a dependency version changes.
@@ -182,10 +182,10 @@ PY_ONLINE   := $(VENV_ONLINE)/bin
 
 .PHONY: install-online
 install-online:
-	@echo "[install-online] Creating $(VENV_ONLINE) (local Octop + PyPI harness deps)..."
+	@echo "[install-online] Creating $(VENV_ONLINE) (local Voyagestar + PyPI harness deps)..."
 	uv venv $(VENV_ONLINE) --python 3.12
 	uv pip install --no-sources --python $(PY_ONLINE)/python -e ".[dev]"
-	@echo "[install-online] Done. Octop=editable(local), harness-*=PyPI."
+	@echo "[install-online] Done. Voyagestar=editable(local), harness-*=PyPI."
 
 .PHONY: test-online
 test-online:
@@ -194,7 +194,7 @@ test-online:
 
 .PHONY: run-online
 run-online:
-	$(PY_ONLINE)/octop run
+	$(PY_ONLINE)/voyagestar run
 
 # ─── Quality (backend) ───────────────────────────────────────────────────────
 
@@ -217,7 +217,7 @@ format:
 .PHONY: typecheck
 typecheck:
 	@echo "[typecheck] mypy..."
-	$(RUN) mypy src/octop
+	$(RUN) mypy src/voyagestar
 
 .PHONY: test
 test:

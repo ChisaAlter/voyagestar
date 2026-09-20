@@ -67,7 +67,7 @@ import { useCardTableView } from "../../../hooks/useCardTableView";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import { useServerTimezone } from "../../../hooks/useServerTimezone";
 import { formatServerDateTime } from "../../../utils/formatMessageTime";
-import type { OctopAgent } from "../../../context/AgentContext";
+import type { VoyagestarAgent } from "../../../context/AgentContext";
 import { AgentCard } from "../../Experts/components/AgentCard";
 import EditAgentDrawer from "../../Experts/components/EditAgentDrawer";
 import InviteDrawer from "./InviteDrawer";
@@ -170,7 +170,7 @@ function formatUserTs(ts: number | undefined, timeZone: string): string {
 interface UserCardGridProps {
   rows: UserRow[];
   loading: boolean;
-  agentsByUserId: Map<number, OctopAgent[]>;
+  agentsByUserId: Map<number, VoyagestarAgent[]>;
   agentsLoading: boolean;
   currentUserId: number | null;
   permLabelByKey: Map<string, string>;
@@ -883,7 +883,7 @@ export default function UsersListPanel() {
   const { t } = useTranslation();
   const timeZone = useServerTimezone();
   const isMobile = useIsMobile();
-  const [agents, setAgents] = useState<OctopAgent[]>([]);
+  const [agents, setAgents] = useState<VoyagestarAgent[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(true);
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -899,7 +899,7 @@ export default function UsersListPanel() {
   const [resetForm] = Form.useForm<ResetValues>();
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [agentDrawerUser, setAgentDrawerUser] = useState<UserRow | null>(null);
-  const [editAgent, setEditAgent] = useState<OctopAgent | null>(null);
+  const [editAgent, setEditAgent] = useState<VoyagestarAgent | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { viewMode, setViewMode, showCardView } = useCardTableView("table");
   const [permCatalog, setPermCatalog] = useState<PermissionCatalogItem[]>([]);
@@ -948,7 +948,7 @@ export default function UsersListPanel() {
   const nowSec = useNowSeconds(hasLockedUser);
 
   const agentsByUserId = useMemo(() => {
-    const map = new Map<number, OctopAgent[]>();
+    const map = new Map<number, VoyagestarAgent[]>();
     for (const agent of agents) {
       if (agent.user_id == null) continue;
       const list = map.get(agent.user_id) ?? [];
@@ -1002,7 +1002,7 @@ export default function UsersListPanel() {
   const refreshAgents = useCallback(async () => {
     setAgentsLoading(true);
     try {
-      const data = await request<OctopAgent[]>("/agents?scope=all");
+      const data = await request<VoyagestarAgent[]>("/agents?scope=all");
       setAgents(data);
     } catch (err) {
       message.error(
@@ -1015,7 +1015,7 @@ export default function UsersListPanel() {
   }, [t]);
 
   const patchAgent = useCallback(
-    (agentId: string, patch: Partial<OctopAgent>) => {
+    (agentId: string, patch: Partial<VoyagestarAgent>) => {
       setAgents((prev) =>
         prev.map((a) => (a.agent_id === agentId ? { ...a, ...patch } : a)),
       );
@@ -1041,7 +1041,7 @@ export default function UsersListPanel() {
   const handleEditSaved = useCallback(
     (
       updated: Pick<
-        OctopAgent,
+        VoyagestarAgent,
         "agent_id" | "name" | "description" | "default_model"
       >,
     ) => {

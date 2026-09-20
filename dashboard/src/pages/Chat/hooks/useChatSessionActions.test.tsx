@@ -20,8 +20,8 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: () => navigateMock };
 });
 
-vi.mock("../../../api/modules/octopThreads", () => ({
-  octopThreadsApi: {
+vi.mock("../../../api/modules/voyagestarThreads", () => ({
+  voyagestarThreadsApi: {
     rebind: vi.fn().mockResolvedValue({}),
     list: vi.fn().mockResolvedValue([]),
   },

@@ -8,15 +8,15 @@ from unittest.mock import MagicMock
 import pytest
 from harness_gateway.models import ChannelSubject, InboundMessage, TextContent
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.sessions import SessionRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.gateway.gateway import Gateway
-from octop.infra.gateway.process.message_keys import session_key_from_message
-from octop.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.sessions import SessionRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.gateway.gateway import Gateway
+from voyagestar.infra.gateway.process.message_keys import session_key_from_message
+from voyagestar.infra.gateway.threads import ThreadRegistry
 
 
 @pytest.mark.asyncio

@@ -9,20 +9,20 @@ import pytest
 from harness_agent.teams.inbox import InboxMessage
 from harness_agent.teams.processor import ReplyEvent
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.sessions import SessionRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.gateway.process.processor import GlobalProcessor
-from octop.infra.gateway.slash.dispatcher import SlashDispatcher
-from octop.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.sessions import SessionRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.gateway.process.processor import GlobalProcessor
+from voyagestar.infra.gateway.slash.dispatcher import SlashDispatcher
+from voyagestar.infra.gateway.threads import ThreadRegistry
 
 
 @pytest.fixture
 def processor_env(tmp_path: Path) -> dict[str, object]:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     UserRepo(db).create(username="u", password_hash="h", role="user")
     AgentRepo(db).create(agent_id="parent", user_id=1, name="Parent")
@@ -40,7 +40,7 @@ def processor_env(tmp_path: Path) -> dict[str, object]:
     agent_manager = MagicMock()
     agent_manager.get_row.side_effect = lambda aid: AgentRepo(db).get(aid)
 
-    from octop.infra.gateway.gateway import Gateway
+    from voyagestar.infra.gateway.gateway import Gateway
 
     gw = Gateway(agent_manager=agent_manager, repos=repos)
     gw._channel_manager = MagicMock()

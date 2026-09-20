@@ -9,24 +9,24 @@ import httpx
 import jwt
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.auth.sso.crypto import encrypt_secret
-from octop.infra.auth.sso.providers.dingtalk import DingTalkAdapter
-from octop.infra.auth.sso.service import SsoService
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.users.manager import UserManager
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.auth.sso.crypto import encrypt_secret
+from voyagestar.infra.auth.sso.providers.dingtalk import DingTalkAdapter
+from voyagestar.infra.auth.sso.service import SsoService
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.users.manager import UserManager
+from voyagestar.infra.utils.paths import PathLayout
 
 
 @pytest.fixture
 def service(tmp_path):
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     return SsoService(services, UserManager(services))
 
 
@@ -53,7 +53,7 @@ def test_dingtalk_authorize_url(service: SsoService) -> None:
         state="st",
         nonce="ignored",
         code_challenge="ignored",
-        redirect_uri="https://octop.example/api/auth/oauth/callback",
+        redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
     )
     assert url.startswith("https://login.dingtalk.com/oauth2/auth?")
     query = httpx.QueryParams(url.split("?", 1)[1])
@@ -90,12 +90,12 @@ def test_dingtalk_complete_login_uses_union_id(service: SsoService) -> None:
         return real_client(*args, transport=httpx.MockTransport(handler), **kwargs)
 
     login_state = type("State", (), {"code_verifier": "n/a"})()
-    with patch("octop.infra.auth.sso.service.httpx.Client", side_effect=factory):
+    with patch("voyagestar.infra.auth.sso.service.httpx.Client", side_effect=factory):
         subject, claims = adapter.complete_login(
             "auth-code",
             row=row,
             login_state=login_state,  # type: ignore[arg-type]
-            redirect_uri="https://octop.example/api/auth/oauth/callback",
+            redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
         )
 
     assert subject == "uid_union"
@@ -121,12 +121,12 @@ def test_dingtalk_missing_subject_is_invalid_token(service: SsoService) -> None:
 
     login_state = type("State", (), {})()
     with (
-        patch("octop.infra.auth.sso.service.httpx.Client", side_effect=factory),
+        patch("voyagestar.infra.auth.sso.service.httpx.Client", side_effect=factory),
         pytest.raises(jwt.InvalidTokenError),
     ):
         adapter.complete_login(
             "auth-code",
             row=row,
             login_state=login_state,  # type: ignore[arg-type]
-            redirect_uri="https://octop.example/api/auth/oauth/callback",
+            redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
         )

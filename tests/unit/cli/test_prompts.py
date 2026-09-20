@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from octop.cli.support import prompts as _prompts
+from voyagestar.cli.support import prompts as _prompts
 
 
 def test_select_returns_selected_value(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import type { FormInstance } from "antd";
 import { providerApi } from "../../../../api/modules/provider";
 import { connectorsApi } from "../../../../api/modules/connectors";
-import { octopThreadsApi } from "../../../../api/modules/octopThreads";
+import { voyagestarThreadsApi } from "../../../../api/modules/voyagestarThreads";
 import {
   buildDefaultFormValues,
   SCHEDULE_PRESETS,
@@ -140,7 +140,7 @@ export function JobDrawer({
       return;
     }
     setSessionsLoading(true);
-    octopThreadsApi
+    voyagestarThreadsApi
       .list(activeAgentId, 100)
       .then((threads) => {
         const seen = new Set<string>();

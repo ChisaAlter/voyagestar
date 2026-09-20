@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from octop.api.routers.browser import harness as harness_mod
+from voyagestar.api.routers.browser import harness as harness_mod
 
 
 def _fake_sess(*, active_id: str | None = "T1", port: int = 9222) -> SimpleNamespace:

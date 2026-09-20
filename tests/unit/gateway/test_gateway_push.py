@@ -9,20 +9,20 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from harness_gateway.models import ChannelSubject
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.sessions import SessionRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.gateway.gateway import Gateway
-from octop.infra.gateway.threads import ThreadRegistry
-from octop.infra.gateway.ws import WS_CHANNEL_ID
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.sessions import SessionRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.gateway.gateway import Gateway
+from voyagestar.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.gateway.ws import WS_CHANNEL_ID
 
 
 @pytest.fixture
 def gateway(tmp_path: Path) -> Gateway:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     UserRepo(db).create(username="u", password_hash="h", role="user")
     AgentRepo(db).create(agent_id="a1", user_id=1, name="Agent 1")

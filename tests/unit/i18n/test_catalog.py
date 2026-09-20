@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from octop.i18n import all_keys_for_locale, tr
-from octop.infra.gateway.slash.catalog import CATALOG, category_label
+from voyagestar.i18n import all_keys_for_locale, tr
+from voyagestar.infra.gateway.slash.catalog import CATALOG, category_label
 
 
 def test_en_and_zh_share_same_keys():

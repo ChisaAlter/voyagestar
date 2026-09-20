@@ -50,11 +50,11 @@ async def test_admin_codex_oauth_start(env: Any) -> None:
     }
     with (
         patch(
-            "octop.api.routers.providers.request_device_code",
+            "voyagestar.api.routers.providers.request_device_code",
             return_value=fake_info,
         ),
         patch(
-            "octop.api.routers.providers._run_codex_device_poll",
+            "voyagestar.api.routers.providers._run_codex_device_poll",
             new=AsyncMock(return_value=None),
         ),
     ):

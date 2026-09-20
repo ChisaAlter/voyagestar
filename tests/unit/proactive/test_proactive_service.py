@@ -17,13 +17,13 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.care_push import CarePushRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.proactive.service import ProactiveCareService
-from octop.infra.utils.ulid import new_ulid
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.care_push import CarePushRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.proactive.service import ProactiveCareService
+from voyagestar.infra.utils.ulid import new_ulid
 
 # ---------------------------------------------------------------------------
 # Fixtures

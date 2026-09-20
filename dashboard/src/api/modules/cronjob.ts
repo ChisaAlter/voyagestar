@@ -1,11 +1,11 @@
 import { request } from "../request";
 import type {
-  OctopCronRow,
-  OctopCronCreateBody,
-  OctopCronPatchBody,
+  VoyagestarCronRow,
+  VoyagestarCronCreateBody,
+  VoyagestarCronPatchBody,
 } from "../types";
 
-export interface OctopCronSettings {
+export interface VoyagestarCronSettings {
   timezone: string;
 }
 
@@ -18,25 +18,25 @@ export interface CronExamplesResponse {
   task_examples: CronTaskExamples | null;
 }
 
-export const octopCronApi = {
-  settings: () => request<OctopCronSettings>("/cron/settings"),
+export const voyagestarCronApi = {
+  settings: () => request<VoyagestarCronSettings>("/cron/settings"),
 
   examples: (agentId: string) =>
     request<CronExamplesResponse>(`/agents/${agentId}/cron/examples`),
 
-  list: (agentId: string) => request<OctopCronRow[]>(`/agents/${agentId}/cron`),
+  list: (agentId: string) => request<VoyagestarCronRow[]>(`/agents/${agentId}/cron`),
 
-  create: (agentId: string, body: OctopCronCreateBody) =>
-    request<OctopCronRow>(`/agents/${agentId}/cron`, {
+  create: (agentId: string, body: VoyagestarCronCreateBody) =>
+    request<VoyagestarCronRow>(`/agents/${agentId}/cron`, {
       method: "POST",
       body: JSON.stringify(body),
     }),
 
   get: (agentId: string, cronId: string) =>
-    request<OctopCronRow>(`/agents/${agentId}/cron/${cronId}`),
+    request<VoyagestarCronRow>(`/agents/${agentId}/cron/${cronId}`),
 
-  patch: (agentId: string, cronId: string, body: OctopCronPatchBody) =>
-    request<OctopCronRow>(`/agents/${agentId}/cron/${cronId}`, {
+  patch: (agentId: string, cronId: string, body: VoyagestarCronPatchBody) =>
+    request<VoyagestarCronRow>(`/agents/${agentId}/cron/${cronId}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     }),

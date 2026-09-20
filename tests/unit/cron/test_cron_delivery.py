@@ -8,15 +8,15 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
 
-from octop.infra.cron.delivery import CronDeliveryCommand, CronDeliveryService
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.sessions import SessionRepo
-from octop.infra.db.repos.thread_messages import ThreadMessageRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.cron.delivery import CronDeliveryCommand, CronDeliveryService
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.sessions import SessionRepo
+from voyagestar.infra.db.repos.thread_messages import ThreadMessageRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.gateway.threads import ThreadRegistry
 
 
 def _command(**overrides: object) -> CronDeliveryCommand:
@@ -302,7 +302,7 @@ async def test_wrong_user_rejects_session() -> None:
 
 @pytest.mark.asyncio
 async def test_dashboard_text_projects_into_real_sqlite(tmp_path: Path) -> None:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     UserRepo(db).create(username="u", password_hash="h", role="user")
     AgentRepo(db).create(agent_id="a1", user_id=1, name="bot")

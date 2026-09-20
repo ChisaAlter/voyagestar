@@ -8,24 +8,24 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from harness_agent.compaction import CompactResult
 
-from octop.config import OctopConfig
-from octop.infra.agents.manager import AgentManager
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.sessions import SessionRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.db.services import build_shared_services
-from octop.infra.gateway.slash import BufferSink, SlashCommand, build_default_dispatcher
-from octop.infra.gateway.slash.ctx import SlashCtx
-from octop.infra.gateway.slash.handlers.composite import _short_offload_path, cmd_compact
-from octop.infra.gateway.threads import ThreadRegistry
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.agents.manager import AgentManager
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.sessions import SessionRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.gateway.slash import BufferSink, SlashCommand, build_default_dispatcher
+from voyagestar.infra.gateway.slash.ctx import SlashCtx
+from voyagestar.infra.gateway.slash.handlers.composite import _short_offload_path, cmd_compact
+from voyagestar.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _agent_manager(tmp_path: Path, db: SqlitePool) -> AgentManager:
-    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=OctopConfig())
+    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=VoyagestarConfig())
     manager = AgentManager(repos=services.repos, paths=services.paths)
     harness_mgr = MagicMock()
     harness_mgr.get_thread_model.return_value = None
@@ -98,7 +98,7 @@ async def test_cmd_compact_calls_harness_without_reset(ctx, dispatcher) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cmd_compact_shows_octop_relative_offload_path(ctx, dispatcher) -> None:
+async def test_cmd_compact_shows_voyagestar_relative_offload_path(ctx, dispatcher) -> None:
     await ctx.thread_registry.get_or_create_by_key(
         session_key=ctx.session_key,
         agent_id=ctx.agent_id,
@@ -114,7 +114,7 @@ async def test_cmd_compact_shows_octop_relative_offload_path(ctx, dispatcher) ->
             ok=True,
             summarized_count=3,
             preserved_count=4,
-            file_path=f"/Users/wally/.octop/workspaces/X/.octop/conversation_history/{tid}.md",
+            file_path=f"/Users/wally/.voyagestar/workspaces/X/.voyagestar/conversation_history/{tid}.md",
             reason="ok",
         )
     )
@@ -124,7 +124,7 @@ async def test_cmd_compact_shows_octop_relative_offload_path(ctx, dispatcher) ->
     await cmd_compact(dispatcher, SlashCommand("compact", ""), ctx, sink)
 
     text = "\n".join(sink.lines)
-    assert ".octop/conversation_history/" in text
+    assert ".voyagestar/conversation_history/" in text
     assert "/Users/wally" not in text
     assert "/home/" not in text
 
@@ -132,15 +132,15 @@ async def test_cmd_compact_shows_octop_relative_offload_path(ctx, dispatcher) ->
 def test_short_offload_path_hides_windows_macos_and_linux_hosts() -> None:
     tid = "thr_win"
     cases = (
-        rf"C:\Users\wally\.octop\workspaces\X\.octop\conversation_history\{tid}.md",
-        rf"\\?\C:\Users\wally\.octop\workspaces\X\.octop\conversation_history\{tid}.md",
-        f"/home/wally/.octop/workspaces/X/.octop/conversation_history/{tid}.md",
-        f"/Users/wally/.octop/workspaces/X/.octop/conversation_history/{tid}.md",
-        f"C:/Users/wally/.octop/conversation_history/{tid}.md",
+        rf"C:\Users\wally\.voyagestar\workspaces\X\.voyagestar\conversation_history\{tid}.md",
+        rf"\\?\C:\Users\wally\.voyagestar\workspaces\X\.voyagestar\conversation_history\{tid}.md",
+        f"/home/wally/.voyagestar/workspaces/X/.voyagestar/conversation_history/{tid}.md",
+        f"/Users/wally/.voyagestar/workspaces/X/.voyagestar/conversation_history/{tid}.md",
+        f"C:/Users/wally/.voyagestar/conversation_history/{tid}.md",
     )
     for raw in cases:
         got = _short_offload_path(raw)
-        assert got == f".octop/conversation_history/{tid}.md"
+        assert got == f".voyagestar/conversation_history/{tid}.md"
         assert "\\" not in got
         assert "C:" not in got
         assert "/Users/" not in got
@@ -168,7 +168,7 @@ async def test_cmd_compact_shows_windows_offload_path(ctx, dispatcher) -> None:
             ok=True,
             summarized_count=3,
             preserved_count=4,
-            file_path=rf"C:\Users\wally\.octop\workspaces\X\.octop\conversation_history\{tid}.md",
+            file_path=rf"C:\Users\wally\.voyagestar\workspaces\X\.voyagestar\conversation_history\{tid}.md",
             reason="ok",
         )
     )
@@ -178,7 +178,7 @@ async def test_cmd_compact_shows_windows_offload_path(ctx, dispatcher) -> None:
     await cmd_compact(dispatcher, SlashCommand("compact", ""), ctx, sink)
 
     text = "\n".join(sink.lines)
-    assert ".octop/conversation_history/" in text
+    assert ".voyagestar/conversation_history/" in text
     assert "C:" not in text
     assert "Users\\wally" not in text
     assert "Users/wally" not in text
@@ -201,8 +201,8 @@ async def test_cmd_compact_prefers_display_path_over_host_file_path(ctx, dispatc
             ok=True,
             summarized_count=3,
             preserved_count=4,
-            file_path=rf"C:\Users\wally\.octop\workspaces\X\.octop\conversation_history\{tid}.md",
-            display_path=f".octop/conversation_history/{tid}.md",
+            file_path=rf"C:\Users\wally\.voyagestar\workspaces\X\.voyagestar\conversation_history\{tid}.md",
+            display_path=f".voyagestar/conversation_history/{tid}.md",
             reason="ok",
         )
     )
@@ -212,7 +212,7 @@ async def test_cmd_compact_prefers_display_path_over_host_file_path(ctx, dispatc
     await cmd_compact(dispatcher, SlashCommand("compact", ""), ctx, sink)
 
     text = "\n".join(sink.lines)
-    assert f".octop/conversation_history/{tid}.md" in text
+    assert f".voyagestar/conversation_history/{tid}.md" in text
     assert "C:" not in text
     assert "/Users/" not in text
     assert "/home/" not in text

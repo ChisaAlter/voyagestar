@@ -9,17 +9,17 @@ from unittest import mock
 
 import pytest
 
-from octop.infra.agents.langfuse import LangfuseSettingsStore, verify_langfuse_credentials
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.secrets import SecretRepo
-from octop.infra.db.repos.settings import SettingsRepo
-from octop.infra.errors import OctopError
+from voyagestar.infra.agents.langfuse import LangfuseSettingsStore, verify_langfuse_credentials
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.secrets import SecretRepo
+from voyagestar.infra.db.repos.settings import SettingsRepo
+from voyagestar.infra.errors import VoyagestarError
 
 
 @pytest.fixture
 def store(tmp_path: Path) -> LangfuseSettingsStore:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     return LangfuseSettingsStore(settings_repo=SettingsRepo(db), secret_repo=SecretRepo(db))
 
@@ -43,7 +43,7 @@ def test_langfuse_settings_roundtrip(store: LangfuseSettingsStore) -> None:
 
 
 def test_langfuse_requires_secret_when_enabling(store: LangfuseSettingsStore) -> None:
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         store.save(enabled=True, public_key="pk", host="http://x")
 
 
@@ -66,7 +66,9 @@ def test_langfuse_harness_config(store: LangfuseSettingsStore) -> None:
 
 
 def test_verify_langfuse_credentials_accepts_legacy_project_shape() -> None:
-    payload = json.dumps({"data": [{"id": "proj-1", "name": "octop", "metadata": {}}]}).encode()
+    payload = json.dumps(
+        {"data": [{"id": "proj-1", "name": "voyagestar", "metadata": {}}]}
+    ).encode()
 
     class _Resp:
         status = 200

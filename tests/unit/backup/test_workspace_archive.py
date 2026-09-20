@@ -13,7 +13,7 @@ from deepagents.backends.local_shell import LocalShellBackend
 from harness_agent.backends import resolve_backend
 from harness_agent.backends.workspace import BackendWorkspace
 
-from octop.infra.backup.workspace_archive import export_workspace_zip, import_workspace_zip
+from voyagestar.infra.backup.workspace_archive import export_workspace_zip, import_workspace_zip
 
 
 @pytest.mark.asyncio
@@ -71,7 +71,7 @@ async def test_export_ignores_same_named_file_at_backend_root(tmp_path: Path) ->
     while the entry name still said ``AGENTS.md``.
     """
     home = tmp_path / "home"
-    workspace_dir = home / ".octop" / "workspaces" / "AGT1"
+    workspace_dir = home / ".voyagestar" / "workspaces" / "AGT1"
     workspace_dir.mkdir(parents=True)
 
     (home / "AGENTS.md").write_bytes(b"backend-root AGENTS.md")
@@ -82,7 +82,7 @@ async def test_export_ignores_same_named_file_at_backend_root(tmp_path: Path) ->
         {"type": "filesystem", "root_dir": str(home), "virtual_mode": True},
         workspace_dir=workspace_dir,
     )
-    workspace = BackendWorkspace(backend, workspace_dir, system_files_path=".octop")
+    workspace = BackendWorkspace(backend, workspace_dir, system_files_path=".voyagestar")
 
     blob = await export_workspace_zip(workspace)
     with zipfile.ZipFile(io.BytesIO(blob), "r") as zf:
@@ -94,15 +94,15 @@ async def test_export_ignores_same_named_file_at_backend_root(tmp_path: Path) ->
 async def test_replace_import_keeps_system_state(tmp_path: Path) -> None:
     """``replace`` must not delete state an archive can never carry.
 
-    Hidden paths are outside the export glob, so ``.octop`` (sessions / skills /
+    Hidden paths are outside the export glob, so ``.voyagestar`` (sessions / skills /
     auth) is absent from every archive; clearing it on replace destroyed data that
     the import could not restore.
     """
     ws = tmp_path / "ws"
-    (ws / ".octop" / "sessions").mkdir(parents=True)
-    (ws / ".octop" / "sessions" / "state.db").write_bytes(b"SESSION DB")
-    (ws / ".octop" / "auth").mkdir(parents=True)
-    (ws / ".octop" / "auth" / "token.json").write_bytes(b"TOKEN")
+    (ws / ".voyagestar" / "sessions").mkdir(parents=True)
+    (ws / ".voyagestar" / "sessions" / "state.db").write_bytes(b"SESSION DB")
+    (ws / ".voyagestar" / "auth").mkdir(parents=True)
+    (ws / ".voyagestar" / "auth" / "token.json").write_bytes(b"TOKEN")
     (ws / "old.txt").write_text("old", encoding="utf-8")
 
     buf = io.BytesIO()
@@ -117,8 +117,8 @@ async def test_replace_import_keeps_system_state(tmp_path: Path) -> None:
     assert result["imported"] == 1
     assert not (ws / "old.txt").exists()  # visible content is still replaced
     assert (ws / "new.txt").read_bytes() == b"new"
-    assert (ws / ".octop" / "sessions" / "state.db").read_bytes() == b"SESSION DB"
-    assert (ws / ".octop" / "auth" / "token.json").read_bytes() == b"TOKEN"
+    assert (ws / ".voyagestar" / "sessions" / "state.db").read_bytes() == b"SESSION DB"
+    assert (ws / ".voyagestar" / "auth" / "token.json").read_bytes() == b"TOKEN"
 
 
 @pytest.mark.asyncio
@@ -126,11 +126,11 @@ async def test_export_reads_legacy_root_system_dir_from_workspace(tmp_path: Path
     """A legacy root ``skills/`` must not be shadowed by the backend root either.
 
     ``workspace.resolve_path()`` re-maps ``skills/`` under ``system_files_path``
-    (``.octop``), so probing it for a workspace that still keeps legacy root
+    (``.voyagestar``), so probing it for a workspace that still keeps legacy root
     ``skills/`` misses and falls back to the shadowed relative read.
     """
     home = tmp_path / "home"
-    workspace_dir = home / ".octop" / "workspaces" / "AGT1"
+    workspace_dir = home / ".voyagestar" / "workspaces" / "AGT1"
     (workspace_dir / "skills" / "demo").mkdir(parents=True)
     (home / "skills" / "demo").mkdir(parents=True)
 
@@ -141,7 +141,7 @@ async def test_export_reads_legacy_root_system_dir_from_workspace(tmp_path: Path
         {"type": "filesystem", "root_dir": str(home), "virtual_mode": True},
         workspace_dir=workspace_dir,
     )
-    workspace = BackendWorkspace(backend, workspace_dir, system_files_path=".octop")
+    workspace = BackendWorkspace(backend, workspace_dir, system_files_path=".voyagestar")
 
     blob = await export_workspace_zip(workspace)
     with zipfile.ZipFile(io.BytesIO(blob), "r") as zf:

@@ -10,7 +10,7 @@ import pytest
 from deepagents.backends.local_shell import LocalShellBackend
 from harness_agent.backends.workspace import BackendWorkspace
 
-from octop.infra.agents.experts.catalog import (
+from voyagestar.infra.agents.experts.catalog import (
     ExpertCatalog,
     default_task_examples,
     default_welcome_payload,
@@ -34,7 +34,7 @@ async def test_read_workspace_manifest_welcome() -> None:
     with tempfile.TemporaryDirectory() as ws_dir:
         workspace = _workspace(ws_dir)
         await workspace.awrite_text(
-            ".octop/manifest.json",
+            ".voyagestar/manifest.json",
             json.dumps(
                 {
                     "id": "demo",
@@ -92,7 +92,7 @@ async def test_seed_expert_directory_includes_manifest() -> None:
             seed_paths=["SOUL.md"],
         )
         assert count == 2
-        text = await workspace.aread_text(".octop/manifest.json")
+        text = await workspace.aread_text(".voyagestar/manifest.json")
         assert text is not None
         assert json.loads(text)["id"] == "demo"
         soul = await workspace.aread_text("SOUL.md")
@@ -115,7 +115,7 @@ def test_welcome_payload_has_content() -> None:
 def test_default_welcome_uses_general_assistant_when_catalog_present() -> None:
     catalog = ExpertCatalog.__new__(ExpertCatalog)
     # Use real library if available
-    from octop.infra.agents.experts.catalog import default_library_root
+    from voyagestar.infra.agents.experts.catalog import default_library_root
 
     catalog = ExpertCatalog(default_library_root())
     catalog.refresh()
@@ -212,7 +212,7 @@ async def test_read_workspace_manifest_task_examples() -> None:
     with tempfile.TemporaryDirectory() as ws_dir:
         workspace = _workspace(ws_dir)
         await workspace.awrite_text(
-            ".octop/manifest.json",
+            ".voyagestar/manifest.json",
             json.dumps({"id": "demo", "task_examples": {"zh": ["巡检"], "en": ["Patrol"]}}),
             force=True,
         )
@@ -227,7 +227,7 @@ async def test_read_workspace_manifest_task_examples_missing() -> None:
     with tempfile.TemporaryDirectory() as ws_dir:
         workspace = _workspace(ws_dir)
         await workspace.awrite_text(
-            ".octop/manifest.json",
+            ".voyagestar/manifest.json",
             json.dumps({"id": "demo"}),
             force=True,
         )

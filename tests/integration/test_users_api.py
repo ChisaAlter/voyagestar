@@ -106,7 +106,7 @@ async def test_admin_can_unlock_login(env):
 
 
 async def test_admin_can_create_user_with_resource_policy(env, tmp_path, monkeypatch):
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "0")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "0")
     c, _srv, auth = env
     jail = tmp_path / "jail"
     jail.mkdir()
@@ -134,7 +134,7 @@ async def test_admin_can_create_user_with_resource_policy(env, tmp_path, monkeyp
 
 
 async def test_create_user_rejects_workspace_root_in_container(env, tmp_path, monkeypatch):
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "1")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "1")
     c, _srv, auth = env
     jail = tmp_path / "jail"
     jail.mkdir()
@@ -156,7 +156,7 @@ async def test_create_user_rejects_workspace_root_in_container(env, tmp_path, mo
 
 
 async def test_create_user_rejects_invalid_workspace_root(env, tmp_path, monkeypatch):
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "0")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "0")
     c, _srv, auth = env
     missing = tmp_path / "no-such-dir"
 
@@ -176,7 +176,7 @@ async def test_create_user_rejects_invalid_workspace_root(env, tmp_path, monkeyp
 
 
 async def test_admin_can_set_resource_policy(env, tmp_path, monkeypatch):
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "0")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "0")
     from tests.support.auth import TEST_PASSWORD, create_user
 
     c, _srv, auth = env

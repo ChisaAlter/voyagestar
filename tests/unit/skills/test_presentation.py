@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from octop.infra.skills.presentation import (
+from voyagestar.infra.skills.presentation import (
     apply_skill_presentation,
     localize_skill_summary,
 )
@@ -10,7 +10,7 @@ def test_apply_skill_presentation_exposes_localized_copy_and_assets() -> None:
     summary = {"slug": "pdf-reader", "name": "pdf-reader", "description": "Agent trigger"}
     frontmatter = {
         "metadata": {
-            "octop": {
+            "voyagestar": {
                 "label": {"zh": "PDF 阅读", "en": "PDF Reader"},
                 "summary": {"zh": "读取 PDF", "en": "Read PDFs"},
                 "emoji": "📄",
@@ -36,7 +36,7 @@ def test_apply_skill_presentation_exposes_localized_copy_and_assets() -> None:
 def test_apply_skill_presentation_keeps_identity_without_locale() -> None:
     raw = apply_skill_presentation(
         {"name": "pdf-reader", "description": "Agent trigger"},
-        {"metadata": {"octop": {"display_name": "PDF Reader"}}},
+        {"metadata": {"voyagestar": {"display_name": "PDF Reader"}}},
     )
 
     assert raw["name"] == "pdf-reader"
@@ -62,7 +62,7 @@ def test_legacy_display_name_and_compatible_emoji_remain_supported() -> None:
         {"name": "stable-name", "description": "Agent trigger"},
         {
             "metadata": {
-                "octop": {"display_name": "Friendly Name"},
+                "voyagestar": {"display_name": "Friendly Name"},
                 "openclaw": {"emoji": "📦"},
             }
         },

@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from octop.api.routers.skills import (
+from voyagestar.api.routers.skills import (
     _summary_dict,
     _valid_skillhub_icon_url,
 )
-from octop.infra.skills.install import with_skillhub_presentation_metadata
+from voyagestar.infra.skills.install import with_skillhub_presentation_metadata
 
 
-def test_summary_prefers_octop_display_metadata_and_supports_openclaw_emoji() -> None:
+def test_summary_prefers_voyagestar_display_metadata_and_supports_openclaw_emoji() -> None:
     summary = _summary_dict(
         "stable-slug",
         {
             "name": "english-name",
             "metadata": {
-                "octop": {
+                "voyagestar": {
                     "display_name": "中文名称",
                     "icon_url": "https://cdn.example.com/icon.png",
                 },

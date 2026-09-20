@@ -1,19 +1,19 @@
 # =============================================================================
-# Local PostgreSQL (+ pgvector) for Octop dual-backend development / tests
+# Local PostgreSQL (+ pgvector) for Voyagestar dual-backend development / tests
 #
 # From repo root:
 #   docker compose -f docker/docker-compose.postgres.yml up -d
 #   docker compose -f docker/docker-compose.postgres.yml down
 #
 # Connection (default):
-#   postgresql://octop:octop@127.0.0.1:5432/octop
+#   postgresql://voyagestar:voyagestar@127.0.0.1:5432/voyagestar
 #
-# For pytest / Octop:
-#   export OCTOP_TEST_DATABASE_URL='postgresql://octop:octop@127.0.0.1:5432/octop'
-#   export OCTOP_DATABASE_URL='postgresql://octop:octop@127.0.0.1:5432/octop'
+# For pytest / Voyagestar:
+#   export VOYAGESTAR_TEST_DATABASE_URL='postgresql://voyagestar:voyagestar@127.0.0.1:5432/voyagestar'
+#   export VOYAGESTAR_DATABASE_URL='postgresql://voyagestar:voyagestar@127.0.0.1:5432/voyagestar'
 #
 # Init layers (ADR 002):
-#   - Control-plane schema → Octop migrate (NNN_*.pg.sql), not this compose
+#   - Control-plane schema → Voyagestar migrate (NNN_*.pg.sql), not this compose
 #   - CREATE EXTENSION vector → postgres/init-vector.sql (initdb.d only)
 #   - Agent memory tables → harness-memory at runtime
 # =============================================================================
@@ -21,16 +21,16 @@
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: octop-postgres
+    container_name: voyagestar-postgres
     restart: unless-stopped
     ports:
-      - "${OCTOP_PG_PORT:-5432}:5432"
+      - "${VOYAGESTAR_PG_PORT:-5432}:5432"
     environment:
-      POSTGRES_USER: ${OCTOP_PG_USER:-octop}
-      POSTGRES_PASSWORD: ${OCTOP_PG_PASSWORD:-octop}
-      POSTGRES_DB: ${OCTOP_PG_DB:-octop}
+      POSTGRES_USER: ${VOYAGESTAR_PG_USER:-voyagestar}
+      POSTGRES_PASSWORD: ${VOYAGESTAR_PG_PASSWORD:-voyagestar}
+      POSTGRES_DB: ${VOYAGESTAR_PG_DB:-voyagestar}
     volumes:
-      - octop_pgdata:/var/lib/postgresql/data
+      - voyagestar_pgdata:/var/lib/postgresql/data
       - ./postgres/init-vector.sql:/docker-entrypoint-initdb.d/01-vector.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -39,4 +39,4 @@ services:
       retries: 10
 
 volumes:
-  octop_pgdata:
+  voyagestar_pgdata:

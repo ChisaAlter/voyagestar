@@ -6,22 +6,22 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos._base import now_ts
-from octop.infra.db.repos.invites import InviteRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.users.invites import (
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos._base import now_ts
+from voyagestar.infra.db.repos.invites import InviteRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.users.invites import (
     DEFAULT_EXPIRES_DAYS,
     generate_invite_code,
     invite_path,
 )
-from octop.infra.users.password import hash_password
+from voyagestar.infra.users.password import hash_password
 
 
 @pytest.fixture
 def db(tmp_path: Path) -> SqlitePool:
-    pool = SqlitePool(tmp_path / "octop.db")
+    pool = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(pool)
     return pool
 

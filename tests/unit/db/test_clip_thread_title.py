@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.threads import (
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.threads import (
     clip_thread_title,
     repair_all_legacy_thread_titles,
     repair_legacy_thread_title,
@@ -50,13 +50,13 @@ def test_repair_legacy_passthrough_short() -> None:
 
 
 def test_migration_003_repairs_stored_hard_cuts(tmp_path: Path) -> None:
-    pool = SqlitePool(tmp_path / "octop.db")
+    pool = SqlitePool(tmp_path / "voyagestar.db")
     with pool.connect() as conn:
         conn.executescript(
             (
                 Path(__file__).resolve().parents[3]
-                / "src/octop/infra/db/migrations/001_initial.sql"
-            ).read_text()
+                / "src/voyagestar/infra/db/migrations/001_initial.sql"
+            ).read_text(encoding="utf-8")
         )
         # Partial v2 columns so full migrate can finish.
         conn.execute("ALTER TABLE cron_jobs ADD COLUMN mcp_servers TEXT NOT NULL DEFAULT '[]'")

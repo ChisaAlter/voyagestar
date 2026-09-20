@@ -58,14 +58,14 @@ export type CronJobSpecOutputLegacy = Record<string, unknown>;
 export type CronJobViewLegacy = Record<string, unknown>;
 
 // ---------------------------------------------------------------------------
-// Octop-native flat cron row — returned by /api/agents/:id/cron endpoints
+// Voyagestar-native flat cron row — returned by /api/agents/:id/cron endpoints
 // ---------------------------------------------------------------------------
 
 /**
- * Wire-shape returned by octop's per-agent cron endpoints.
+ * Wire-shape returned by voyagestar's per-agent cron endpoints.
  * Matches the Python ``_row_to_dict`` serializer in ``api/routers/cron.py``.
  */
-export interface OctopCronRow {
+export interface VoyagestarCronRow {
   id: string;
   name: string;
   agent_id: string;
@@ -83,7 +83,7 @@ export interface OctopCronRow {
 }
 
 /** Body sent to POST /api/agents/:id/cron */
-export interface OctopCronCreateBody {
+export interface VoyagestarCronCreateBody {
   name?: string | null;
   trigger: string;
   prompt: string;
@@ -96,7 +96,7 @@ export interface OctopCronCreateBody {
 }
 
 /** Body sent to PATCH /api/agents/:id/cron/:cron_id */
-export interface OctopCronPatchBody {
+export interface VoyagestarCronPatchBody {
   name?: string | null;
   trigger?: string;
   prompt?: string;

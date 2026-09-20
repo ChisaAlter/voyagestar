@@ -26,8 +26,8 @@ import { skillPackagesApi } from "../../../api/modules/skillPackages";
 import { apiErrorMessage, isNotFoundApiError } from "../../../utils/apiError";
 import { isAgentChatReady } from "../../../utils/agentError";
 import { useAgentFormResources } from "../../../hooks/useAgentFormResources";
-import { octopAgentsApi } from "../../../api/modules/octopAgents";
-import { useAgent, type OctopAgent } from "../../../context/AgentContext";
+import { voyagestarAgentsApi } from "../../../api/modules/voyagestarAgents";
+import { useAgent, type VoyagestarAgent } from "../../../context/AgentContext";
 import ExpertAvatarPicker from "./ExpertAvatarPicker";
 import WorkspaceDrawer from "../../Agent/Workspace/components/WorkspaceDrawer";
 import {
@@ -146,11 +146,11 @@ interface EditFormValues {
 
 interface EditAgentDrawerProps {
   open: boolean;
-  agent: OctopAgent | null;
+  agent: VoyagestarAgent | null;
   onClose: () => void;
   onSaved: (
     updated: Pick<
-      OctopAgent,
+      VoyagestarAgent,
       | "agent_id"
       | "name"
       | "description"
@@ -163,7 +163,7 @@ interface EditAgentDrawerProps {
 }
 
 interface EditAgentDrawerBodyProps {
-  agent: OctopAgent;
+  agent: VoyagestarAgent;
   onClose: () => void;
   onSaved: EditAgentDrawerProps["onSaved"];
   onSaveReady: (save: () => Promise<void>) => void;
@@ -171,7 +171,7 @@ interface EditAgentDrawerBodyProps {
 }
 
 /**
- * Merge page-config fields into the existing workspace .octop/manifest.json.
+ * Merge page-config fields into the existing workspace .voyagestar/manifest.json.
  * Missing file → start from {}. Invalid JSON is refused so we do not
  * clobber a hand-edited manifest.
  */
@@ -183,7 +183,7 @@ async function persistWelcomeManifest(
   try {
     const file = await workspaceApi.readWorkspaceFile(
       agentId,
-      "/.octop/manifest.json",
+      "/.voyagestar/manifest.json",
     );
     const parsed = parseManifestObject(file.content ?? "");
     if (!parsed.ok) return "invalid-json";
@@ -206,7 +206,7 @@ async function persistWelcomeManifest(
   const merged = mergeWelcomeIntoManifest(existing, data);
   await workspaceApi.createWorkspaceFile(
     agentId,
-    "/.octop/manifest.json",
+    "/.voyagestar/manifest.json",
     JSON.stringify(merged, null, 2),
   );
   return "ok";
@@ -738,7 +738,7 @@ function EditAgentDrawerBody({
                     void (async () => {
                       setAvatarBusy(true);
                       try {
-                        const result = await octopAgentsApi.uploadAvatar(
+                        const result = await voyagestarAgentsApi.uploadAvatar(
                           agent.agent_id,
                           file,
                         );
@@ -762,7 +762,7 @@ function EditAgentDrawerBody({
                     void (async () => {
                       setAvatarBusy(true);
                       try {
-                        await octopAgentsApi.deleteAvatar(agent.agent_id);
+                        await voyagestarAgentsApi.deleteAvatar(agent.agent_id);
                         setIconUrl(null);
                         await refresh({ silent: true });
                       } catch (err) {

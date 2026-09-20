@@ -239,9 +239,9 @@ export function useChatSend({
 
   useEffect(() => {
     const consumePending = () => {
-      const raw = localStorage.getItem("octop.pendingChatMessage");
+      const raw = localStorage.getItem("voyagestar.pendingChatMessage");
       if (!raw) return;
-      localStorage.removeItem("octop.pendingChatMessage");
+      localStorage.removeItem("voyagestar.pendingChatMessage");
 
       let textToSend = raw;
       let autoRecord = false;
@@ -299,9 +299,9 @@ export function useChatSend({
     consumePending();
 
     const handler = () => consumePending();
-    window.addEventListener("octop:pending-chat-message", handler);
+    window.addEventListener("voyagestar:pending-chat-message", handler);
     return () =>
-      window.removeEventListener("octop:pending-chat-message", handler);
+      window.removeEventListener("voyagestar:pending-chat-message", handler);
   }, [handleSend, activeThreadId, onAutoRecordingStarted]);
 
   return { handleSend };

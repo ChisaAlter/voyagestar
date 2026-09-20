@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 
-from octop.infra.auth.captcha import get_provider, list_providers, parse_slug, register
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.infra.auth.captcha import get_provider, list_providers, parse_slug, register
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 
 def test_parse_slug_rejects_unknown() -> None:
@@ -74,7 +74,7 @@ class _FakeStrong:
 
 
 def test_register_makes_test_double_reachable(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.infra.auth.captcha import providers as captcha_providers
+    from voyagestar.infra.auth.captcha import providers as captcha_providers
 
     monkeypatch.setattr(captcha_providers, "_REGISTRY", dict(captcha_providers._REGISTRY))
     register(_FakeStrong())
@@ -115,7 +115,7 @@ def test_tencent_verify_call_builds_tc3_signed_post() -> None:
 
 
 def test_tencent_verify_call_requires_cam_keys() -> None:
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         _tencent().verify_call(
             site_key="195642000",
             secret="app-secret",
@@ -126,7 +126,7 @@ def test_tencent_verify_call_requires_cam_keys() -> None:
 
 
 def test_tencent_verify_call_rejects_non_integer_appid() -> None:
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         _tencent().verify_call(
             site_key="not-an-int",
             secret="app-secret",
@@ -142,7 +142,7 @@ def test_tencent_interpret_accepts_code_one() -> None:
 
 
 def test_tencent_interpret_rejects_malicious_evil_level() -> None:
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         _tencent().interpret(
             {"Response": {"CaptchaCode": 1, "EvilLevel": 100}},
             min_score=0.5,
@@ -151,7 +151,7 @@ def test_tencent_interpret_rejects_malicious_evil_level() -> None:
 
 @pytest.mark.parametrize("code", [7, 8, 9, 15, 16, 21, 100])
 def test_tencent_interpret_rejects_failure_codes(code: int) -> None:
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         _tencent().interpret(
             {"Response": {"CaptchaCode": code, "CaptchaMsg": "nope"}},
             min_score=0.5,
@@ -159,7 +159,7 @@ def test_tencent_interpret_rejects_failure_codes(code: int) -> None:
 
 
 def test_tencent_interpret_rejects_api_error_envelope() -> None:
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         _tencent().interpret(
             {"Response": {"Error": {"Code": "UnauthorizedOperation", "Message": "nope"}}},
             min_score=0.5,

@@ -13,7 +13,7 @@ import {
   GitFork,
 } from "lucide-react";
 import type { Session } from "../hooks/useSessions";
-import type { OctopAgent } from "../../../context/AgentContext";
+import type { VoyagestarAgent } from "../../../context/AgentContext";
 import { isAgentChatReady } from "../../../utils/agentError";
 import { showConfirmModal } from "../../../utils/confirmModal";
 import { ExpertIcon } from "../../Experts/components/iconForName";
@@ -207,7 +207,7 @@ const SessionItem = memo(function SessionItem({
 });
 
 interface AgentCardProps {
-  agent: OctopAgent;
+  agent: VoyagestarAgent;
   sessions: Session[];
   activeId: string | null;
   searchQuery: string;
@@ -359,7 +359,7 @@ function ActiveAgentCard({
 }
 
 interface AgentRowProps {
-  agent: OctopAgent;
+  agent: VoyagestarAgent;
   onSelect: () => void;
 }
 
@@ -393,7 +393,7 @@ function InactiveAgentRow({ agent, onSelect }: AgentRowProps) {
 }
 
 interface SessionListProps {
-  agents: OctopAgent[];
+  agents: VoyagestarAgent[];
   sessions: Session[];
   activeId: string | null;
   activeAgentId: string | null;

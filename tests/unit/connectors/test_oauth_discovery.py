@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import pytest
 
-from octop.infra.connectors.custom_mcp import (
+from voyagestar.infra.connectors.custom_mcp import (
     build_oauth_storage,
     harness_spec_for_server,
     mark_oauth_reauth_required,
     merge_preserved_oauth,
     redact_server_for_api,
 )
-from octop.infra.connectors.oauth.discovery import (
+from voyagestar.infra.connectors.oauth.discovery import (
     build_protected_resource_metadata_urls,
     clear_oauth_discovery_cache,
     discover_oauth_from_mcp_url,
     parse_www_authenticate_resource_metadata,
 )
-from octop.infra.connectors.oauth.registry import (
+from voyagestar.infra.connectors.oauth.registry import (
     oauth_state_kind_for_target,
     oauth_target_requires_https,
 )
@@ -145,7 +145,7 @@ async def test_discover_oauth_from_mcp_url_uses_cache(monkeypatch: pytest.Monkey
         return cached_result
 
     monkeypatch.setattr(
-        "octop.infra.connectors.oauth.discovery._discover_oauth_from_mcp_url_uncached",
+        "voyagestar.infra.connectors.oauth.discovery._discover_oauth_from_mcp_url_uncached",
         fake_uncached,
     )
 

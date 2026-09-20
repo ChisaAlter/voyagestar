@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 from harness_agent.security.models import SecurityPolicy
 
-from octop.infra.agents.security import SecuritySettingsStore
+from voyagestar.infra.agents.security import SecuritySettingsStore
 
 
 def test_load_defaults_when_missing() -> None:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop.infra.agents.providers.presets import load_provider_presets
+from voyagestar.infra.agents.providers.presets import load_provider_presets
 
 
 def test_load_provider_presets_integration() -> None:

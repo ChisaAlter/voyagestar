@@ -26,10 +26,10 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <meta name="apple-mobile-web-app-title" content="Octop" />
+    <meta name="apple-mobile-web-app-title" content="远航星Sanctum" />
     <!-- Web App Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    <title>Octop</title>
+    <title>远航星Sanctum</title>
     <!--
       First-paint boot splash: visible before JS chunks parse. React.createRoot
       replaces #root contents on mount, so this disappears automatically.
@@ -45,7 +45,7 @@
         min-height: 100%;
         min-height: 100dvh;
       }
-      #octop-boot {
+      #voyagestar-boot {
         /* fixed + inset: always viewport-centered before app CSS sets #root height */
         position: fixed;
         inset: 0;
@@ -68,33 +68,33 @@
         body {
           background: #12141c;
         }
-        #octop-boot {
+        #voyagestar-boot {
           background: #12141c;
           color: rgba(255, 255, 255, 0.55);
         }
       }
-      #octop-boot-mark {
+      #voyagestar-boot-mark {
         position: relative;
         width: 88px;
         height: 88px;
         flex: none;
       }
-      #octop-boot-ring {
+      #voyagestar-boot-ring {
         box-sizing: border-box;
         position: absolute;
         inset: 0;
         border-radius: 50%;
         border: 3px solid rgba(232, 93, 117, 0.18);
         border-top-color: #e85d75;
-        animation: octop-boot-spin 0.85s linear infinite;
+        animation: voyagestar-boot-spin 0.85s linear infinite;
       }
       @media (prefers-color-scheme: dark) {
-        #octop-boot-ring {
+        #voyagestar-boot-ring {
           border-color: rgba(240, 139, 154, 0.22);
           border-top-color: #f08b9a;
         }
       }
-      #octop-boot-logo {
+      #voyagestar-boot-logo {
         position: absolute;
         inset: 14px;
         width: 60px;
@@ -102,20 +102,20 @@
         border-radius: 14px;
         object-fit: contain;
         display: block;
-        animation: octop-boot-breathe 1.6s ease-in-out infinite;
+        animation: voyagestar-boot-breathe 1.6s ease-in-out infinite;
       }
-      #octop-boot-text {
+      #voyagestar-boot-text {
         font-size: 14px;
         font-weight: 500;
         letter-spacing: 0.04em;
         user-select: none;
       }
-      @keyframes octop-boot-spin {
+      @keyframes voyagestar-boot-spin {
         to {
           transform: rotate(360deg);
         }
       }
-      @keyframes octop-boot-breathe {
+      @keyframes voyagestar-boot-breathe {
         0%,
         100% {
           transform: scale(1);
@@ -127,19 +127,19 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        #octop-boot-ring,
-        #octop-boot-logo {
+        #voyagestar-boot-ring,
+        #voyagestar-boot-logo {
           animation: none;
         }
       }
     </style>
     <!--
       Classic script (not type=module) so it runs even when hashed chunks 404.
-      Shares octop:chunk-reload with reloadOnStaleChunk.ts.
+      Shares voyagestar:chunk-reload with reloadOnStaleChunk.ts.
     -->
     <script>
       (function () {
-        var KEY = "octop:chunk-reload";
+        var KEY = "voyagestar:chunk-reload";
         // Firefox fires error on <link rel="modulepreload"> for /assets/*.js
         // even when the file is fine; treating those as stale chunks caused
         // infinite location.reload() loops (and aborted real dynamic imports).
@@ -206,23 +206,23 @@
   </head>
   <body>
     <div id="root">
-      <div id="octop-boot" role="status" aria-live="polite">
-        <div id="octop-boot-mark" aria-hidden="true">
-          <div id="octop-boot-ring"></div>
+      <div id="voyagestar-boot" role="status" aria-live="polite">
+        <div id="voyagestar-boot-mark" aria-hidden="true">
+          <div id="voyagestar-boot-ring"></div>
           <img
-            id="octop-boot-logo"
+            id="voyagestar-boot-logo"
             src="/logo.svg"
             alt=""
             width="60"
             height="60"
           />
         </div>
-        <div id="octop-boot-text">Loading…</div>
+        <div id="voyagestar-boot-text">Loading…</div>
       </div>
     </div>
     <script>
       (function () {
-        var el = document.getElementById("octop-boot-text");
+        var el = document.getElementById("voyagestar-boot-text");
         if (!el) return;
         try {
           var lang = (

@@ -1,4 +1,4 @@
-export const CONNECTORS_STORAGE_PREFIX = "octop:chat-connectors:";
+export const CONNECTORS_STORAGE_PREFIX = "voyagestar:chat-connectors:";
 
 function loadSavedStringList(key: string): string[] {
   try {

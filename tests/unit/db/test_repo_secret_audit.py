@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.audit import AuditRepo, AuditRow
-from octop.infra.db.repos.secrets import SecretRepo
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.audit import AuditRepo, AuditRow
+from voyagestar.infra.db.repos.secrets import SecretRepo
 
 
 @pytest.fixture

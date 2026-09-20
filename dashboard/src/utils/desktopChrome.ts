@@ -13,8 +13,8 @@ export const WINDOW_CONTROLS_INSET: Record<DesktopChromeStyle, number> = {
 };
 
 /** Right-edge overlay chrome (dock toolbar, etc.) to keep clear of caption buttons. */
-export const CHROME_END_PAD_ATTR = "data-octop-chrome-end-pad";
-export const WINDOW_CONTROLS_SPACER_ATTR = "data-octop-window-controls-spacer";
+export const CHROME_END_PAD_ATTR = "data-voyagestar-chrome-end-pad";
+export const WINDOW_CONTROLS_SPACER_ATTR = "data-voyagestar-window-controls-spacer";
 
 /**
  * Dock toolbar already has 12px end padding. Subtract that plus 6px so the
@@ -41,12 +41,12 @@ export function windowControlsEndSpacerPx(
 }
 
 /** Marks shell chrome that Wails should treat as a window-drag region. */
-export const DESKTOP_DRAG_REGION_CLASS = "octop-desktop-drag";
-export const DESKTOP_NO_DRAG_CLASS = "octop-desktop-no-drag";
+export const DESKTOP_DRAG_REGION_CLASS = "voyagestar-desktop-drag";
+export const DESKTOP_NO_DRAG_CLASS = "voyagestar-desktop-no-drag";
 export const DESKTOP_TITLEBAR_DRAG_HEIGHT = 32;
 
 const NO_DRAG_SELECTOR =
-  'button, a, input, textarea, select, [role="button"], [role="menuitem"], [data-octop-no-drag], .octop-desktop-no-drag';
+  'button, a, input, textarea, select, [role="button"], [role="menuitem"], [data-voyagestar-no-drag], .voyagestar-desktop-no-drag';
 
 export function isDesktopShell(
   win: Pick<DesktopWindow, "_wails"> = window as DesktopWindow,
@@ -70,11 +70,11 @@ export function applyDesktopChrome(
   root: HTMLElement = document.documentElement,
 ): void {
   if (!style) {
-    delete root.dataset.octopDesktopChrome;
+    delete root.dataset.voyagestarDesktopChrome;
     root.style.removeProperty(INSET_VAR);
     return;
   }
-  root.dataset.octopDesktopChrome = style;
+  root.dataset.voyagestarDesktopChrome = style;
   root.style.setProperty(INSET_VAR, `${WINDOW_CONTROLS_INSET[style]}px`);
 }
 
@@ -122,8 +122,8 @@ export function installDesktopWindowDrag(
   const invoke = win._wails?.invoke;
   if (typeof invoke !== "function") return false;
   const root = document.documentElement;
-  if (root.dataset.octopDragReady === "1") return false;
-  root.dataset.octopDragReady = "1";
+  if (root.dataset.voyagestarDragReady === "1") return false;
+  root.dataset.voyagestarDragReady = "1";
 
   let armed = false;
   let startX = 0;

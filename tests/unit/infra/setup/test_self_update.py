@@ -1,10 +1,10 @@
-"""Tests for octop.infra.setup.self_update."""
+"""Tests for voyagestar.infra.setup.self_update."""
 
 from __future__ import annotations
 
 import pytest
 
-from octop.infra.setup.self_update import (
+from voyagestar.infra.setup.self_update import (
     build_upgrade_command,
     is_newer,
     is_prerelease,
@@ -55,28 +55,28 @@ def test_pick_latest_versions_all_prerelease() -> None:
 def test_build_upgrade_command_prerelease_flags(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    python = "/home/user/.octop/venv/bin/python"
+    python = "/home/user/.voyagestar/venv/bin/python"
     uv_cmd = build_upgrade_command("uv", python, allow_prerelease=True, version="0.9.34b1")
     assert uv_cmd is not None
     assert uv_cmd[uv_cmd.index("--prerelease") + 1] == "allow"
-    assert "octop==0.9.34b1" in uv_cmd
-    monkeypatch.setattr("octop.infra.setup.self_update.has_pip", lambda _: True)
+    assert "voyagestar==0.9.34b1" in uv_cmd
+    monkeypatch.setattr("voyagestar.infra.setup.self_update.has_pip", lambda _: True)
     pip_cmd = build_upgrade_command("pip", python, allow_prerelease=True, version="0.9.34b1")
     assert pip_cmd is not None
     assert "--pre" in pip_cmd
-    assert "octop==0.9.34b1" in pip_cmd
+    assert "voyagestar==0.9.34b1" in pip_cmd
 
 
 def test_build_upgrade_command_pins_stable_without_pre(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    python = "/home/user/.octop/venv/bin/python"
+    python = "/home/user/.voyagestar/venv/bin/python"
     uv_cmd = build_upgrade_command("uv", python, version="0.9.33")
     assert uv_cmd is not None
-    assert "octop==0.9.33" in uv_cmd
+    assert "voyagestar==0.9.33" in uv_cmd
     assert "--prerelease" not in uv_cmd
-    monkeypatch.setattr("octop.infra.setup.self_update.has_pip", lambda _: True)
+    monkeypatch.setattr("voyagestar.infra.setup.self_update.has_pip", lambda _: True)
     pip_cmd = build_upgrade_command("pip", python, version="0.9.33")
     assert pip_cmd is not None
-    assert "octop==0.9.33" in pip_cmd
+    assert "voyagestar==0.9.33" in pip_cmd
     assert "--pre" not in pip_cmd

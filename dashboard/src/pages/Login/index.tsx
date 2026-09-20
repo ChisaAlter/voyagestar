@@ -246,7 +246,7 @@ export default function LoginPage() {
       >
         <img
           src={isDark ? "/logo_name_dark.png" : "/logo_name.png"}
-          alt="Octop"
+          alt="Voyagestar"
           style={{
             height: 48,
             width: "auto",

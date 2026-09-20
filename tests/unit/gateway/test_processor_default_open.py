@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from harness_gateway.models import ChannelSubject, InboundMessage, TextContent
 
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.gateway.process.processor import GlobalProcessor
-from octop.infra.gateway.slash.dispatcher import SlashDispatcher
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.gateway.process.processor import GlobalProcessor
+from voyagestar.infra.gateway.slash.dispatcher import SlashDispatcher
 
 
 @pytest.mark.asyncio
@@ -64,7 +64,7 @@ async def test_im_call_merges_default_open_mcp_servers() -> None:
     )
 
     with patch(
-        "octop.infra.gateway.process.processor.project_stream",
+        "voyagestar.infra.gateway.process.processor.project_stream",
         new=fake_project_stream,
     ):
         events = [ev async for ev in processor(msg)]
@@ -216,7 +216,7 @@ async def test_resolve_turn_mcp_servers_raises_when_prepare_fails() -> None:
         gateway=None,
     )
 
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await processor._resolve_turn_mcp_servers(
             agent_id="a1",
             user_id=1,

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from octop.api.routers.chat.trajectory import (
+from voyagestar.api.routers.chat.trajectory import (
     _LIST_MAX_SUMMARY_CHARS,
     _LIST_MAX_TOOL_FIELD_CHARS,
     _resume_after_seq,
     _summarize_event,
 )
-from octop.infra.trajectory.types import TrajectoryEvent
+from voyagestar.infra.trajectory.types import TrajectoryEvent
 
 
 def _event(

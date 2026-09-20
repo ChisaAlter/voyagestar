@@ -6,14 +6,14 @@ import json
 import pytest
 from langchain_core.messages import HumanMessage
 
-from octop.infra.gateway.history_backfill import HistoryBackfillQueue
-from octop.infra.gateway.process.history_projection import (
+from voyagestar.infra.gateway.history_backfill import HistoryBackfillQueue
+from voyagestar.infra.gateway.process.history_projection import (
     TurnHistoryTracker,
     _wire_text,
     live_message_input,
     message_input,
 )
-from octop.infra.gateway.process.message_keys import (
+from voyagestar.infra.gateway.process.message_keys import (
     CHECKPOINT_TS_KEY,
     STREAM_ERROR_FLAG,
     parse_checkpoint_ts_ms,

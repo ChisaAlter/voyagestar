@@ -8,8 +8,8 @@ from typing import Any
 import pytest
 from lark_oapi.scene.registration.errors import AppAccessDeniedError, RegisterAppError
 
-from octop.infra.gateway.bot_creators import feishu_bot_creator as creator
-from octop.infra.gateway.bot_creators.feishu_runner import extract_feishu_credentials
+from voyagestar.infra.gateway.bot_creators import feishu_bot_creator as creator
+from voyagestar.infra.gateway.bot_creators.feishu_runner import extract_feishu_credentials
 
 
 def test_extract_feishu_credentials_from_url_payload() -> None:
@@ -77,7 +77,7 @@ def test_register_feishu_app_maps_sdk_result(monkeypatch: pytest.MonkeyPatch) ->
     assert finish["open_id"] == "ou_1"
     assert finish["manage_url"] == "https://open.feishu.cn/app/cli_new"
     assert captured["create_only"] is True
-    assert captured["source"] == "octop"
+    assert captured["source"] == "voyagestar"
     assert "name" not in captured["app_preset"]
     assert "avatar" not in captured["app_preset"]
     assert sent["open_id"] == "ou_1"

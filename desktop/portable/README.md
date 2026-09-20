@@ -1,6 +1,6 @@
-# Octop 绿色便携包（多平台）
+# Voyagestar 绿色便携包（多平台）
 
-解压即用：内置便携 CPython + Octop 及依赖，通过 `start.sh` / `start.bat` 启动。  
+解压即用：内置便携 CPython + Voyagestar 及依赖，通过 `start.sh` / `start.bat` 启动。  
 **不依赖**系统 Python，也**不包含** Wails / 桌面壳——用浏览器打开 Dashboard。  
 首启走上游正常 setup wizard（本目录**不含** OOB / UI 裁剪）。
 
@@ -9,7 +9,7 @@
 本能力全部落在：
 
 - `desktop/portable/**`（脚本 / 模板 / 本目录 Makefile）
-- `.github/workflows/octop-portable.yml`（多平台 CI）
+- `.github/workflows/voyagestar-portable.yml`（多平台 CI）
 - 根 `.gitignore` 一行 `/green`（忽略构建产物）
 - `tests/unit/test_green_launch.py`（launch.py PATH / addsitedir）
 
@@ -29,12 +29,12 @@ make -f desktop/portable/Makefile green
 
 ## 产物布局
 
-公开文件名：`Octop-portable-<plat>-<version>.zip`。zip 内目录仍是：
+公开文件名：`Voyagestar-portable-<plat>-<version>.zip`。zip 内目录仍是：
 
 ```
-Octop-<plat>/
+Voyagestar-<plat>/
   runtime/       # python-build-standalone
-  packages/      # Octop + 依赖（site-packages，可搬迁）
+  packages/      # Voyagestar + 依赖（site-packages，可搬迁）
   launch.py      # 启动引导（site.addsitedir / Windows pywin32）
   start.sh       # macOS / Linux
   start.bat      # Windows
@@ -76,7 +76,7 @@ bash desktop/portable/rebuild.sh
 
 ```bash
 bash desktop/portable/vendor-wheels.sh          # 按当前 uv.lock 预取 wheel
-OCTOP_GREEN_OFFLINE=1 bash desktop/portable/package.sh
+VOYAGESTAR_GREEN_OFFLINE=1 bash desktop/portable/package.sh
 ```
 
 离线缓存必须来自**当前分支**的 `uv.lock`，不要复用旧分叉的 wheel 目录。
@@ -106,7 +106,7 @@ OCTOP_GREEN_OFFLINE=1 bash desktop/portable/package.sh
 
 ## CI
 
-[`.github/workflows/octop-portable.yml`](../../.github/workflows/octop-portable.yml) 在 6 个 runner 上出 zip：
+[`.github/workflows/voyagestar-portable.yml`](../../.github/workflows/voyagestar-portable.yml) 在 6 个 runner 上出 zip：
 
 `linux-amd64` `linux-arm64` `darwin-arm64` `darwin-amd64` `windows-amd64` `windows-arm64`
 
@@ -114,5 +114,5 @@ Actions 使用 GitHub 上游 PBS（`PBS_BASE_URL`），本机构建默认 npmmir
 
 ## Electron 壳
 
-壳只消费 `Octop-portable-<plat>-<version>.zip`（zip 内仍是 `Octop-<plat>/`），不要把绿包编进 asar。步骤见
+壳只消费 `Voyagestar-portable-<plat>-<version>.zip`（zip 内仍是 `Voyagestar-<plat>/`），不要把绿包编进 asar。步骤见
 [`AGENT_ELECTRON_INTEGRATION.md`](AGENT_ELECTRON_INTEGRATION.md)。

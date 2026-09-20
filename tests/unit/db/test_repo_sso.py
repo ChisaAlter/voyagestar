@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.sso import SsoRepo
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.sso import SsoRepo
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def test_login_code_single_consume(db: SqlitePool) -> None:
         client_id="client-id",
         client_secret_enc=b"encrypted-secret",
         scopes="openid profile email",
-        dashboard_origin="https://octop.example.com",
+        dashboard_origin="https://voyagestar.example.com",
     )
     repo.create_login_state(
         state="state-1",
@@ -60,7 +60,7 @@ def test_provider_state_lookup_and_expiry_cleanup(db: SqlitePool) -> None:
         client_id="client-id",
         client_secret_enc=b"encrypted-secret",
         scopes="openid profile email",
-        dashboard_origin="https://octop.example.com",
+        dashboard_origin="https://voyagestar.example.com",
     )
     updated = repo.upsert_provider(
         enabled=False,

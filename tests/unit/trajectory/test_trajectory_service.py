@@ -9,15 +9,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.trajectory_events import TrajectoryEventRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.trajectory.live import TrajectoryLiveBus
-from octop.infra.trajectory.service import TrajectoryService
-from octop.infra.trajectory.store import TrajectoryStore
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.trajectory_events import TrajectoryEventRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.trajectory.live import TrajectoryLiveBus
+from voyagestar.infra.trajectory.service import TrajectoryService
+from voyagestar.infra.trajectory.store import TrajectoryStore
 
 
 def _seed_threads(db: SqlitePool, *thread_ids: str, agent_id: str = "A1") -> None:
@@ -36,7 +36,7 @@ def _seed_threads(db: SqlitePool, *thread_ids: str, agent_id: str = "A1") -> Non
 
 
 def _service(tmp_path: Path) -> tuple[TrajectoryService, TrajectoryLiveBus]:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     _seed_threads(db, "T1")
     bus = TrajectoryLiveBus()
@@ -50,7 +50,7 @@ def test_observe_chunk_swallows_projector_errors(
     def boom(*_args: Any, **_kwargs: Any) -> list[Any]:
         raise RuntimeError("projector down")
 
-    monkeypatch.setattr("octop.infra.trajectory.service.project_harness_chunk", boom)
+    monkeypatch.setattr("voyagestar.infra.trajectory.service.project_harness_chunk", boom)
     service, _bus = _service(tmp_path)
 
     service.observe_chunk("A1", "T1", {"type": "user", "content": "hi"})
@@ -87,7 +87,7 @@ def test_observe_aggregates_tokens_without_per_token_db_writes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr("octop.infra.trajectory.service.time.monotonic", lambda: 1.0)
+    monkeypatch.setattr("voyagestar.infra.trajectory.service.time.monotonic", lambda: 1.0)
     service, bus = _service(tmp_path)
     queue = bus.subscribe("T1")
     append = MagicMock(side_effect=service._store.append)  # noqa: SLF001
@@ -284,7 +284,7 @@ def test_has_kind_detects_system_events(tmp_path: Path) -> None:
     service.observe_chunk(
         "A1",
         "T1",
-        {"type": "system", "label": "Initial System Prompt", "content": "You are Octop."},
+        {"type": "system", "label": "Initial System Prompt", "content": "You are Voyagestar."},
     )
     assert service.has_kind("T1", "system") is True
     assert service.has_kind("T1", "context") is False
@@ -324,7 +324,7 @@ def test_observe_tool_result_records_tool_duration_ms(
     def fake_time() -> float:
         return clock["t"]
 
-    monkeypatch.setattr("octop.infra.trajectory.service.time.time", fake_time)
+    monkeypatch.setattr("voyagestar.infra.trajectory.service.time.time", fake_time)
     service.observe_chunk(
         "A1",
         "T1",
@@ -343,7 +343,7 @@ def test_observe_tool_result_records_tool_duration_ms(
 
 
 def test_finish_turn_prunes_old_user_turns(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("octop.infra.trajectory.service.TRAJECTORY_RETENTION_USER_TURNS", 1)
+    monkeypatch.setattr("voyagestar.infra.trajectory.service.TRAJECTORY_RETENTION_USER_TURNS", 1)
     service, _bus = _service(tmp_path)
     service.observe_chunk("A1", "T1", {"type": "user", "content": "one"})
     service.observe_chunk("A1", "T1", {"type": "user", "content": "two"})

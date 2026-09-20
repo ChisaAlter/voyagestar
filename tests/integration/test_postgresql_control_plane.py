@@ -1,9 +1,9 @@
 """Gated PostgreSQL control-plane integration tests.
 
-Set ``OCTOP_TEST_DATABASE_URL`` to a **dedicated** database (tests DROP SCHEMA public).
+Set ``VOYAGESTAR_TEST_DATABASE_URL`` to a **dedicated** database (tests DROP SCHEMA public).
 Example::
 
-    export OCTOP_TEST_DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:15432/octop_test'
+    export VOYAGESTAR_TEST_DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:15432/voyagestar_test'
 
 Avoid pointing at a shared app DB (locks from other sessions will hang resets).
 Without the env var these tests are skipped — default CI stays SQLite-only.
@@ -23,7 +23,7 @@ from tests.support.postgresql import requires_postgresql
 
 
 def _conninfo() -> str:
-    return os.environ["OCTOP_TEST_DATABASE_URL"]
+    return os.environ["VOYAGESTAR_TEST_DATABASE_URL"]
 
 
 def _reset_public_schema(pool: object) -> None:
@@ -40,7 +40,7 @@ def _pg_payload_from_url(url: str) -> dict[str, object]:
         "driver": "postgresql",
         "host": parsed.hostname or "127.0.0.1",
         "port": parsed.port or 5432,
-        "database": (parsed.path or "/octop").lstrip("/") or "octop",
+        "database": (parsed.path or "/voyagestar").lstrip("/") or "voyagestar",
         "user": parsed.username or "postgres",
         "password": parsed.password or "",
         "url": url,
@@ -50,9 +50,9 @@ def _pg_payload_from_url(url: str) -> dict[str, object]:
 @requires_postgresql
 @pytest.mark.postgresql
 def test_pg_migrate_and_user_roundtrip() -> None:
-    from octop.infra.db.migrate import run_migrations
-    from octop.infra.db.pool import PostgresPool
-    from octop.infra.db.repos.users import UserRepo
+    from voyagestar.infra.db.migrate import run_migrations
+    from voyagestar.infra.db.pool import PostgresPool
+    from voyagestar.infra.db.repos.users import UserRepo
 
     pool = PostgresPool(_conninfo())
     try:
@@ -72,17 +72,17 @@ def test_pg_migrate_and_user_roundtrip() -> None:
 @pytest.mark.postgresql
 def test_pg_control_plane_repo_smoke() -> None:
     """Exercise the main control-plane repos on a live PG schema."""
-    from octop.infra.db.migrate import run_migrations
-    from octop.infra.db.pool import PostgresPool
-    from octop.infra.db.repos.agents import AgentRepo
-    from octop.infra.db.repos.channels import ChannelRepo
-    from octop.infra.db.repos.cron import CronJobRepo
-    from octop.infra.db.repos.providers import ProviderRepo
-    from octop.infra.db.repos.sessions import SessionRepo
-    from octop.infra.db.repos.threads import ThreadRepo
-    from octop.infra.db.repos.users import UserRepo
-    from octop.infra.gateway.threads import ThreadRegistry
-    from octop.infra.utils.ulid import new_ulid
+    from voyagestar.infra.db.migrate import run_migrations
+    from voyagestar.infra.db.pool import PostgresPool
+    from voyagestar.infra.db.repos.agents import AgentRepo
+    from voyagestar.infra.db.repos.channels import ChannelRepo
+    from voyagestar.infra.db.repos.cron import CronJobRepo
+    from voyagestar.infra.db.repos.providers import ProviderRepo
+    from voyagestar.infra.db.repos.sessions import SessionRepo
+    from voyagestar.infra.db.repos.threads import ThreadRepo
+    from voyagestar.infra.db.repos.users import UserRepo
+    from voyagestar.infra.gateway.threads import ThreadRegistry
+    from voyagestar.infra.utils.ulid import new_ulid
 
     pool = PostgresPool(_conninfo())
     try:
@@ -151,9 +151,9 @@ def test_pg_control_plane_repo_smoke() -> None:
 @requires_postgresql
 @pytest.mark.postgresql
 def test_pg_probe_ok() -> None:
-    from octop.config import DatabaseConfig
-    from octop.infra.db.probe import probe_database
-    from octop.infra.utils.paths import PathLayout
+    from voyagestar.config import DatabaseConfig
+    from voyagestar.infra.db.probe import probe_database
+    from voyagestar.infra.utils.paths import PathLayout
 
     payload = _pg_payload_from_url(_conninfo())
     cfg = DatabaseConfig(
@@ -174,12 +174,12 @@ def test_pg_backup_roundtrip(tmp_path: Path) -> None:
     if not shutil.which("pg_dump") or not shutil.which("pg_restore"):
         pytest.skip("pg_dump/pg_restore not on PATH")
 
-    from octop.config import DatabaseConfig
-    from octop.infra.backup.system_archive import create_system_backup, restore_system_backup
-    from octop.infra.db.migrate import run_migrations
-    from octop.infra.db.pool import PostgresPool
-    from octop.infra.db.repos.users import UserRepo
-    from octop.infra.utils.paths import PathLayout
+    from voyagestar.config import DatabaseConfig
+    from voyagestar.infra.backup.system_archive import create_system_backup, restore_system_backup
+    from voyagestar.infra.db.migrate import run_migrations
+    from voyagestar.infra.db.pool import PostgresPool
+    from voyagestar.infra.db.repos.users import UserRepo
+    from voyagestar.infra.utils.paths import PathLayout
 
     conninfo = _conninfo()
     payload = _pg_payload_from_url(conninfo)
@@ -200,7 +200,7 @@ def test_pg_backup_roundtrip(tmp_path: Path) -> None:
         username = f"pg_bak_{uuid.uuid4().hex[:8]}"
         repo.create(username=username, password_hash="x", role="user")
 
-        layout = PathLayout(tmp_path / ".octop")
+        layout = PathLayout(tmp_path / ".voyagestar")
         layout.root.mkdir(parents=True, exist_ok=True)
         layout.config.write_text('{"port": 8088}', encoding="utf-8")
 
@@ -236,11 +236,11 @@ def test_pg_backup_roundtrip(tmp_path: Path) -> None:
 @requires_postgresql
 @pytest.mark.postgresql
 @pytest.mark.asyncio
-async def test_setup_database_postgresql_bind(tmp_octop_home: Path) -> None:
+async def test_setup_database_postgresql_bind(tmp_voyagestar_home: Path) -> None:
     """Wizard: probe + bind live PostgreSQL, then create admin."""
-    from octop.infra.db.pool import PostgresPool
-    from octop.infra.setup.password_file import read_password
-    from tests.support.app import octop_client
+    from tests.support.app import voyagestar_client
+    from voyagestar.infra.db.pool import PostgresPool
+    from voyagestar.infra.setup.password_file import read_password
 
     pool = PostgresPool(_conninfo())
     try:
@@ -249,7 +249,7 @@ async def test_setup_database_postgresql_bind(tmp_octop_home: Path) -> None:
         pool.close()
 
     payload = _pg_payload_from_url(_conninfo())
-    async with octop_client(tmp_octop_home, bind_database=False) as (client, srv):
+    async with voyagestar_client(tmp_voyagestar_home, bind_database=False) as (client, srv):
         assert srv.database_bound is False
 
         probed = await client.post("/api/setup/test-database", json=payload)
@@ -267,7 +267,7 @@ async def test_setup_database_postgresql_bind(tmp_octop_home: Path) -> None:
         assert status.json()["database_bound"] is True
         assert status.json()["database_driver"] == "postgresql"
 
-        pw = read_password(tmp_octop_home.parent)
+        pw = read_password(tmp_voyagestar_home.parent)
         assert pw is not None
         verified = await client.post("/api/setup/verify-password", json={"password": pw})
         assert verified.status_code == 200, verified.text
@@ -287,10 +287,10 @@ async def test_setup_database_postgresql_bind(tmp_octop_home: Path) -> None:
 @pytest.mark.postgresql
 def test_pg_knowledge_base_max_documents_schema_and_crud() -> None:
     """Ensure PostgreSQL fresh migration includes max_documents on knowledge_bases and CRUD works."""
-    from octop.infra.db.migrate import run_migrations
-    from octop.infra.db.pool import PostgresPool
-    from octop.infra.db.repos.knowledge import KnowledgeRepo
-    from octop.infra.db.repos.users import UserRepo
+    from voyagestar.infra.db.migrate import run_migrations
+    from voyagestar.infra.db.pool import PostgresPool
+    from voyagestar.infra.db.repos.knowledge import KnowledgeRepo
+    from voyagestar.infra.db.repos.users import UserRepo
 
     pool = PostgresPool(_conninfo())
     try:

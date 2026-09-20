@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { octopThreadsApi } from "../../../api/modules/octopThreads";
-import { octopAgentsApi } from "../../../api/modules/octopAgents";
+import { voyagestarThreadsApi } from "../../../api/modules/voyagestarThreads";
+import { voyagestarAgentsApi } from "../../../api/modules/voyagestarAgents";
 import * as chatStore from "./chatStore";
 import {
   pickPreferredSession,
@@ -70,7 +70,7 @@ export function useChatNavigation({
     if (!resolvedAgentId) return;
     if (markedAgentReadRef.current === resolvedAgentId) return;
     markedAgentReadRef.current = resolvedAgentId;
-    void octopAgentsApi
+    void voyagestarAgentsApi
       .markRead(resolvedAgentId)
       .then(() => refreshAgents({ silent: true }))
       .catch(() => {});
@@ -151,7 +151,7 @@ export function useChatNavigation({
     if (sessions.length > 0) {
       const preferred = pickPreferredSession(sessions);
       if (preferred) {
-        void octopThreadsApi.rebind(agent, preferred.id).catch(() => {});
+        void voyagestarThreadsApi.rebind(agent, preferred.id).catch(() => {});
         navigate(`/chat/${agent}/${preferred.id}`, { replace: true });
       }
     } else if (!routeAgentId) {
@@ -198,7 +198,7 @@ export function useChatNavigation({
       if (result !== "missing") return;
       const preferred = pickPreferredSession(sessions);
       if (preferred) {
-        void octopThreadsApi
+        void voyagestarThreadsApi
           .rebind(resolvedAgentId, preferred.id)
           .catch(() => {});
         navigate(`/chat/${resolvedAgentId}/${preferred.id}`, { replace: true });

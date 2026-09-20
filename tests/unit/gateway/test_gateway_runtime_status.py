@@ -7,19 +7,19 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.agents.manager import AgentManager
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.gateway.gateway import Gateway
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.agents.manager import AgentManager
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.gateway.gateway import Gateway
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _make_gateway(tmp_path: Path) -> Gateway:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
-    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=OctopConfig())
+    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=VoyagestarConfig())
     registry = AgentManager(
         repos=services.repos,
         paths=services.paths,
@@ -131,8 +131,8 @@ async def test_reload_channels_from_db_unregisters_old_and_registers_enabled(
     tmp_path: Path,
 ) -> None:
     """Hot restore path: drop live IM channels, keep builtins, register DB rows."""
-    from octop.infra.gateway.cli import CLI_CHANNEL_ID
-    from octop.infra.gateway.ws import WS_CHANNEL_ID
+    from voyagestar.infra.gateway.cli import CLI_CHANNEL_ID
+    from voyagestar.infra.gateway.ws import WS_CHANNEL_ID
 
     gw = _make_gateway(tmp_path)
     remove_channel = AsyncMock()

@@ -7,14 +7,14 @@ from unittest.mock import MagicMock
 import pytest
 from harness_gateway.models import MessageEvent, MessageEventType, TextContent
 
-from octop.infra.gateway.hitl.coordinator import (
+from voyagestar.infra.gateway.hitl.coordinator import (
     HitlChannelCoordinator,
     HitlSlashOutcome,
     HitlStreamContext,
 )
-from octop.infra.gateway.hitl.format import format_hitl_card, parse_action_requests
-from octop.infra.gateway.hitl.store import HitlPendingStore
-from octop.infra.gateway.process.stream_project import (
+from voyagestar.infra.gateway.hitl.format import format_hitl_card, parse_action_requests
+from voyagestar.infra.gateway.hitl.store import HitlPendingStore
+from voyagestar.infra.gateway.process.stream_project import (
     StreamProjectionState,
     project_resume_stream,
     project_stream,
@@ -319,7 +319,7 @@ def test_hitl_store_resolve_pending_for_thread() -> None:
 
 
 def test_pending_hitl_payload() -> None:
-    from octop.infra.gateway.hitl.coordinator import pending_hitl_payload
+    from voyagestar.infra.gateway.hitl.coordinator import pending_hitl_payload
 
     store = HitlPendingStore()
     record = store.register(

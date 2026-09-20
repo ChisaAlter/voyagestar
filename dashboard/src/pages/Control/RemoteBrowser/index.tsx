@@ -41,7 +41,7 @@ import { useTranslation } from "react-i18next";
 
 import StreamEdgeControls from "../../../components/StreamEdgeControls/StreamEdgeControls";
 import StreamSetupGuide from "../../../components/StreamSetupGuide/StreamSetupGuide";
-import { OctopEmptyMascot } from "../../../components/EmptyState";
+import { VoyagestarEmptyMascot } from "../../../components/EmptyState";
 import PageShell from "../../../layouts/PageShell";
 import BrowserAiPanel from "../../../components/BrowserAiPanel";
 import SkillRecordGuideModal from "../../../components/SkillRecordGuideModal";
@@ -114,16 +114,16 @@ type InstallPhase =
   | "install_success"
   | "install_failed";
 
-const REFRESH_STORAGE_KEY = "octop:remote-browser:refresh-interval";
-const PROFILE_STORAGE_KEY = "octop:remote-browser:harness-profile";
-const LEGACY_SESSION_STORAGE_KEY = "octop:remote-browser:session-id";
+const REFRESH_STORAGE_KEY = "voyagestar:remote-browser:refresh-interval";
+const PROFILE_STORAGE_KEY = "voyagestar:remote-browser:harness-profile";
+const LEGACY_SESSION_STORAGE_KEY = "voyagestar:remote-browser:session-id";
 /** Whether the user left the remote-browser stream open last time. */
-const STREAM_ACTIVE_KEY = "octop:remote-browser:stream-active";
+const STREAM_ACTIVE_KEY = "voyagestar:remote-browser:stream-active";
 const DEFAULT_REFRESH_INTERVAL = 500;
 const DEFAULT_START_URL = "https://cloud.tencent.com";
-const BROWSER_AI_PANEL_KEY = "octop:remote-browser:ai-panel-open";
-const BROWSER_AI_PANEL_WIDTH_KEY = "octop:remote-browser:ai-panel-width";
-const BROWSER_AI_PANEL_HEIGHT_KEY = "octop:remote-browser:ai-panel-height";
+const BROWSER_AI_PANEL_KEY = "voyagestar:remote-browser:ai-panel-open";
+const BROWSER_AI_PANEL_WIDTH_KEY = "voyagestar:remote-browser:ai-panel-width";
+const BROWSER_AI_PANEL_HEIGHT_KEY = "voyagestar:remote-browser:ai-panel-height";
 const BROWSER_AI_PANEL_MIN_WIDTH = 260;
 const BROWSER_AI_PANEL_MAX_WIDTH = 620;
 const BROWSER_AI_PANEL_MIN_HEIGHT = 200;
@@ -374,7 +374,7 @@ export default function RemoteBrowserPage({
     mode: viewportMode,
     setMode: setViewportMode,
     resolve: resolveViewport,
-  } = useViewportMode("octop:remote-browser:viewport", "auto");
+  } = useViewportMode("voyagestar:remote-browser:viewport", "auto");
 
   const viewportSelectOptions = useMemo(
     () =>
@@ -601,7 +601,7 @@ export default function RemoteBrowserPage({
       title: t("remoteBrowser.uninstallTitle", "卸载内置浏览器"),
       content: t(
         "remoteBrowser.uninstallConfirm",
-        "将关闭当前浏览器窗口，并卸载 Octop 自动安装的浏览器。你电脑上已有的 Chrome 等浏览器不受影响。",
+        "将关闭当前浏览器窗口，并卸载 Voyagestar 自动安装的浏览器。你电脑上已有的 Chrome 等浏览器不受影响。",
       ),
       okText: t("remoteBrowser.uninstall", "卸载"),
       okButtonProps: { danger: true },
@@ -1102,8 +1102,8 @@ export default function RemoteBrowserPage({
                 }}
               >
                 {t(
-                  "common.askOctopHint",
-                  "If the install keeps failing, copy the log and ask Octop to help you troubleshoot.",
+                  "common.askVoyagestarHint",
+                  "If the install keeps failing, copy the log and ask Voyagestar to help you troubleshoot.",
                 )}
               </div>
             </div>
@@ -1142,7 +1142,7 @@ export default function RemoteBrowserPage({
             )}
             description={t(
               "remoteBrowser.playwrightOptionalDesc",
-              "harness-browser (CDP) 已就绪，浏览器功能可用。如需 Playwright 备用模式，可安装 octop[browser] extras。",
+              "harness-browser (CDP) 已就绪，浏览器功能可用。如需 Playwright 备用模式，可安装 voyagestar[browser] extras。",
             )}
           />
         );
@@ -1163,7 +1163,7 @@ export default function RemoteBrowserPage({
         title={t("remoteBrowser.notInstalled", "未检测到可用浏览器")}
         subTitle={t(
           "remoteBrowser.notInstalledHint",
-          "Octop 需要浏览器才能帮你自动打开网页、填写表单和截图。点击下方按钮即可自动安装，无需手动配置。",
+          "Voyagestar 需要浏览器才能帮你自动打开网页、填写表单和截图。点击下方按钮即可自动安装，无需手动配置。",
         )}
         style={{ padding: "8px 0" }}
       />
@@ -1467,7 +1467,7 @@ export default function RemoteBrowserPage({
                 ) : (
                   <StreamSetupGuide
                     icon={
-                      <OctopEmptyMascot
+                      <VoyagestarEmptyMascot
                         size={120}
                         className={styles.setupMascot}
                       />

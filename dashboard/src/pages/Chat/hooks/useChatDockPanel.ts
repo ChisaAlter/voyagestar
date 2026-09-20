@@ -11,13 +11,13 @@ import { dockKnowledgeTabId } from "../utils/dockKnowledgeTabId";
 import { dockToolUiTabId } from "../utils/dockToolUiTabId";
 import { usePanelResize, type PanelSizes } from "./usePanelResize";
 
-const PANEL_MODE_KEY = "octop:chat-dock:mode";
-const PANEL_SIZE_KEY = "octop:chat-dock:size";
+const PANEL_MODE_KEY = "voyagestar:chat-dock:mode";
+const PANEL_SIZE_KEY = "voyagestar:chat-dock:size";
 /** Legacy keys — read once for migration. */
-const LEGACY_FILE_MODE_KEY = "octop:file-panel:mode";
-const LEGACY_BROWSER_MODE_KEY = "octop:browser-panel:mode";
-const LEGACY_FILE_SIZE_KEY = "octop:file-panel:size";
-const LEGACY_BROWSER_SIZE_KEY = "octop:browser-panel:size";
+const LEGACY_FILE_MODE_KEY = "voyagestar:file-panel:mode";
+const LEGACY_BROWSER_MODE_KEY = "voyagestar:browser-panel:mode";
+const LEGACY_FILE_SIZE_KEY = "voyagestar:file-panel:size";
+const LEGACY_BROWSER_SIZE_KEY = "voyagestar:browser-panel:size";
 
 export type DockTab =
   | { id: "files"; kind: "files" }
@@ -167,9 +167,9 @@ export function useChatDockPanel(isMobile: boolean, agentId?: string | null) {
         return;
       }
       const hostAbs = normalizeDockFilePath(path);
-      // Keep host-absolute tool paths. Collapsing ``~/.octop/agents/<id>/…`` to a
+      // Keep host-absolute tool paths. Collapsing ``~/.voyagestar/agents/<id>/…`` to a
       // relative key breaks virtual ``root_dir`` nests (bytes live under
-      // ``{root}/Users/…/.octop/agents/<id>/…``, not the real agent home).
+      // ``{root}/Users/…/.voyagestar/agents/<id>/…``, not the real agent home).
       const tabPath = isHostAbsolutePath(hostAbs)
         ? hostAbs
         : canonicalizeDockFilePath(path, agentId);

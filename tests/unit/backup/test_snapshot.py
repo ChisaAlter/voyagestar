@@ -8,13 +8,13 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.backup.snapshot import (
+from voyagestar.infra.backup.snapshot import (
     capture_jwt_secret_from_pool,
     restore_jwt_secret_into_pool,
     snapshot_sqlite_file,
 )
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
 
 
 @pytest.mark.skipif(os.name == "nt", reason="Windows disallows '?' in path names")
@@ -37,7 +37,7 @@ def test_snapshot_sqlite_file_with_special_chars_in_path(tmp_path: Path) -> None
 
 
 def test_jwt_secret_capture_and_restore(tmp_path: Path) -> None:
-    pool = SqlitePool(tmp_path / "octop.db")
+    pool = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(pool)
     secret = b"session-jwt-secret-value-32bytes!!"
 

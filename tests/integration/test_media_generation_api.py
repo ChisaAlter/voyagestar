@@ -19,7 +19,7 @@ async def test_media_generation_key_is_write_only_and_enables_runtime(
     assert initial.json()["api_key_set"] is False
 
     with patch(
-        "octop.infra.agents.media_generation.verify_ark_api_key",
+        "voyagestar.infra.agents.media_generation.verify_ark_api_key",
         new=AsyncMock(return_value={"ok": True}),
     ):
         saved = await client.put(
@@ -50,7 +50,7 @@ async def test_media_generation_model_test_dispatches_selected_model(
     client, auth = env_admin_client
 
     with patch(
-        "octop.infra.agents.media_generation.MediaGenerationSettingsStore.test_model",
+        "voyagestar.infra.agents.media_generation.MediaGenerationSettingsStore.test_model",
         new=AsyncMock(return_value={"ok": True}),
     ) as test_model:
         response = await client.post(

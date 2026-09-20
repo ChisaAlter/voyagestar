@@ -6,13 +6,13 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from octop.infra.skills.install import (
+from voyagestar.infra.skills.install import (
     SkillAlreadyExistsError,
     SkillInstallTarget,
     commit_skill_install,
     prepare_skillhub_package,
 )
-from octop.infra.skills.skill_packages import ResolvedSkillPackage, resolve_skill_package
+from voyagestar.infra.skills.skill_packages import ResolvedSkillPackage, resolve_skill_package
 
 
 @dataclass

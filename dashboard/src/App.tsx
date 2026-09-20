@@ -18,7 +18,7 @@ import OidcComplete from "./pages/Login/OidcComplete";
 import SetupPage from "./pages/Setup";
 import InvitePage from "./pages/Invite";
 import AuthGuard from "./components/AuthGuard";
-import OctopSpinner from "./components/OctopSpinner";
+import VoyagestarSpinner from "./components/VoyagestarSpinner";
 import { AntdAppProvider } from "./components/AntdAppProvider";
 import GlobalErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
@@ -122,9 +122,9 @@ function ThemedApp() {
   return (
     <ConfigProvider
       theme={themeConfig}
-      prefixCls="octop"
+      prefixCls="voyagestar"
       locale={antdLocale}
-      spin={{ indicator: <OctopSpinner /> }}
+      spin={{ indicator: <VoyagestarSpinner /> }}
     >
       <AntdAppProvider>
         <DesktopChromeProvider value={desktopChrome}>

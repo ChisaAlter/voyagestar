@@ -1,4 +1,4 @@
-"""Green portable entry: wire packages/ onto sys.path then run ``octop``.
+"""Green portable entry: wire packages/ onto sys.path then run ``voyagestar``.
 
 Using plain ``PYTHONPATH=packages`` skips ``.pth`` processing (pywin32 etc.).
 ``site.addsitedir`` loads those hooks. On Windows we also expose
@@ -19,7 +19,7 @@ def _bootstrap() -> Path:
     root = Path(__file__).resolve().parent
     # The bundled interpreter is launched by absolute path, so its bin dir is
     # rarely on PATH. Prepend it so inherited envs (agent shells, subprocesses)
-    # resolve ``python3`` to the same interpreter Octop runs with.
+    # resolve ``python3`` to the same interpreter Voyagestar runs with.
     interpreter_dir = os.path.dirname(sys.executable)
     if interpreter_dir:
         _path = os.environ.get("PATH", "")
@@ -52,9 +52,9 @@ def _bootstrap() -> Path:
 
 def main() -> None:
     _bootstrap()
-    # ``python launch.py …`` → same as ``python -m octop …``
+    # ``python launch.py …`` → same as ``python -m voyagestar …``
     sys.argv = [sys.argv[0], *sys.argv[1:]]
-    runpy.run_module("octop", run_name="__main__", alter_sys=True)
+    runpy.run_module("voyagestar", run_name="__main__", alter_sys=True)
 
 
 if __name__ == "__main__":

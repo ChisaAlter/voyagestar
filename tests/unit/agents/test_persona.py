@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from octop.infra.agents.mbti_profiles import get_profile
-from octop.infra.agents.persona import PersonaLoader, render_persona_template
+from voyagestar.infra.agents.mbti_profiles import get_profile
+from voyagestar.infra.agents.persona import PersonaLoader, render_persona_template
 
 
 @pytest.fixture

@@ -9,22 +9,22 @@ from unittest.mock import MagicMock, patch
 from langchain_core.messages import ToolMessage
 from langgraph.types import Command
 
-from octop.infra.agents.middleware.thread_artifacts import (
+from voyagestar.infra.agents.middleware.thread_artifacts import (
     ThreadArtifactsMiddleware,
     artifacts_for_response,
     extract_artifact_paths,
     is_artifact_tool_name,
     normalize_artifact_path,
 )
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.users import UserRepo
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.users import UserRepo
 
 
 def _ws(tmp_path: Path) -> Path:
-    return tmp_path / ".octop" / "agents" / "ABC123"
+    return tmp_path / ".voyagestar" / "agents" / "ABC123"
 
 
 class _FakeThreads:
@@ -59,8 +59,8 @@ def test_normalize_artifact_path_absolute_passthrough_relative_joins_workspace(
     assert normalize_artifact_path(abs_path, ws) == abs_path
     # Absolute-looking paths are stored as-is (no rewrite).
     assert (
-        normalize_artifact_path("/.octop/agents/main/skills/env-reader/SKILL.md", ws)
-        == "/.octop/agents/main/skills/env-reader/SKILL.md"
+        normalize_artifact_path("/.voyagestar/agents/main/skills/env-reader/SKILL.md", ws)
+        == "/.voyagestar/agents/main/skills/env-reader/SKILL.md"
     )
     assert normalize_artifact_path("outbound/screenshots/harness.png", ws) == str(
         (ws / "outbound/screenshots/harness.png").as_posix()
@@ -72,13 +72,13 @@ def test_artifacts_for_response_upgrades_legacy_relative_paths(tmp_path: Path) -
     ws = _ws(tmp_path)
     abs_path = str((ws / "docs" / "a.md").as_posix())
     out = artifacts_for_response(
-        ["docs/a.md", abs_path, "/.octop/agents/main/skills/x.md"],
+        ["docs/a.md", abs_path, "/.voyagestar/agents/main/skills/x.md"],
         ws,
     )
     # Relative upgrades to workspace abs; identical abs dedupes; other abs kept.
     assert out == [
         str((ws / "docs/a.md").as_posix()),
-        "/.octop/agents/main/skills/x.md",
+        "/.voyagestar/agents/main/skills/x.md",
     ]
 
 
@@ -106,7 +106,7 @@ def test_extract_prefers_args_over_result_text(tmp_path: Path) -> None:
 
 def test_extract_screenshot_from_tool_result_text(tmp_path: Path) -> None:
     ws = _ws(tmp_path)
-    abs_path = "/Users/me/.octop/agents/A1/outbound/screenshots/harness.png"
+    abs_path = "/Users/me/.voyagestar/agents/A1/outbound/screenshots/harness.png"
     paths = extract_artifact_paths(
         tool_name="desktop_screenshot",
         args={},
@@ -123,7 +123,7 @@ def test_middleware_records_successful_write(tmp_path: Path) -> None:
     request = _request("write_file", {"path": "docs/note.md"})
     result = ToolMessage(content="ok", tool_call_id="tc1")
     with patch(
-        "octop.infra.agents.middleware.thread_artifacts.current_thread_id",
+        "voyagestar.infra.agents.middleware.thread_artifacts.current_thread_id",
         return_value="thr_1",
     ):
         out = mw.wrap_tool_call(request, lambda _req: result)
@@ -135,10 +135,10 @@ def test_middleware_records_absolute_write_as_is(tmp_path: Path) -> None:
     ws = _ws(tmp_path)
     store = _FakeThreads()
     mw = ThreadArtifactsMiddleware(thread_repo=store, workspace_dir=ws)
-    abs_path = "/.octop/agents/main/skills/env-reader/SKILL.md"
+    abs_path = "/.voyagestar/agents/main/skills/env-reader/SKILL.md"
     request = _request("write_file", {"path": abs_path})
     with patch(
-        "octop.infra.agents.middleware.thread_artifacts.current_thread_id",
+        "voyagestar.infra.agents.middleware.thread_artifacts.current_thread_id",
         return_value="thr_1",
     ):
         mw.wrap_tool_call(
@@ -154,7 +154,7 @@ def test_middleware_skips_error_and_command(tmp_path: Path) -> None:
     request = _request("write_file", {"path": "docs/note.md"})
     error = ToolMessage(content="fail", tool_call_id="tc1", status="error")
     with patch(
-        "octop.infra.agents.middleware.thread_artifacts.current_thread_id",
+        "voyagestar.infra.agents.middleware.thread_artifacts.current_thread_id",
         return_value="thr_1",
     ):
         mw.wrap_tool_call(request, lambda _req: error)
@@ -167,7 +167,7 @@ def test_middleware_skips_without_thread_id(tmp_path: Path) -> None:
     mw = ThreadArtifactsMiddleware(thread_repo=store, workspace_dir=_ws(tmp_path))
     request = _request("write_file", {"path": "docs/note.md"})
     with patch(
-        "octop.infra.agents.middleware.thread_artifacts.current_thread_id",
+        "voyagestar.infra.agents.middleware.thread_artifacts.current_thread_id",
         return_value="",
     ):
         mw.wrap_tool_call(
@@ -178,7 +178,7 @@ def test_middleware_skips_without_thread_id(tmp_path: Path) -> None:
 
 
 def test_append_artifacts_merges_unique(tmp_path: Path) -> None:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     UserRepo(db).create(username="u", password_hash="h", role="user")
     AgentRepo(db).create(agent_id="a1", user_id=1, name="Agent 1")

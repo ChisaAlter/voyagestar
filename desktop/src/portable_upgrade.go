@@ -29,7 +29,7 @@ type desktopDatabaseConfig struct {
 
 func desktopSQLitePath(home string) (string, bool, error) {
 	driver := "sqlite"
-	sqlitePath := "octop.db"
+	sqlitePath := "voyagestar.db"
 	configPath := filepath.Join(home, "config.json")
 	if data, err := os.ReadFile(configPath); err == nil {
 		var config desktopDatabaseConfig
@@ -46,13 +46,13 @@ func desktopSQLitePath(home string) (string, bool, error) {
 		return "", false, fmt.Errorf("read database config: %w", err)
 	}
 
-	if os.Getenv("OCTOP_DATABASE_URL") != "" {
+	if os.Getenv("VOYAGESTAR_DATABASE_URL") != "" {
 		driver = "postgresql"
 	}
-	if value := strings.TrimSpace(os.Getenv("OCTOP_DATABASE_DRIVER")); value != "" {
+	if value := strings.TrimSpace(os.Getenv("VOYAGESTAR_DATABASE_DRIVER")); value != "" {
 		driver = strings.ToLower(value)
 	}
-	if value := os.Getenv("OCTOP_DATABASE_SQLITE_PATH"); value != "" {
+	if value := os.Getenv("VOYAGESTAR_DATABASE_SQLITE_PATH"); value != "" {
 		sqlitePath = value
 	}
 	if driver == "postgresql" {
@@ -82,7 +82,7 @@ func safeVersion(value string) string {
 }
 
 func backupSQLiteBeforeUpgrade(root, currentVersion, nextVersion string) (string, error) {
-	home := octopHome()
+	home := voyagestarHome()
 	source, isSQLite, err := desktopSQLitePath(home)
 	if err != nil || !isSQLite {
 		return "", err
@@ -98,7 +98,7 @@ func backupSQLiteBeforeUpgrade(root, currentVersion, nextVersion string) (string
 		return "", fmt.Errorf("create backup directory: %w", err)
 	}
 	name := fmt.Sprintf(
-		"octop-desktop-pre-upgrade-%s-to-%s-%s.db",
+		"voyagestar-desktop-pre-upgrade-%s-to-%s-%s.db",
 		safeVersion(currentVersion),
 		safeVersion(nextVersion),
 		time.Now().UTC().Format("20060102T150405.000000000Z"),

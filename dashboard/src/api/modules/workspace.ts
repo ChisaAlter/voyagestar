@@ -180,7 +180,7 @@ export const workspaceApi = {
     }),
 
   /** Initialize workspace with default prompt files and skills.
-   *  Equivalent to `octop init` — safe to call repeatedly. */
+   *  Equivalent to `voyagestar init` — safe to call repeatedly. */
   initializeWorkspace: () =>
     request<{ ok: boolean }>("/workspace/initialize", { method: "POST" }),
 

@@ -7,20 +7,20 @@ from pathlib import Path
 import httpx
 import pytest
 
-from octop.infra.agents.media_generation import (
+from voyagestar.infra.agents.media_generation import (
     MediaGenerationSettingsStore,
     verify_ark_api_key,
     verify_ark_media_model,
 )
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.secrets import SecretRepo
-from octop.infra.db.repos.settings import SettingsRepo
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.secrets import SecretRepo
+from voyagestar.infra.db.repos.settings import SettingsRepo
 
 
 @pytest.fixture
 def store(tmp_path: Path) -> tuple[MediaGenerationSettingsStore, SecretRepo]:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     secrets = SecretRepo(db)
     return (

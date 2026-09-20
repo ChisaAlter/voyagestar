@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { octopSettingsApi } from "../api/modules/settings";
+import { voyagestarSettingsApi } from "../api/modules/settings";
 
 let cachedTimezone: string | null = null;
 let inflight: Promise<string> | null = null;
@@ -7,7 +7,7 @@ let inflight: Promise<string> | null = null;
 async function fetchServerTimezone(): Promise<string> {
   if (cachedTimezone) return cachedTimezone;
   if (!inflight) {
-    inflight = octopSettingsApi
+    inflight = voyagestarSettingsApi
       .timezone()
       .then((settings) => {
         cachedTimezone = settings.timezone?.trim() || "UTC";

@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from octop.infra.backend.browse import list_storage_backend_tree
-from octop.infra.backend.probe import row_for_probe
-from octop.infra.db.repos.backends import BackendRow
+from voyagestar.infra.backend.browse import list_storage_backend_tree
+from voyagestar.infra.backend.probe import row_for_probe
+from voyagestar.infra.db.repos.backends import BackendRow
 
 
 def _row(**kwargs: object) -> BackendRow:
@@ -78,7 +78,7 @@ async def test_list_storage_backend_tree_docker_lists_and_closes(
         ),
     )
     monkeypatch.setattr(
-        "octop.infra.backend.browse.resolve_storage_backend",
+        "voyagestar.infra.backend.browse.resolve_storage_backend",
         lambda _row: fake_backend,
     )
 
@@ -95,7 +95,7 @@ async def test_list_storage_backend_tree_maps_runtime_errors(
 ) -> None:
     """Docker/image failures become ValueError (API 400), not uncaught 500."""
     monkeypatch.setattr(
-        "octop.infra.backend.browse.resolve_backend",
+        "voyagestar.infra.backend.browse.resolve_backend",
         lambda *_a, **_k: (_ for _ in ()).throw(
             RuntimeError(
                 "Docker image 'python:3.12-slim' is not available; "
@@ -130,7 +130,7 @@ async def test_list_storage_backend_tree_returns_entries(
         ),
     )
     monkeypatch.setattr(
-        "octop.infra.backend.browse.resolve_storage_backend",
+        "voyagestar.infra.backend.browse.resolve_storage_backend",
         lambda _row: fake_backend,
     )
 

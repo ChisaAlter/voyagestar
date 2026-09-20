@@ -23,26 +23,26 @@ ALL_PLATS=(
   windows-arm64
 )
 
-# Public GitHub Release names: Octop-<kind>-<os>-<arch>-<version>.<ext>
-# Zip payload directory stays Octop-<plat>/ (the desktop unzip strips the first
+# Public GitHub Release names: Voyagestar-<kind>-<os>-<arch>-<version>.<ext>
+# Zip payload directory stays Voyagestar-<plat>/ (the desktop unzip strips the first
 # path component). PyPI wheels keep the PEP 427 name and are not renamed here.
-octop_version() {
+voyagestar_version() {
   sed -nE 's/^version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' \
     "${REPO_ROOT}/pyproject.toml" | head -1
 }
 
 portable_zip_basename() {
-  echo "Octop-portable-${1}-$(octop_version).zip"
+  echo "Voyagestar-portable-${1}-$(voyagestar_version).zip"
 }
 
 desktop_pkg_basename() {
   local plat="$1"
   local ver
-  ver="$(octop_version)"
+  ver="$(voyagestar_version)"
   case "$plat" in
-    darwin-*) echo "Octop-desktop-${plat}-${ver}.dmg" ;;
-    windows-*) echo "Octop-desktop-${plat}-${ver}.exe" ;;
-    linux-*) echo "Octop-desktop-${plat}-${ver}.tar.gz" ;;
+    darwin-*) echo "Voyagestar-desktop-${plat}-${ver}.dmg" ;;
+    windows-*) echo "Voyagestar-desktop-${plat}-${ver}.exe" ;;
+    linux-*) echo "Voyagestar-desktop-${plat}-${ver}.tar.gz" ;;
     *)
       echo "unknown platform: ${plat}" >&2
       return 1
@@ -253,8 +253,8 @@ write_green_overrides() {
   case "$plat" in
     windows-arm64)
       {
-        echo "psycopg-binary ; sys_platform == 'octop-unsupported'"
-        echo "sqlite-vec ; sys_platform == 'octop-unsupported'"
+        echo "psycopg-binary ; sys_platform == 'voyagestar-unsupported'"
+        echo "sqlite-vec ; sys_platform == 'voyagestar-unsupported'"
         # 46.0.0 is the only release shipping a win_arm64 wheel; newer ones would
         # fall back to a Rust + OpenSSL source build that fails on the runner.
         echo "cryptography==46.0.0"

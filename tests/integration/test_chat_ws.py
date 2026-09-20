@@ -12,7 +12,7 @@ import httpx
 import pytest
 from starlette.websockets import WebSocketDisconnect
 
-from tests.support.app import octop_client
+from tests.support.app import voyagestar_client
 from tests.support.auth import (
     auth_header,
     bootstrap_admin,
@@ -25,19 +25,19 @@ from tests.support.http import chat_ws_path, ws_connect
 
 
 def _chat_ws(c: httpx.AsyncClient, aid: str, auth: dict[str, str]) -> Any:
-    return ws_connect(c._octop_app, chat_ws_path(aid, auth))  # type: ignore[attr-defined]
+    return ws_connect(c._voyagestar_app, chat_ws_path(aid, auth))  # type: ignore[attr-defined]
 
 
 @pytest.fixture
-async def env(tmp_octop_home: Path) -> AsyncIterator[Any]:
+async def env(tmp_voyagestar_home: Path) -> AsyncIterator[Any]:
     fake = FakeHarnessAgent(
         chunks=[
             {"type": "token", "node": "agent", "content": "Hello "},
             {"type": "token", "node": "agent", "content": "Bob."},
         ]
     )
-    async with octop_client(tmp_octop_home, fake_agent=fake) as (c, srv):
-        await bootstrap_admin(c, tmp_octop_home)
+    async with voyagestar_client(tmp_voyagestar_home, fake_agent=fake) as (c, srv):
+        await bootstrap_admin(c, tmp_voyagestar_home)
         admin_auth = await auth_header(c)
         await seed_openai_provider(c, admin_auth)
         users = await ensure_users(c, admin_auth, "alice", "bob")

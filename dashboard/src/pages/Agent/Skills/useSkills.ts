@@ -8,16 +8,16 @@ import { parseApiError } from "../../../utils/apiError";
 import { showApiError } from "../../../utils/showApiToast";
 
 /**
- * SkillSpec mirrors the JSON shape returned by octop's
- * ``GET /api/agents/{aid}/skills`` (see ``octop/api/routers/skills.py``).
+ * SkillSpec mirrors the JSON shape returned by voyagestar's
+ * ``GET /api/agents/{aid}/skills`` (see ``voyagestar/api/routers/skills.py``).
  *
  * Field-name reconciliation: finnie's UI treats the identifier as ``slug``
  * and uses ``kind`` (``builtin`` | ``workspace``) to split built-in vs
- * customised skills. Octop only returns ``name`` and has no kind concept.
+ * customised skills. Voyagestar only returns ``name`` and has no kind concept.
  *
  * To reuse finnie-style components without renaming everything, this
  * hook exposes ``slug`` (= server's ``name``) and synthesises ``kind``
- * (always ``"workspace"`` for now — every octop skill is editable).
+ * (always ``"workspace"`` for now — every voyagestar skill is editable).
  * The optional ``emoji`` from frontmatter is also surfaced for the card.
  */
 export interface SkillSpec {
@@ -32,7 +32,7 @@ export interface SkillSpec {
   emoji?: string;
   /** Persisted SkillHub marketplace icon. */
   iconUrl?: string;
-  /** ``metadata.octop.label`` when the API keeps the localized map. */
+  /** ``metadata.voyagestar.label`` when the API keeps the localized map. */
   label?:
     | string
     | { zh?: string; en?: string; [key: string]: string | undefined };
@@ -58,7 +58,7 @@ interface ServerSummary {
   kind?: "workspace" | "builtin" | "package";
   emoji?: string;
   icon_url?: string;
-  /** ``metadata.octop.label`` map (zh/en) when not yet folded into ``name``. */
+  /** ``metadata.voyagestar.label`` map (zh/en) when not yet folded into ``name``. */
   label?:
     | string
     | { zh?: string; en?: string; [key: string]: string | undefined };

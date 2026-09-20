@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop.infra.trajectory.settings import (
+from voyagestar.infra.trajectory.settings import (
     PAYLOAD_MAX_CHARS,
     SUMMARY_MAX_CHARS,
     agent_trajectory_enabled,
@@ -10,7 +10,7 @@ from octop.infra.trajectory.settings import (
     clip_persisted_event,
     clip_text,
 )
-from octop.infra.trajectory.types import TrajectoryEvent
+from voyagestar.infra.trajectory.types import TrajectoryEvent
 
 
 def test_agent_trajectory_enabled_defaults_on_and_allows_explicit_opt_out() -> None:

@@ -43,16 +43,16 @@ export function JobDetailDrawer({
 
   const meta = (job.meta as Record<string, unknown> | undefined) ?? {};
   const sessionKey =
-    typeof meta.octop_session_key === "string" ? meta.octop_session_key : "";
+    typeof meta.voyagestar_session_key === "string" ? meta.voyagestar_session_key : "";
   const channel = sessionKey
     ? channelFromSessionKey(sessionKey)
     : String(job.dispatch?.channel || "—");
   const agentPrompt = extractPromptFromJob(job) || null;
   const lastStatus =
-    typeof meta.octop_last_status === "string" ? meta.octop_last_status : "";
+    typeof meta.voyagestar_last_status === "string" ? meta.voyagestar_last_status : "";
   const lastError =
-    typeof meta.octop_last_error === "string" && meta.octop_last_error.trim()
-      ? meta.octop_last_error
+    typeof meta.voyagestar_last_error === "string" && meta.voyagestar_last_error.trim()
+      ? meta.voyagestar_last_error
       : null;
 
   const handleGoToChat = () => {
@@ -146,8 +146,8 @@ export function JobDetailDrawer({
         </Descriptions.Item>
         <Descriptions.Item label={t("cronJobs.col.lastRunAt")}>
           {formatCronTimestamp(
-            typeof meta.octop_last_run_at === "number"
-              ? meta.octop_last_run_at
+            typeof meta.voyagestar_last_run_at === "number"
+              ? meta.voyagestar_last_run_at
               : null,
             timeZone,
           )}
@@ -209,13 +209,13 @@ export function JobDetailDrawer({
             </Text>
           </Descriptions.Item>
         )}
-        {job.model || meta.octop_model ? (
+        {job.model || meta.voyagestar_model ? (
           <Descriptions.Item label={t("cronJobs.form.model")}>
-            {String(job.model || meta.octop_model)}
+            {String(job.model || meta.voyagestar_model)}
           </Descriptions.Item>
         ) : null}
         <Descriptions.Item label={t("cronJobs.col.freshThread")}>
-          {meta.octop_fresh_thread
+          {meta.voyagestar_fresh_thread
             ? t("cronJobs.col.freshThreadOn")
             : t("cronJobs.col.freshThreadOff")}
         </Descriptions.Item>

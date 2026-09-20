@@ -4,17 +4,17 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from octop.config import OctopConfig
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.sso import SsoRepo
-from octop.infra.db.services import SharedServices, build_shared_services
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.sso import SsoRepo
+from voyagestar.infra.db.services import SharedServices, build_shared_services
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def test_build_shared_services(tmp_path: Path):
-    cfg = OctopConfig()
-    paths = PathLayout(tmp_path / ".octop")
+    cfg = VoyagestarConfig()
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)

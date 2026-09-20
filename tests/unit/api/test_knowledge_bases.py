@@ -10,7 +10,7 @@ import pytest
 from starlette.datastructures import Headers, UploadFile
 from starlette.requests import Request
 
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 
 def _request() -> Request:
@@ -67,7 +67,7 @@ class _Document:
 async def test_enabling_without_model_maps_prerequisite_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     server = SimpleNamespace(services=_services())
 
@@ -76,7 +76,7 @@ async def test_enabling_without_model_maps_prerequisite_error(
 
     monkeypatch.setattr(knowledge_bases, "set_feature_enabled", fail)
 
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         await knowledge_bases.put_feature(
             knowledge_bases.FeatureBody(enabled=True),
             request=_request(),
@@ -91,7 +91,7 @@ async def test_enabling_without_model_maps_prerequisite_error(
 async def test_enabling_reindexes_documents_when_model_changes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     settings = {
         "knowledge_bases_enabled": "true",
@@ -150,7 +150,7 @@ async def test_enabling_reindexes_documents_when_model_changes(
 
 @pytest.mark.asyncio
 async def test_create_base_maps_disabled_feature_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     server = SimpleNamespace(services=_services())
     user = SimpleNamespace(id=1, is_admin=False)
@@ -160,7 +160,7 @@ async def test_create_base_maps_disabled_feature_error(monkeypatch: pytest.Monke
 
     monkeypatch.setattr(knowledge_bases, "assert_knowledge_usable", fail)
 
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         await knowledge_bases.create_base(
             knowledge_bases.CreateBaseBody(name="Docs"),
             request=_request(),
@@ -175,7 +175,7 @@ async def test_create_base_maps_disabled_feature_error(monkeypatch: pytest.Monke
 async def test_create_base_uses_selected_model_when_usable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     created: dict[str, object] = {}
     service = SimpleNamespace(
@@ -207,7 +207,7 @@ async def test_create_base_uses_selected_model_when_usable(
 
 @pytest.mark.asyncio
 async def test_upload_enqueues_document_indexing(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     calls: list[tuple[object, str, str]] = []
     service = SimpleNamespace(
@@ -237,7 +237,7 @@ async def test_upload_enqueues_document_indexing(monkeypatch: pytest.MonkeyPatch
 
 
 def test_base_payload_includes_owner_display_fields() -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     owner = SimpleNamespace(username="Test", display_name=None)
     server = SimpleNamespace(
@@ -256,7 +256,7 @@ def test_base_payload_includes_owner_display_fields() -> None:
 async def test_preview_document_returns_extracted_text(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     service = SimpleNamespace(
         preview_document=lambda *_args, **_kwargs: {
@@ -280,7 +280,7 @@ async def test_preview_document_returns_extracted_text(
 async def test_download_document_file_returns_original_bytes(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     path = tmp_path / "doc.pdf"
     path.write_bytes(b"%PDF-1.4 test")
@@ -314,7 +314,7 @@ async def test_download_document_file_returns_original_bytes(
 async def test_download_document_file_missing_maps_not_found(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     def missing(*_args: object, **_kwargs: object) -> None:
         raise FileNotFoundError("knowledge document original file not found")
@@ -324,7 +324,7 @@ async def test_download_document_file_missing_maps_not_found(
     user = SimpleNamespace(id=1, is_admin=False)
     monkeypatch.setattr(knowledge_bases, "_knowledge_service", lambda _server: service)
 
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         await knowledge_bases.download_document_file(
             "kb-1",
             "doc-1",
@@ -338,8 +338,8 @@ async def test_download_document_file_missing_maps_not_found(
 
 
 def test_row_payload_includes_has_original(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.api.routers import knowledge_bases
-    from octop.infra.knowledge import files as knowledge_files
+    from voyagestar.api.routers import knowledge_bases
+    from voyagestar.infra.knowledge import files as knowledge_files
 
     monkeypatch.setattr(
         knowledge_files,
@@ -358,7 +358,7 @@ def test_row_payload_includes_has_original(tmp_path: Path, monkeypatch: pytest.M
 
 @pytest.mark.asyncio
 async def test_embedding_options_excludes_onnx_local_provider() -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     providers = [
         SimpleNamespace(
@@ -392,7 +392,7 @@ async def test_embedding_options_excludes_onnx_local_provider() -> None:
     assert [row["provider_name"] for row in options["remote"]] == ["OpenAI"]
     assert options["remote"][0]["models"] == [{"id": "text-embedding-3-small", "name": "embed"}]
     assert isinstance(options["onnx"], list)
-    from octop.infra.agents.providers.onnx_catalog import ONNX_PRESET_MODEL_IDS
+    from voyagestar.infra.agents.providers.onnx_catalog import ONNX_PRESET_MODEL_IDS
 
     onnx_ids = [row["id"] for row in options["onnx"]]
     assert onnx_ids == list(ONNX_PRESET_MODEL_IDS)
@@ -403,7 +403,7 @@ async def test_embedding_options_excludes_onnx_local_provider() -> None:
 
 @pytest.mark.asyncio
 async def test_ocr_options_only_lists_image_capable_models() -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     provider = SimpleNamespace(
         id=2,
@@ -435,8 +435,8 @@ async def test_ocr_options_only_lists_image_capable_models() -> None:
 
 @pytest.mark.asyncio
 async def test_embedding_options_omits_non_recommended_onnx() -> None:
-    from octop.api.routers import knowledge_bases
-    from octop.infra.agents.providers.onnx_catalog import ONNX_PRESET_MODEL_IDS
+    from voyagestar.api.routers import knowledge_bases
+    from voyagestar.infra.agents.providers.onnx_catalog import ONNX_PRESET_MODEL_IDS
 
     extra = "BAAI/bge-small-en-v1.5"
     server = SimpleNamespace(
@@ -456,8 +456,8 @@ async def test_embedding_options_omits_non_recommended_onnx() -> None:
 
 @pytest.mark.asyncio
 async def test_embedding_options_all_onnx_includes_extras() -> None:
-    from octop.api.routers import knowledge_bases
-    from octop.infra.agents.providers.onnx_catalog import ONNX_PRESET_MODEL_IDS
+    from voyagestar.api.routers import knowledge_bases
+    from voyagestar.infra.agents.providers.onnx_catalog import ONNX_PRESET_MODEL_IDS
 
     server = SimpleNamespace(
         services=SimpleNamespace(provider_repo=SimpleNamespace(list_all=lambda: []))
@@ -476,7 +476,7 @@ async def test_embedding_options_all_onnx_includes_extras() -> None:
 async def test_reindex_document_enqueues_job(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     calls: list[tuple[object, str, str]] = []
     service = SimpleNamespace(
@@ -502,7 +502,7 @@ async def test_reindex_document_enqueues_job(
 
 @pytest.mark.asyncio
 async def test_onnx_download_starts_catalog_model(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     class _State:
         def to_dict(self) -> dict[str, object]:
@@ -533,7 +533,7 @@ async def test_onnx_download_starts_catalog_model(monkeypatch: pytest.MonkeyPatc
 async def test_onnx_activate_enables_downloaded_service(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     saved: dict[str, object] = {}
 
@@ -570,7 +570,7 @@ async def test_onnx_activate_enables_downloaded_service(
 async def test_rename_document_returns_row_payload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     server = SimpleNamespace(services=_services())
     renamed = _Document(id="doc-1", is_dir=True, path="docs/new", filename="new")
@@ -599,14 +599,14 @@ async def test_rename_document_returns_row_payload(
 async def test_rename_document_maps_not_found(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     def fail(*_args: object, **_kwargs: object) -> None:
         raise LookupError("knowledge document not found")
 
     monkeypatch.setattr(knowledge_bases, "_knowledge_service", fail)
 
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         await knowledge_bases.rename_document(
             kb_id="kb-1",
             doc_id="doc-1",
@@ -623,14 +623,14 @@ async def test_rename_document_maps_not_found(
 async def test_rename_document_maps_name_taken(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     def fail(*_args: object, **_kwargs: object) -> None:
         raise ValueError("a knowledge document with this name already exists")
 
     monkeypatch.setattr(knowledge_bases, "_knowledge_service", fail)
 
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         await knowledge_bases.rename_document(
             kb_id="kb-1",
             doc_id="doc-1",
@@ -647,14 +647,14 @@ async def test_rename_document_maps_name_taken(
 async def test_rename_document_maps_invalid_name(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     def fail(*_args: object, **_kwargs: object) -> None:
         raise ValueError("invalid knowledge document name")
 
     monkeypatch.setattr(knowledge_bases, "_knowledge_service", fail)
 
-    with pytest.raises(OctopError) as raised:
+    with pytest.raises(VoyagestarError) as raised:
         await knowledge_bases.rename_document(
             kb_id="kb-1",
             doc_id="doc-1",
@@ -669,7 +669,7 @@ async def test_rename_document_maps_invalid_name(
 
 @pytest.mark.asyncio
 async def test_update_base_accepts_max_documents(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     received: dict[str, object] = {}
 
@@ -695,7 +695,7 @@ async def test_update_base_accepts_max_documents(monkeypatch: pytest.MonkeyPatch
 async def test_update_base_rejects_max_documents_out_of_range() -> None:
     from pydantic import ValidationError
 
-    from octop.api.routers import knowledge_bases
+    from voyagestar.api.routers import knowledge_bases
 
     with pytest.raises(ValidationError):
         knowledge_bases.UpdateBaseBody(max_documents=-1)
@@ -707,7 +707,7 @@ async def test_update_base_rejects_max_documents_out_of_range() -> None:
 
 
 def test_map_knowledge_error_unclassified_returns_internal_error() -> None:
-    from octop.api.routers.knowledge_bases import _map_knowledge_error
+    from voyagestar.api.routers.knowledge_bases import _map_knowledge_error
 
     err = _map_knowledge_error(RuntimeError("column max_documents does not exist"), locale="zh")
     assert err.code == ErrorCode.INTERNAL_ERROR
@@ -719,7 +719,7 @@ def test_map_knowledge_error_unclassified_returns_internal_error() -> None:
 
 
 def test_map_knowledge_error_prerequisites_distinguished() -> None:
-    from octop.api.routers.knowledge_bases import _map_knowledge_error
+    from voyagestar.api.routers.knowledge_bases import _map_knowledge_error
 
     err = _map_knowledge_error(
         RuntimeError("knowledge embedding prerequisites are not satisfied"), locale="zh"

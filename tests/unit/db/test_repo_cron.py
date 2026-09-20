@@ -7,13 +7,13 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.cron import CronJobRepo, CronJobRow
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.gateway.threads import ThreadRegistry
-from octop.infra.utils.ulid import new_ulid
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.cron import CronJobRepo, CronJobRow
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.utils.ulid import new_ulid
 
 
 @pytest.fixture

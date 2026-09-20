@@ -120,7 +120,7 @@ describe("useUpdateStatus", () => {
   });
 
   it("listens for the shared change event name", () => {
-    expect(UPDATE_STATUS_CHANGED_EVENT).toBe("octop:update-status-changed");
+    expect(UPDATE_STATUS_CHANGED_EVENT).toBe("voyagestar:update-status-changed");
   });
 
   it("trusts server has_update for chrome reminders", async () => {

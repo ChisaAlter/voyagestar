@@ -31,7 +31,7 @@ const WorkbenchPage = lazy(() => import("../../pages/Control/Workbench"));
 
 const { Content } = Layout;
 
-const SIDEBAR_COLLAPSED_KEY = "octop:sidebar:collapsed";
+const SIDEBAR_COLLAPSED_KEY = "voyagestar:sidebar:collapsed";
 
 function getSavedCollapsed(): boolean {
   try {
@@ -133,8 +133,8 @@ export default function MainLayout() {
   // navigation sidebar (since the global Header is hidden on mobile fullscreen).
   useEffect(() => {
     const handler = () => setCollapsed((prev) => !prev);
-    window.addEventListener("octop:toggle-nav", handler);
-    return () => window.removeEventListener("octop:toggle-nav", handler);
+    window.addEventListener("voyagestar:toggle-nav", handler);
+    return () => window.removeEventListener("voyagestar:toggle-nav", handler);
   }, []);
 
   // Chat history rail expand: if nav is also collapsed, open both rails.
@@ -168,9 +168,9 @@ export default function MainLayout() {
   const isChatRoute = isChatPath(currentPath);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("octop-chat-open", isChatRoute);
+    document.documentElement.classList.toggle("voyagestar-chat-open", isChatRoute);
     return () => {
-      document.documentElement.classList.remove("octop-chat-open");
+      document.documentElement.classList.remove("voyagestar-chat-open");
     };
   }, [isChatRoute]);
 

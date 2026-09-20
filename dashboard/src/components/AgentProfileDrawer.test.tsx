@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { I18nextProvider } from "react-i18next";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import i18n from "../i18n";
-import type { OctopAgent } from "../context/AgentContext";
+import type { VoyagestarAgent } from "../context/AgentContext";
 
 vi.mock("../api/request", () => ({
   request: vi.fn(async (path: string) => {
@@ -66,7 +66,7 @@ const agent = {
   agent_id: "agent-1",
   name: "Demo agent",
   state: "running",
-} as OctopAgent;
+} as VoyagestarAgent;
 
 describe("AgentProfileDrawer sections", () => {
   const getComputedStyle = window.getComputedStyle;

@@ -1,4 +1,4 @@
-from octop.infra.agents.providers.reasoning import (
+from voyagestar.infra.agents.providers.reasoning import (
     reasoning_capability,
     reasoning_request_parameters,
 )

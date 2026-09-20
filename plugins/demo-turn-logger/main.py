@@ -1,7 +1,7 @@
 """Demo Turn Logger — sample hook plugin (kind=hook).
 
 Hook plugins register a LangChain AgentMiddleware via ctx.middleware(...).
-Octop attaches middleware from globally enabled plugins to the agent chain
+Voyagestar attaches middleware from globally enabled plugins to the agent chain
 (lower priority runs earlier).
 
 This demo only emits observability logs and does not mutate messages or the
@@ -15,7 +15,7 @@ from typing import Any
 
 from harness_agent.plugins import AgentMiddleware, PluginContext
 
-logger = logging.getLogger("octop.plugins.demo_turn_logger")
+logger = logging.getLogger("voyagestar.plugins.demo_turn_logger")
 
 
 def _message_count(state: Any) -> int:

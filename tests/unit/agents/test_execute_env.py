@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from octop.infra.agents.execute_env import inject_agent_execute_env
-from octop.infra.db.repos.agents import AgentRow
-from octop.infra.utils.env_file import save_env_file
-from octop.infra.utils.paths import PathLayout
+from voyagestar.infra.agents.execute_env import inject_agent_execute_env
+from voyagestar.infra.db.repos.agents import AgentRow
+from voyagestar.infra.utils.env_file import save_env_file
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _row(agent_id: str = "a1") -> AgentRow:
@@ -29,8 +29,10 @@ def _row(agent_id: str = "a1") -> AgentRow:
     )
 
 
-def test_inject_local_shell_uses_octop_auth_for_new_layout(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path))
+def test_inject_local_shell_uses_voyagestar_auth_for_new_layout(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path))
     paths = PathLayout(tmp_path)
     paths.ensure_root()
     save_env_file(paths.root / "env", {"GLOBAL_KEY": "global"})
@@ -43,21 +45,21 @@ def test_inject_local_shell_uses_octop_auth_for_new_layout(tmp_path: Path, monke
         paths=paths,
         row=_row("agent-1"),
         workspace_dir=ws,
-        cfg={"system_files_path": ".octop"},
+        cfg={"system_files_path": ".voyagestar"},
     )
     env = spec["env"]
-    assert env["OCTOP_AGENT_ID"] == "agent-1"
-    assert (ws / ".octop" / "auth").is_dir()
-    assert env["OCTOP_AUTH_DIR"] == str(ws / ".octop" / "auth")
-    assert env["OCTOP_HOME"] == str(paths.root)
-    assert env["OCTOP_SKILLS_DIR"] == str(ws / ".octop" / "skills")
+    assert env["VOYAGESTAR_AGENT_ID"] == "agent-1"
+    assert (ws / ".voyagestar" / "auth").is_dir()
+    assert env["VOYAGESTAR_AUTH_DIR"] == str(ws / ".voyagestar" / "auth")
+    assert env["VOYAGESTAR_HOME"] == str(paths.root)
+    assert env["VOYAGESTAR_SKILLS_DIR"] == str(ws / ".voyagestar" / "skills")
     assert "GLOBAL_KEY" not in env
     assert "AGENT_KEY" not in env
     assert spec["inherit_env"] is True
 
 
-def test_inject_legacy_layout_keeps_root_octop_auth(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path))
+def test_inject_legacy_layout_keeps_root_voyagestar_auth(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path))
     paths = PathLayout(tmp_path)
     paths.ensure_root()
     ws = paths.ensure_agent_workspace("agent-legacy")
@@ -69,16 +71,16 @@ def test_inject_legacy_layout_keeps_root_octop_auth(tmp_path: Path, monkeypatch)
         workspace_dir=ws,
         cfg={},
     )
-    assert (ws / ".octop-auth").is_dir()
-    assert spec["env"]["OCTOP_AUTH_DIR"] == str(ws / ".octop-auth")
+    assert (ws / ".voyagestar-auth").is_dir()
+    assert spec["env"]["VOYAGESTAR_AUTH_DIR"] == str(ws / ".voyagestar-auth")
 
 
 def test_inject_keeps_legacy_auth_when_tokens_already_there(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path))
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path))
     paths = PathLayout(tmp_path)
     paths.ensure_root()
     ws = paths.ensure_agent_workspace("agent-mig")
-    legacy = ws / ".octop-auth"
+    legacy = ws / ".voyagestar-auth"
     legacy.mkdir()
     (legacy / "token.json").write_text("{}", encoding="utf-8")
 
@@ -87,13 +89,13 @@ def test_inject_keeps_legacy_auth_when_tokens_already_there(tmp_path: Path, monk
         paths=paths,
         row=_row("agent-mig"),
         workspace_dir=ws,
-        cfg={"system_files_path": ".octop"},
+        cfg={"system_files_path": ".voyagestar"},
     )
-    assert spec["env"]["OCTOP_AUTH_DIR"] == str(legacy)
+    assert spec["env"]["VOYAGESTAR_AUTH_DIR"] == str(legacy)
 
 
 def test_inject_composite_default_local_shell(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path))
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path))
     paths = PathLayout(tmp_path)
     paths.ensure_root()
     ws = paths.ensure_agent_workspace("agent-c")
@@ -107,24 +109,24 @@ def test_inject_composite_default_local_shell(tmp_path: Path, monkeypatch) -> No
         paths=paths,
         row=_row("agent-c"),
         workspace_dir=ws,
-        cfg={"system_files_path": ".octop"},
+        cfg={"system_files_path": ".voyagestar"},
     )
-    assert spec["default"]["env"]["OCTOP_AGENT_ID"] == "agent-c"
-    assert spec["default"]["env"]["OCTOP_AUTH_DIR"] == str(ws / ".octop" / "auth")
+    assert spec["default"]["env"]["VOYAGESTAR_AGENT_ID"] == "agent-c"
+    assert spec["default"]["env"]["VOYAGESTAR_AUTH_DIR"] == str(ws / ".voyagestar" / "auth")
     assert spec["default"]["inherit_env"] is True
 
 
 def test_inject_scoped_root_uses_agent_facing_auth_paths(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path))
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path))
     paths = PathLayout(tmp_path)
     paths.ensure_root()
     root = tmp_path / "scoped"
     root.mkdir()
-    ws = root / ".octop" / "workspaces" / "agent-s"
+    ws = root / ".voyagestar" / "workspaces" / "agent-s"
     ws.mkdir(parents=True)
     cfg = {
-        "system_files_path": ".octop",
-        "workspace_dir": "/.octop/workspaces/agent-s",
+        "system_files_path": ".voyagestar",
+        "workspace_dir": "/.voyagestar/workspaces/agent-s",
         "backend": {
             "type": "local_shell",
             "root_dir": str(root),
@@ -140,13 +142,13 @@ def test_inject_scoped_root_uses_agent_facing_auth_paths(tmp_path: Path, monkeyp
         cfg=cfg,
     )
     env = spec["env"]
-    assert (ws / ".octop" / "auth").is_dir()
-    assert env["OCTOP_AUTH_DIR"] == "/.octop/workspaces/agent-s/.octop/auth"
-    assert env["OCTOP_SKILLS_DIR"] == "/.octop/workspaces/agent-s/.octop/skills"
+    assert (ws / ".voyagestar" / "auth").is_dir()
+    assert env["VOYAGESTAR_AUTH_DIR"] == "/.voyagestar/workspaces/agent-s/.voyagestar/auth"
+    assert env["VOYAGESTAR_SKILLS_DIR"] == "/.voyagestar/workspaces/agent-s/.voyagestar/skills"
 
 
 def test_inject_docker_only_sets_platform_defaults(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path))
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path))
     paths = PathLayout(tmp_path)
     paths.ensure_root()
     save_env_file(paths.root / "env", {"GLOBAL_KEY": "global"})
@@ -157,9 +159,9 @@ def test_inject_docker_only_sets_platform_defaults(tmp_path: Path, monkeypatch) 
         paths=paths,
         row=_row("agent-2"),
         workspace_dir=ws,
-        cfg={"system_files_path": ".octop"},
+        cfg={"system_files_path": ".voyagestar"},
     )
     env = spec["env"]
-    assert env["OCTOP_AGENT_ID"] == "agent-2"
-    assert env["OCTOP_AUTH_DIR"] == str(ws / ".octop" / "auth")
+    assert env["VOYAGESTAR_AGENT_ID"] == "agent-2"
+    assert env["VOYAGESTAR_AUTH_DIR"] == str(ws / ".voyagestar" / "auth")
     assert "GLOBAL_KEY" not in env

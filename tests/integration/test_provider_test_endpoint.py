@@ -13,7 +13,7 @@ async def test_provider_test_ok(env_with_provider_record: Any) -> None:
     fake_model.ainvoke = AsyncMock(return_value=MagicMock(content="pong"))
 
     with patch(
-        "octop.infra.agents.providers.probe.build_probe_chat_model", return_value=fake_model
+        "voyagestar.infra.agents.providers.probe.build_probe_chat_model", return_value=fake_model
     ):
         r = await c.post(f"/api/admin/providers/{pid}/test", headers=auth)
     assert r.status_code == 200, r.text
@@ -28,7 +28,7 @@ async def test_provider_test_failure(env_with_provider_record: Any) -> None:
     def boom(*_a: Any, **_kw: Any) -> Any:
         raise RuntimeError("auth failed")
 
-    with patch("octop.infra.agents.providers.probe.build_probe_chat_model", side_effect=boom):
+    with patch("voyagestar.infra.agents.providers.probe.build_probe_chat_model", side_effect=boom):
         r = await c.post(f"/api/admin/providers/{pid}/test", headers=auth)
     assert r.status_code == 200, r.text
     body = r.json()
@@ -60,7 +60,7 @@ async def test_provider_test_embedding_skips_chat_probe(
         return {"ok": True, "latency_ms": 12}
 
     with patch(
-        "octop.api.routers.providers.probe_provider_row",
+        "voyagestar.api.routers.providers.probe_provider_row",
         new=AsyncMock(side_effect=fake_probe),
     ):
         r = await c.post(

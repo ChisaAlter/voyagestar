@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 import time
 
-from octop.infra.utils.ulid import new_short_id, new_ulid
+from voyagestar.infra.utils.ulid import new_short_id, new_ulid
 
 
 def test_short_id_is_6_char_crockford():

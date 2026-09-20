@@ -5,19 +5,19 @@ from __future__ import annotations
 import asyncio
 from types import SimpleNamespace
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.knowledge import KnowledgeRepo
-from octop.infra.db.repos.settings import SettingsRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.knowledge import retrieve as retrieve_module
-from octop.infra.knowledge.citations import CITATIONS_MARKER_PREFIX
-from octop.infra.knowledge.index import KnowledgeIndex
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.knowledge import KnowledgeRepo
+from voyagestar.infra.db.repos.settings import SettingsRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.knowledge import retrieve as retrieve_module
+from voyagestar.infra.knowledge.citations import CITATIONS_MARKER_PREFIX
+from voyagestar.infra.knowledge.index import KnowledgeIndex
 
 
 def test_retrieve_context_filters_unreadable_knowledge_base(tmp_path, monkeypatch) -> None:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path / "home"))
-    pool = SqlitePool(tmp_path / "octop.db")
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path / "home"))
+    pool = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(pool)
     services = SimpleNamespace(
         knowledge_repo=KnowledgeRepo(pool),

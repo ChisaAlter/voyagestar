@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from octop.cli.support.state import CLIState, load, save
+from voyagestar.cli.support.state import CLIState, load, save
 
 
 def test_load_missing_returns_default(tmp_path: Path) -> None:

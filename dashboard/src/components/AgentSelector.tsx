@@ -1,7 +1,7 @@
 import { Select, Spin } from "antd";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useAgent, type OctopAgent } from "../context/AgentContext";
+import { useAgent, type VoyagestarAgent } from "../context/AgentContext";
 import { ownedExperts } from "../utils/sharedExpert";
 import { iconForName } from "../pages/Experts/components/iconForName";
 import styles from "./AgentSelector.module.less";
@@ -14,7 +14,7 @@ interface AgentSelectorProps {
   showLabel?: boolean;
 }
 
-function agentAccent(agent: OctopAgent): string {
+function agentAccent(agent: VoyagestarAgent): string {
   const cfg = agent.config ?? {};
   const fromConfig = typeof cfg.color === "string" ? cfg.color : null;
   return agent.color || fromConfig || "#2563eb";
@@ -25,7 +25,7 @@ function AgentChip({
   active,
   onSelect,
 }: {
-  agent: OctopAgent;
+  agent: VoyagestarAgent;
   active: boolean;
   onSelect: (id: string) => void;
 }) {

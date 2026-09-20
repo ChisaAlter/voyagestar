@@ -8,7 +8,7 @@ import plistlib
 from pathlib import Path
 
 _STAMP = Path(__file__).resolve().parents[3] / "desktop" / "src" / "build" / "stamp_version.py"
-_SPEC = importlib.util.spec_from_file_location("octop_desktop_stamp_version", _STAMP)
+_SPEC = importlib.util.spec_from_file_location("voyagestar_desktop_stamp_version", _STAMP)
 assert _SPEC is not None and _SPEC.loader is not None
 stamp_version = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(stamp_version)
@@ -67,7 +67,7 @@ def test_four_part_version_pads_semver() -> None:
     assert stamp_version.four_part_version("dev") is None
 
 
-def test_stamp_manifest_sets_octop_identity_only(tmp_path: Path) -> None:
+def test_stamp_manifest_sets_voyagestar_identity_only(tmp_path: Path) -> None:
     src = (
         Path(__file__).resolve().parents[3]
         / "desktop"
@@ -79,5 +79,5 @@ def test_stamp_manifest_sets_octop_identity_only(tmp_path: Path) -> None:
     dest = tmp_path / "wails.exe.generated.manifest"
     stamp_version.stamp_manifest(src, dest, "1.2.3")
     text = dest.read_text(encoding="utf-8")
-    assert 'name="com.tencent.octop" version="1.2.3.0"' in text
+    assert 'name="com.tencent.voyagestar" version="1.2.3.0"' in text
     assert 'name="Microsoft.Windows.Common-Controls" version="6.0.0.0"' in text

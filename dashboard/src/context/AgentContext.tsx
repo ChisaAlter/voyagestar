@@ -15,15 +15,15 @@ import { agentApi as legacyAgentApi } from "../api/modules/agent";
  *
  * Plan §14.3: the dashboard fetches the current user's agents on login,
  * stores the list + selected id in this context, persists the selection
- * in ``localStorage`` (``octop:active-agent``), and pipes the selected id
+ * in ``localStorage`` (``voyagestar:active-agent``), and pipes the selected id
  * into ``api/request.ts`` so every agent-scoped HTTP call gets an
- * ``X-Octop-Agent-Id`` header.
+ * ``X-Voyagestar-Agent-Id`` header.
  */
 
-export interface OctopAgent {
+export interface VoyagestarAgent {
   /** Surrogate integer primary key from the database. */
   id: number;
-  /** Public agent id used in API paths and ``X-Octop-Agent-Id``. */
+  /** Public agent id used in API paths and ``X-Voyagestar-Agent-Id``. */
   agent_id: string;
   /** Owning user id (present on list responses). */
   user_id?: number | null;
@@ -63,11 +63,11 @@ export interface OctopAgent {
 
 interface AgentContextValue {
   /** Latest agents fetched from ``GET /api/agents``. */
-  agents: OctopAgent[];
+  agents: VoyagestarAgent[];
   /** Active agent id, or ``null`` when no agent is selected. */
   activeAgentId: string | null;
   /** Convenience: the full record for ``activeAgentId``. */
-  activeAgent: OctopAgent | null;
+  activeAgent: VoyagestarAgent | null;
   /** True while the initial fetch is in flight. */
   loading: boolean;
   /** Last fetch error message, or ``null``. */
@@ -91,7 +91,7 @@ export interface EnabledExpertsOptions {
   pinActive?: boolean;
 }
 
-const STORAGE_KEY = "octop:active-agent";
+const STORAGE_KEY = "voyagestar:active-agent";
 
 /**
  * Pure helper: narrow ``agents`` down to those that are "enabled" for the
@@ -105,10 +105,10 @@ const STORAGE_KEY = "octop:active-agent";
  * never leak into any chat-side surface.
  */
 export function selectEnabledExperts(
-  agents: OctopAgent[],
+  agents: VoyagestarAgent[],
   resolvedAgentId: string | null | undefined,
   options: EnabledExpertsOptions = {},
-): OctopAgent[] {
+): VoyagestarAgent[] {
   const { pinActive = false } = options;
   const enabled = agents.filter((a) => a.state === "running");
   if (!pinActive || !resolvedAgentId) return enabled;
@@ -124,7 +124,7 @@ export function selectEnabledExperts(
  * consistent across surfaces — name/icon for the chip, shared badge for
  * the picker, owner_username for the current-user indicator.
  */
-export function projectChatAgentOption(agent: OctopAgent): {
+export function projectChatAgentOption(agent: VoyagestarAgent): {
   agent_id: string;
   name: string;
   icon_name: string | null;
@@ -159,10 +159,10 @@ const defaultValue: AgentContextValue = {
 const AgentContext = createContext<AgentContextValue>(defaultValue);
 
 interface ListAgentsResponse {
-  // Server returns OctopAgent[]; typed loosely so legacy agent.ts module
+  // Server returns VoyagestarAgent[]; typed loosely so legacy agent.ts module
   // (which has a different ``agentApi`` shape for finnie endpoints) stays
   // untouched.
-  list: () => Promise<OctopAgent[]>;
+  list: () => Promise<VoyagestarAgent[]>;
 }
 
 /**
@@ -170,7 +170,7 @@ interface ListAgentsResponse {
  * falls back to a direct request if the legacy module hasn't been
  * regenerated yet.
  */
-async function fetchAgents(): Promise<OctopAgent[]> {
+async function fetchAgents(): Promise<VoyagestarAgent[]> {
   const candidate = legacyAgentApi as Partial<ListAgentsResponse> &
     Record<string, unknown>;
   if (typeof candidate.list === "function") {
@@ -178,11 +178,11 @@ async function fetchAgents(): Promise<OctopAgent[]> {
   }
   // Direct fallback so 14.3 doesn't depend on 14.6's API module rewrite.
   const { request } = await import("../api/request");
-  return request<OctopAgent[]>("/agents");
+  return request<VoyagestarAgent[]>("/agents");
 }
 
 export function AgentProvider({ children }: { children: ReactNode }) {
-  const [agents, setAgents] = useState<OctopAgent[]>([]);
+  const [agents, setAgents] = useState<VoyagestarAgent[]>([]);
   const [activeAgentId, setActiveAgentIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

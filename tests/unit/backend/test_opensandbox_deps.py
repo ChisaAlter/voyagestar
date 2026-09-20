@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop.infra.backend import opensandbox_deps
+from voyagestar.infra.backend import opensandbox_deps
 
 
 def test_ensure_opensandbox_deps_ready_when_importable(monkeypatch) -> None:

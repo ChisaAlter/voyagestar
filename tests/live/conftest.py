@@ -10,13 +10,13 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.agents.experts.catalog import ExpertCatalog, default_library_root
-from octop.infra.agents.manager import AgentCreateSpec, AgentManager
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.agents.experts.catalog import ExpertCatalog, default_library_root
+from voyagestar.infra.agents.manager import AgentCreateSpec, AgentManager
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.utils.paths import PathLayout
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -97,11 +97,11 @@ async def live_agent_manager(
     tmp_path: Path,
     live_openai_config: LiveOpenAIConfig,
 ) -> AsyncIterator[AgentManager]:
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     _seed_live_provider(services, live_openai_config)
 
     catalog = ExpertCatalog(default_library_root())

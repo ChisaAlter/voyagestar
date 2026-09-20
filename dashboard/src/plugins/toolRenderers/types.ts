@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 
-/** Parsed ``octop_ui`` envelope from a tool JSON string output. */
-export interface OctopUiHint {
+/** Parsed ``voyagestar_ui`` envelope from a tool JSON string output. */
+export interface VoyagestarUiHint {
   renderer: string;
   version?: number;
 }
@@ -10,7 +10,7 @@ export interface ParsedToolOutput {
   /** True when ``output`` parsed as JSON object. */
   isJson: boolean;
   raw: unknown;
-  octopUi?: OctopUiHint;
+  voyagestarUi?: VoyagestarUiHint;
   data?: unknown;
   text?: string;
 }
@@ -34,7 +34,7 @@ export interface ToolRenderProps {
   /** Parsed ``data`` field, or full parsed object / raw string. */
   data: unknown;
   textFallback?: string;
-  host: OctopPluginUIHost;
+  host: VoyagestarPluginUIHost;
   /** Original tool output string (for builtins that need media parsing). */
   output?: string;
   isStreaming: boolean;
@@ -44,11 +44,11 @@ export interface ToolRenderProps {
 }
 
 export interface ToolRendererRegistration {
-  /** Plugin-local renderer id (matches ``octop_ui.renderer``). */
+  /** Plugin-local renderer id (matches ``voyagestar_ui.renderer``). */
   id: string;
   /** Owning plugin id (``builtin`` for first-party renderers). */
   pluginId: string;
-  /** Tool names this renderer handles when ``octop_ui`` is absent. */
+  /** Tool names this renderer handles when ``voyagestar_ui`` is absent. */
   tools?: string[];
   component: ComponentType<ToolRenderProps>;
 }
@@ -59,14 +59,14 @@ export interface OpenSidePanelOptions {
   toolName?: string;
 }
 
-export interface OctopPluginUIHost {
+export interface VoyagestarPluginUIHost {
   registerRenderer(
     reg: Omit<ToolRendererRegistration, "pluginId"> & { pluginId?: string },
   ): void;
   getToolContext(): ToolRenderContext;
   /** L2: update display payload for a tool call without re-running the LLM. */
   patchResult(callId: string, nextData: unknown): void;
-  /** Authenticated Octop API request (path starts with ``/`` under ``/api``). */
+  /** Authenticated Voyagestar API request (path starts with ``/`` under ``/api``). */
   request<T = unknown>(path: string, init?: RequestInit): Promise<T>;
   /** Open this tool call's UI in the chat side dock (one tab per callId). */
   openSidePanel(opts: OpenSidePanelOptions): void;
@@ -76,8 +76,8 @@ export interface OctopPluginUIHost {
 
 /** Shape expected from ``ui/dist/index.js``. */
 export interface PluginUiModule {
-  setup?: (host: OctopPluginUIHost) => void;
-  default?: { setup?: (host: OctopPluginUIHost) => void };
+  setup?: (host: VoyagestarPluginUIHost) => void;
+  default?: { setup?: (host: VoyagestarPluginUIHost) => void };
 }
 
 export interface PluginUiManifest {

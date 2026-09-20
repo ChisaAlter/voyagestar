@@ -11,7 +11,7 @@
 ### 新增
 
 - 飞书 / 钉钉 / 企业微信 OAuth SSO 登录与绑定
-- 可选登录验证码（滑块及多家云验证码），并提供 `octop captcha reset`
+- 可选登录验证码（滑块及多家云验证码），并提供 `voyagestar captcha reset`
 - 容器工作区默认、专家头像，以及聊天 HITL / 技能选择体验优化
 - 模型列表搜索；ACP 纳入个性化「工具」页签
 
@@ -56,7 +56,7 @@
 - 语音探测按界面语言返回中文/英文错误（含腾讯云 SecretId 等常见鉴权失败）
 - 语音探测失败直接展示错误，不再返回 500；录音上传前转码为 WAV
 - `/compact` 回复隐藏本机绝对路径
-- `octop run` 正确应用 `OCTOP_PORT` / `OCTOP_BIND_HOST`
+- `voyagestar run` 正确应用 `VOYAGESTAR_PORT` / `VOYAGESTAR_BIND_HOST`
 
 ## [0.9.34] - 2026-09-12
 
@@ -144,8 +144,8 @@
 
 ### 变更
 
-- 语音与搜索设置迁到模型页；控制台改用 OctopSpinner
-- 默认管理员凭据改为首次运行写入 `~/octop-login.txt`
+- 语音与搜索设置迁到模型页；控制台改用 VoyagestarSpinner
+- 默认管理员凭据改为首次运行写入 `~/voyagestar-login.txt`
 
 ## [0.9.31] - 2026-09-01
 
@@ -185,7 +185,7 @@
 - 数据库 v10 迁移遗漏 thread projection 表
 - 飞牛 FPK 无效在线升级与原生版启动加载；长会话相关问题
 - 通道弹框文案统一为「通道」，新建默认实时过程
-- `octop acp` 启动即崩溃（CLI 注册表属性应对齐 `acp_cmd`）
+- `voyagestar acp` 启动即崩溃（CLI 注册表属性应对齐 `acp_cmd`）
 
 ## [0.9.29] - 2026-08-27
 
@@ -202,8 +202,8 @@
 ### 修复
 
 - 无更新权限时隐藏检查更新入口
-- `/compact` 兼容 `.octop/conversation_history/` 卸载路径
-- FnOS 镜像改为 Docker Hub `jubaoliang/octop`
+- `/compact` 兼容 `.voyagestar/conversation_history/` 卸载路径
+- FnOS 镜像改为 Docker Hub `jubaoliang/voyagestar`
 
 ### 新增
 
@@ -214,7 +214,7 @@
 ### 新增
 
 - 内置插件随包装分发（默认关闭，卸载后升级不重建）
-- 可配置上传上限（`max_upload_mb` / `OCTOP_MAX_UPLOAD_MB`，默认 100MB）
+- 可配置上传上限（`max_upload_mb` / `VOYAGESTAR_MAX_UPLOAD_MB`，默认 100MB）
 - Dashboard 推送通知（定时任务与主动关怀 toast）
 - 聊天音视频附件预览播放，并扩展 inbound 附件 MIME
 - 火山方舟 Seedream / Seedance 生成模型配置、测试与结果展示
@@ -260,10 +260,10 @@
 
 - Token 计量新增缓存命中支持：按模型调用累计未缓存输入、缓存读取、缓存写入、推理 Token 与模型调用次数；用量页和消息气泡展示缓存命中数据。
 - 编辑专家抽屉可修改标题语（欢迎语），与创建时同一字段，写入智能体实例而非仅页面配置
-- 专家支持上传自定义头像，写入工作区 `.octop/avatar.png`（或 jpg/webp/gif）并通过 `agents.icon_url` 展示；发布快照会带上头像，安装后自动绑定。未设置时仍用配色 + Lucide 图标
+- 专家支持上传自定义头像，写入工作区 `.voyagestar/avatar.png`（或 jpg/webp/gif）并通过 `agents.icon_url` 展示；发布快照会带上头像，安装后自动绑定。未设置时仍用配色 + Lucide 图标
 - 实例化专家的欢迎语改为单一 `welcome_message` 字段（用户自填，不再分中英）；专家模板仍保留双语欢迎词
 - 智能体状态接口返回 `memory_maintenance`（queued / pruning / compacting）。聊天页显示阶段进度条，整理本库时暂停发送；专家卡片显示「整理记忆」标签。
-- 聊天页：文件工具卡片显示「编辑了 N 个文件」（不含截图）；文件面板标题改为「文件变更」。会话 `artifacts` 由 Octop 工具中间件在写文件 / 发文件 / 桌面截图成功后写入，切换会话后仍可在文件变更中查看。路径优先取工具 args，仅在 args 没有 path 时才扫结果文本。专家选择器「共享」标记与名称同一行。右侧增加工作区入口；工作区目录树支持将文件拖到其他文件夹。
+- 聊天页：文件工具卡片显示「编辑了 N 个文件」（不含截图）；文件面板标题改为「文件变更」。会话 `artifacts` 由 Voyagestar 工具中间件在写文件 / 发文件 / 桌面截图成功后写入，切换会话后仍可在文件变更中查看。路径优先取工具 args，仅在 args 没有 path 时才扫结果文本。专家选择器「共享」标记与名称同一行。右侧增加工作区入口；工作区目录树支持将文件拖到其他文件夹。
 - 知识库、技能包、已发布专家改为整数自增 `id` + 对外字符串 ID（`knowledge_base_id` / `skill_package_id` / `published_expert_id`；文档用 `kb_id` 关联）。`agents` 仍用字符串引用技能包与已发布专家。知识库文档支持文件夹路径；分片大小等仍存实例 `settings`。删除未使用的 `knowledge_base_members`。上述库变更与专家资料列、会话 artifacts、实例欢迎语单字段一并作为 schema v7。
 - 对话检索结果附带知识库引用标记；聊天页在回答下方展示可点击的来源文档（跳转知识库页）
 
@@ -271,7 +271,7 @@
 
 - 技能：修复编辑已导入技能并保存后，技能内其余文件与文件夹（README.md、references/ 等）被整体清除的问题——内容编辑（仅 SKILL.md）现原地覆盖清单文件、保留全部同级文件；携带完整 `files` 载荷的更新仍整目录替换（与覆盖重装语义一致）
 - Harness usage 事件按稳定调用 ID 去重，避免流重放重复计费；上下文环保留路由模型的真实窗口上限，并将构成拆分明确显示为近似估算。
-- Admin 环境变量未进入正在运行的 Agent：本地 shell 默认不继承进程 env，Docker exec 也不传 env，工作区 `.env` 只落盘不注入。现本地 shell 每次 execute 继承当前进程环境（含 `~/.octop/env`）并 overlay 工作区 `.env`；Docker 热读全局文件 + 工作区 `.env` + 最小 PATH（不含完整宿主机环境）。保存 Admin 列表会从进程环境删除已去掉的键；仅搜索类 key 变化时后台 reload Agent。MCP stdio 只注入 SDK 安全子集 + 全局/连接器 env，不再灌入整份 `os.environ`。
+- Admin 环境变量未进入正在运行的 Agent：本地 shell 默认不继承进程 env，Docker exec 也不传 env，工作区 `.env` 只落盘不注入。现本地 shell 每次 execute 继承当前进程环境（含 `~/.voyagestar/env`）并 overlay 工作区 `.env`；Docker 热读全局文件 + 工作区 `.env` + 最小 PATH（不含完整宿主机环境）。保存 Admin 列表会从进程环境删除已去掉的键；仅搜索类 key 变化时后台 reload Agent。MCP stdio 只注入 SDK 安全子集 + 全局/连接器 env，不再灌入整份 `os.environ`。
 - Token 用量账本每轮只记下最后一次模型调用，工具循环中前面若干次调用被丢弃，页面合计会远低于聊天里看到的用量；现按该轮全部 AI 调用的 `usage_metadata` 累加，以 `state_snapshot` 为权威终值（snapshot 之后的增量不再相加），畸形 usage 字段跳过以免打断对话
 - 插件工具使用中文等非 ASCII 名称时 LLM 调用失败：主流 API 要求工具名匹配 `^[a-zA-Z0-9_-]{1,64}$`，现自动将非法名称转写为合法拼音名（`pypinyin` 缺失时退回下划线替换），冲突追加 `_2`/`_3` 后缀，并在工具描述前缀 `[原名: …]` 保留原名映射；`config_json.plugins` 配置键与插件内部仍使用原始名称，路由不受影响
 - 修复聊天页在"生成中"时于输入框持续打字导致消息列表上下轻微抖动的问题：输入框高度测量改为在离屏克隆节点上进行，不再瞬态改变页面布局
@@ -308,12 +308,12 @@
 ## [0.9.23] - 2026-08-13
 
 ### 修复
-- 取消首次引导时删除 `octop-login.txt` 引导密码文件的逻辑，避免引导密码意外丢失
+- 取消首次引导时删除 `voyagestar-login.txt` 引导密码文件的逻辑，避免引导密码意外丢失
 - 修复安装脚本版本显示问题，并将安装输出调整为英文
 
 ### 新增
 
-- Octop-owned built-in `skill-manager` for conversational Skill lifecycle
+- Voyagestar-owned built-in `skill-manager` for conversational Skill lifecycle
   management from uploaded files, archives, Git/GitHub or web URLs, and
   SkillHub. It is seeded into every agent instance without modifying
   harness-agent and installs user Skills only under that agent's `skills/`.
@@ -342,11 +342,11 @@
 - 新增每用户模型与推理（reasoning）偏好设置
 
 ### 变更
-- 依赖 `orcakit-harness-agent[all]>=0.9.20`；FilesystemGuard / ModelSettings 由 harness 自动挂载（Octop 仅保留 BinaryReadGuard 与 runtime_limits）
-- 专家 `workspace_dir`：创建时写入 `config_json.workspace_dir`（默认 `{OCTOP_HOME}/agents/<id>/`），所有 backend 共用；Docker 在容器内镜像同名路径为专家工作区，宿主同路径放 sessions/memory/checkpoints
-- Docker：`sandbox_scope`（agent/user/fixed）+ `sandbox_prefix`（默认 `octop_sandbox`）；删专家不删容器；专家工作区在 running 时可预览；Admin 存储 `previewable` 仅控制浏览（默认仅 fixed）；探测用 test 沙箱做真实读写
+- 依赖 `orcakit-harness-agent[all]>=0.9.20`；FilesystemGuard / ModelSettings 由 harness 自动挂载（Voyagestar 仅保留 BinaryReadGuard 与 runtime_limits）
+- 专家 `workspace_dir`：创建时写入 `config_json.workspace_dir`（默认 `{VOYAGESTAR_HOME}/agents/<id>/`），所有 backend 共用；Docker 在容器内镜像同名路径为专家工作区，宿主同路径放 sessions/memory/checkpoints
+- Docker：`sandbox_scope`（agent/user/fixed）+ `sandbox_prefix`（默认 `voyagestar_sandbox`）；删专家不删容器；专家工作区在 running 时可预览；Admin 存储 `previewable` 仅控制浏览（默认仅 fixed）；探测用 test 沙箱做真实读写
 - 删除被专家 `named` 引用的存储后端时返回 `STORAGE_BACKEND_REFERENCED` 并列出引用专家
-- 将 IM 频道定时任务从 ACE 迁移至 Octop cron
+- 将 IM 频道定时任务从 ACE 迁移至 Voyagestar cron
 
 ### 修复
 - 超大图片不再降级为附件路径提示：超过视觉嵌入上限（2 MB）的图片由 Pillow 压缩缩放至最长边 1568px 后仍以内联图片嵌入请求（保留 EXIF 方向与透明通道，仅当压缩失败时才回退为路径提示），视觉模型自动升级随之生效 (#219)
@@ -356,13 +356,13 @@
 ## [0.9.20] - 2026-08-09
 
 ### 新增
-- QQ 频道二维码扫码绑定，支持群聊上下文（仪表盘频道抽屉 + `octop channel` CLI）(#160)
+- QQ 频道二维码扫码绑定，支持群聊上下文（仪表盘频道抽屉 + `voyagestar channel` CLI）(#160)
 - 语音接入小米 MiMo STT / TTS 供应商（`mimo-v2.5-asr` / `mimo-v2.5-tts`），设置页可选择计费端点与 9 种预置音色，TTS 标注限免 (#186)
 - 仪表盘自定义品牌配色：8 套调色板（玫瑰 / 科技 / 靛蓝 / 青绿 / 紫罗兰 / 翠绿 / 琥珀 / 石墨），与浅色 / 深色模式正交且本地持久化
 
 ### 修复
 - Windows 下新建 agent 时，本地后端 `root_dir:"/"` 被解析为当前盘根目录，导致读取工作区（通常位于另一盘符）时抛 `Path ... outside root directory`；现在后端规格解析会在 Windows 上将主机根 `/` 的 `root_dir` 改写为工作区路径（保留原 `type` 等字段）
-- 删除专家时同步清理 `~/.octop/agents/<id>/` 工作区目录（rmtree 移出事件循环执行）；清理失败不阻断数据库删除；仪表盘与 CLI 删除确认提示工作区将永久删除且不可恢复
+- 删除专家时同步清理 `~/.voyagestar/agents/<id>/` 工作区目录（rmtree 移出事件循环执行）；清理失败不阻断数据库删除；仪表盘与 CLI 删除确认提示工作区将永久删除且不可恢复
 - 乐享连接器 MCP URL 补充 `preset=meta` 参数并简化快捷授权链接 (#213)
 - 专家卡片的编辑 / 删除按钮默认可见，不再仅在悬停时显示 (#187, #193)
 - 登录页滑动验证通过后，提示文案居中显示在滑块左侧的可见区域 (#185)
@@ -385,7 +385,7 @@
 
 ### 变更
 - `make all` 先执行前后端 `format-all`（Ruff + Prettier）；pre-commit 在 format 后回写已暂存文件并构建 dashboard (#143)
-- harness runtime 诊断日志写入 `~/.octop/logs`（与 `octop.log` 并排），不再落到各 agent workspace 的 `logs/`；行内带 `[agent=…]`
+- harness runtime 诊断日志写入 `~/.voyagestar/logs`（与 `voyagestar.log` 并排），不再落到各 agent workspace 的 `logs/`；行内带 `[agent=…]`
 - 依赖 `orcakit-harness-agent>=0.9.19`、`harness-gateway>=0.9.1`（scoped root execute jail）
 - 企业微信客户群二维码与文档有效期更新至 2026-08-08 (#149)
 
@@ -433,7 +433,7 @@
 ### 修复
 - 修复自定义提供商弹窗 TypeScript 错误（未使用导入 / 可选 `input`），恢复 release 构建
 - 从 GitHub URL 导入技能时保留完整技能目录（含引用文件与脚本），并加固归档下载的分支名、文件数与体积限制 (#92)
-- 浏览器配置不再对系统路径执行 chmod，改为使用共享目录 `~/.octop/browser-profiles` (#87)
+- 浏览器配置不再对系统路径执行 chmod，改为使用共享目录 `~/.voyagestar/browser-profiles` (#87)
 - 部署后静态资源哈希不匹配导致白屏时，自动软刷新一次并防止重载死循环 (#88)
 - 修正网易邮箱 IMAP 主机解析，并在登录前发送 IMAP ID；同时加固 QQ / 网易 / Gmail 邮件主机预设与探测 (#89)
 
@@ -547,7 +547,7 @@
 ## [0.9.8] - 2026-07-15
 
 ### 新增
-- 远程浏览器/远程桌面安装日志面板新增「复制日志」按钮，并在安装失败时提示可将日志交给 Octop 协助排查
+- 远程浏览器/远程桌面安装日志面板新增「复制日志」按钮，并在安装失败时提示可将日志交给 Voyagestar 协助排查
 - 新增前端 `copyText` 工具，在非安全上下文（如 plain-http 管理页）下通过临时 textarea + execCommand 回退，保证剪贴板复制可用
 - 桌面安装脚本新增 `A-F4`（关闭窗口）与 `C-A-D`（显示桌面）openbox 快捷键，对应桌面快捷键
 
@@ -560,7 +560,7 @@
 - 新增 `docker-publish.yml` 工作流，构建并推送镜像到 Docker Hub
 - 移除 `release.yml` 中多余的 `id-token: write` 权限
 - 删除已与现行 Docker Hub 发版流程脱节的离线部署脚本 `docker_deploy.sh`，并清理 `docker/README.md`、`README_CN.md` 中的相关章节
-- 修正 `docker/README.md` 标题笔误（`ODocker` → `Octop`）
+- 修正 `docker/README.md` 标题笔误（`ODocker` → `Voyagestar`）
 
 ## [0.9.7] - 2026-07-14
 
@@ -601,7 +601,7 @@
 - 修复 Windows 下 sqlite 路径测试、媒体路径与 POSIX 专属测试导致的 CI 失败
 - 修复 Windows 测试收集问题（惰性导入 pwd 模块）
 - 修复 harness-memory Bridge 导入路径
-- 修复 CI 流水线并让测试套件通过，项目重命名为 Octop
+- 修复 CI 流水线并让测试套件通过，项目重命名为 Voyagestar
 
 ### 变更
 - Windows 兼容：默认 agent backend 限定到 workspace，并集中 POSIX 专属 stdlib 调用以适配 Windows mypy CI

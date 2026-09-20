@@ -9,12 +9,12 @@ const AUTH_TOKEN_KEY = "auth_token";
  * React tree calls ``preventDefault()`` to route to /login itself, which keeps
  * the SPA alive instead of tearing the document down mid-render.
  */
-export const UNAUTHORIZED_EVENT = "octop:unauthorized";
+export const UNAUTHORIZED_EVENT = "voyagestar:unauthorized";
 /** Fired when an agent-scoped API request is forbidden. */
-export const FORBIDDEN_EVENT = "octop:forbidden";
+export const FORBIDDEN_EVENT = "voyagestar:forbidden";
 
 /** Response header used by the server for JWT sliding renewal. */
-export const ACCESS_TOKEN_RESPONSE_HEADER = "X-Octop-Access-Token";
+export const ACCESS_TOKEN_RESPONSE_HEADER = "X-Voyagestar-Access-Token";
 
 /** Quiet error thrown when setup lockdown blocks a non-wizard API call. */
 export class SetupRequiredError extends Error {
@@ -56,7 +56,7 @@ export function getAuthToken(): string {
 /** Remove JWT token from localStorage */
 export function clearAuthToken() {
   localStorage.removeItem(AUTH_TOKEN_KEY);
-  localStorage.removeItem("octop:active-agent");
+  localStorage.removeItem("voyagestar:active-agent");
   setActiveAgentId(null);
 }
 
@@ -149,7 +149,7 @@ async function check503ForSetupRequired(
  * module scope so plain functions like ``request()`` can read it without
  * threading a context through every call site.
  *
- * The value is ALSO mirrored to ``localStorage["octop:active-agent"]`` by
+ * The value is ALSO mirrored to ``localStorage["voyagestar:active-agent"]`` by
  * the provider — but the source of truth at request time is this variable
  * so reactions stay synchronous.
  */
@@ -168,7 +168,7 @@ export function getActiveAgentId(): string | null {
 /**
  * Decide whether a request path is "agent-scoped" — i.e. talking to a
  * concrete agent's resource — and therefore should carry the
- * ``X-Octop-Agent-Id`` header. Health, admin, auth, setup, providers, and
+ * ``X-Voyagestar-Agent-Id`` header. Health, admin, auth, setup, providers, and
  * personas don't need it.
  */
 function isAgentScopedPath(path: string): boolean {
@@ -211,9 +211,9 @@ function buildHeaders(path: string, extra?: HeadersInit): HeadersInit {
   if (
     activeAgentId &&
     isAgentScopedPath(path) &&
-    !headers["X-Octop-Agent-Id"]
+    !headers["X-Voyagestar-Agent-Id"]
   ) {
-    headers["X-Octop-Agent-Id"] = activeAgentId;
+    headers["X-Voyagestar-Agent-Id"] = activeAgentId;
   }
 
   return headers;
@@ -233,9 +233,9 @@ function buildAuthHeaders(path: string): Record<string, string> {
   if (
     activeAgentId &&
     isAgentScopedPath(path) &&
-    !headers["X-Octop-Agent-Id"]
+    !headers["X-Voyagestar-Agent-Id"]
   ) {
-    headers["X-Octop-Agent-Id"] = activeAgentId;
+    headers["X-Voyagestar-Agent-Id"] = activeAgentId;
   }
   return headers;
 }

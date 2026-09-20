@@ -11,18 +11,18 @@ from unittest.mock import AsyncMock
 import pytest
 from tests.support.harness import build_harness_manager_mock
 
-from octop.config import OctopConfig
-from octop.infra.agents.manager import AgentManager
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.agents.manager import AgentManager
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _make_services(tmp_path: Path):
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
-    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=OctopConfig())
+    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=VoyagestarConfig())
     services.provider_repo.create(
         name="test-openai",
         kind="openai",

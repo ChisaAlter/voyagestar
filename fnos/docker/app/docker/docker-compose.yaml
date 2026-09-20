@@ -1,20 +1,20 @@
 services:
-  octop:
-    image: ghcr.io/tencentcloud/octop:latest
-    container_name: octop
+  voyagestar:
+    image: ghcr.io/chisaalter/voyagestar:latest
+    container_name: voyagestar
     restart: unless-stopped
     pull_policy: always
     ports:
       - "8088:8088"
     volumes:
-      - "/var/apps/octop/share/octop/data:/data/.octop"
+      - "/var/apps/voyagestar/share/voyagestar/data:/data/.voyagestar"
     environment:
       - HOME=/data
-      - OCTOP_BIND_HOST=0.0.0.0
-      - OCTOP_PORT=${OCTOP_PORT:-8088}
-      - OCTOP_LOG_LEVEL=${OCTOP_LOG_LEVEL:-info}
-      - OCTOP_DEFAULT_PASSWORD=${OCTOP_DEFAULT_PASSWORD:-}
-      - OCTOP_ADMIN_USERNAME=${OCTOP_ADMIN_USERNAME:-admin}
-      - OCTOP_ADMIN_DISPLAY_NAME=${OCTOP_ADMIN_DISPLAY_NAME:-Admin}
+      - VOYAGESTAR_BIND_HOST=0.0.0.0
+      - VOYAGESTAR_PORT=${VOYAGESTAR_PORT:-8088}
+      - VOYAGESTAR_LOG_LEVEL=${VOYAGESTAR_LOG_LEVEL:-info}
+      - VOYAGESTAR_DEFAULT_PASSWORD=${VOYAGESTAR_DEFAULT_PASSWORD:-}
+      - VOYAGESTAR_ADMIN_USERNAME=${VOYAGESTAR_ADMIN_USERNAME:-admin}
+      - VOYAGESTAR_ADMIN_DISPLAY_NAME=${VOYAGESTAR_ADMIN_DISPLAY_NAME:-Admin}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-}

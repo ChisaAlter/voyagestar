@@ -5,7 +5,7 @@ import { Alert, Collapse, Drawer, Form, Input, Select, Spin } from "antd";
 import { message } from "@/utils/antdMessage";
 
 import { request } from "../../../api/request";
-import { octopAgentsApi } from "../../../api/modules/octopAgents";
+import { voyagestarAgentsApi } from "../../../api/modules/voyagestarAgents";
 import {
   expertMarketApi,
   type MarketExpert,
@@ -385,7 +385,7 @@ export default function CreateFromExpertDrawer({
       }
       if (avatarFile) {
         try {
-          await octopAgentsApi.uploadAvatar(body.agent_id, avatarFile);
+          await voyagestarAgentsApi.uploadAvatar(body.agent_id, avatarFile);
         } catch {
           message.warning(t("experts.avatarUploadLater"));
         }

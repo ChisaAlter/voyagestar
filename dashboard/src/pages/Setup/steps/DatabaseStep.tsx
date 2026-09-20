@@ -62,15 +62,15 @@ export default function DatabaseStep({ onContinue, onBack }: Props) {
 
   const buildSqliteBody = (values: DatabaseSetupBody): DatabaseSetupBody => ({
     driver: "sqlite",
-    sqlite_path: values.sqlite_path?.trim() || "octop.db",
+    sqlite_path: values.sqlite_path?.trim() || "voyagestar.db",
   });
 
   const buildPostgresBody = (values: DatabaseSetupBody): DatabaseSetupBody => ({
     driver: "postgresql",
     host: values.host?.trim() || "127.0.0.1",
     port: values.port ?? 5432,
-    database: values.database?.trim() || "octop",
-    user: values.user?.trim() || "octop",
+    database: values.database?.trim() || "voyagestar",
+    user: values.user?.trim() || "voyagestar",
     password: values.password || undefined,
   });
 
@@ -176,11 +176,11 @@ export default function DatabaseStep({ onContinue, onBack }: Props) {
         form={form}
         layout="vertical"
         initialValues={{
-          sqlite_path: "octop.db",
+          sqlite_path: "voyagestar.db",
           host: "127.0.0.1",
           port: 5432,
-          database: "octop",
-          user: "octop",
+          database: "voyagestar",
+          user: "voyagestar",
         }}
       >
         <Form.Item
@@ -194,7 +194,7 @@ export default function DatabaseStep({ onContinue, onBack }: Props) {
           ]}
           extra={t("wizard.database.sqlitePathHint")}
         >
-          <Input prefix={<Database size={14} />} placeholder="octop.db" />
+          <Input prefix={<Database size={14} />} placeholder="voyagestar.db" />
         </Form.Item>
 
         <Button

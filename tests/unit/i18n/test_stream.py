@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop.i18n.domains.stream import (
+from voyagestar.i18n.domains.stream import (
     MODEL_CALL_FAILED,
     RECURSION_LIMIT,
     STREAM_STALL,
@@ -30,7 +30,7 @@ def test_classify_stream_stall_prefers_inner_timeout() -> None:
 def test_classify_rate_limit() -> None:
     assert (
         classify_stream_error_message("Error code: 429 - {'error': {'type': 'rate_limit_error'}}")
-        == "octop:stream_errors.rate_limit"
+        == "voyagestar:stream_errors.rate_limit"
     )
 
 
@@ -39,32 +39,32 @@ def test_classify_insufficient_balance() -> None:
         "Error code: 402 - {'error': {'message': 'Insufficient Balance', "
         "'type': 'unknown_error', 'param': None, 'code': 'invalid_request_error'}}"
     )
-    assert classify_stream_error_message(msg) == "octop:stream_errors.insufficient_balance"
+    assert classify_stream_error_message(msg) == "voyagestar:stream_errors.insufficient_balance"
     assert (
         classify_stream_error_message("HTTP 402 POST https://api.example.com/v1/embeddings: quota")
-        == "octop:stream_errors.insufficient_balance"
+        == "voyagestar:stream_errors.insufficient_balance"
     )
     assert (
         classify_stream_error_message("You exceeded your current quota, please check billing")
-        == "octop:stream_errors.insufficient_balance"
+        == "voyagestar:stream_errors.insufficient_balance"
     )
 
 
 def test_classify_auth() -> None:
     assert (
         classify_stream_error_message("Error code: 401 - Incorrect API key provided")
-        == "octop:stream_errors.auth"
+        == "voyagestar:stream_errors.auth"
     )
 
 
 def test_classify_provider_unavailable_http_status() -> None:
     assert (
         classify_stream_error_message("HTTP 503 POST https://api.example.com/v1/embeddings")
-        == "octop:stream_errors.provider_unavailable"
+        == "voyagestar:stream_errors.provider_unavailable"
     )
     assert (
         classify_stream_error_message("Error code: 502 - Bad Gateway")
-        == "octop:stream_errors.provider_unavailable"
+        == "voyagestar:stream_errors.provider_unavailable"
     )
 
 
@@ -73,7 +73,7 @@ def test_classify_context_length() -> None:
         classify_stream_error_message(
             "Error code: 400 - This model's maximum context length is 128000 tokens"
         )
-        == "octop:stream_errors.context_length"
+        == "voyagestar:stream_errors.context_length"
     )
 
 
@@ -133,7 +133,7 @@ def test_format_recursion_limit_zh_guides_to_config() -> None:
     assert "recursion_limit" not in text
 
 
-def test_stream_error_message_octop_key() -> None:
+def test_stream_error_message_voyagestar_key() -> None:
     assert "重试" in stream_error_message(STREAM_STALL, "zh")
 
 

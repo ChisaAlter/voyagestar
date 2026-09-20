@@ -35,8 +35,8 @@ describe("skill package backend gates", () => {
     expect(
       supportsHostSkillPackages({
         backendChoice: "local_shell",
-        rootDir: "/home/u/.octop/agents/A1",
-        workspaceDir: "/home/u/.octop/agents/A1/",
+        rootDir: "/home/u/.voyagestar/agents/A1",
+        workspaceDir: "/home/u/.voyagestar/agents/A1/",
       }),
     ).toBe(true);
   });
@@ -52,7 +52,7 @@ describe("skill package backend gates", () => {
       supportsHostSkillPackages({
         backendChoice: "local_shell",
         rootDir: "/home/u/project",
-        workspaceDir: "/home/u/project/.octop/workspaces/A1",
+        workspaceDir: "/home/u/project/.voyagestar/workspaces/A1",
       }),
     ).toBe(false);
     expect(

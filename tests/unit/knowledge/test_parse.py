@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.knowledge.parse import parse_document
+from voyagestar.infra.knowledge.parse import parse_document
 
 _DOCX_NAMESPACES = (
     'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
@@ -202,17 +202,17 @@ def test_parse_html_json_and_plain_variants(tmp_path: Path) -> None:
     rst = tmp_path / "notes.rst"
     rst.write_text("Heading\n=======\n\nbody", encoding="utf-8")
     yaml_path = tmp_path / "config.yaml"
-    yaml_path.write_text("name: octop\n", encoding="utf-8")
+    yaml_path.write_text("name: voyagestar\n", encoding="utf-8")
     json_path = tmp_path / "data.json"
-    json_path.write_text('{"name":"octop","ok":true}', encoding="utf-8")
+    json_path.write_text('{"name":"voyagestar","ok":true}', encoding="utf-8")
     jsonl = tmp_path / "rows.jsonl"
     jsonl.write_text('{"a":1}\n{"b":2}\n', encoding="utf-8")
 
     assert parse_document(html) == "Title\nHello world"
     assert parse_document(markdown) == "# Heading\n\nbody"
     assert parse_document(rst) == "Heading\n=======\n\nbody"
-    assert parse_document(yaml_path) == "name: octop\n"
-    assert parse_document(json_path) == '{\n  "name": "octop",\n  "ok": true\n}'
+    assert parse_document(yaml_path) == "name: voyagestar\n"
+    assert parse_document(json_path) == '{\n  "name": "voyagestar",\n  "ok": true\n}'
     assert parse_document(jsonl) == '{"a":1}\n{"b":2}\n'
 
 

@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.agents.security import ToolGuardRulesStore
-from octop.infra.utils.paths import PathLayout
+from voyagestar.infra.agents.security import ToolGuardRulesStore
+from voyagestar.infra.utils.paths import PathLayout
 
 
 @pytest.fixture

@@ -13,9 +13,9 @@ import {
   ChevronRight,
   Plus,
 } from "lucide-react";
-import type { OctopAgent } from "../../../context/AgentContext";
+import type { VoyagestarAgent } from "../../../context/AgentContext";
 import { ExpertIcon } from "../../Experts/components/iconForName";
-import { octopThreadsApi } from "../../../api/modules/octopThreads";
+import { voyagestarThreadsApi } from "../../../api/modules/voyagestarThreads";
 import { showConfirmModal } from "../../../utils/confirmModal";
 import { isAgentChatReady } from "../../../utils/agentError";
 import { sortSessions, toSession, type Session } from "../hooks/useSessions";
@@ -27,7 +27,7 @@ import styles from "../index.module.less";
 /** Default preview size per expert in minimal nav (matches session page size). */
 export const MINIMAL_AGENT_SESSION_PREVIEW = 10;
 
-const FOLDER_COLLAPSED_KEY = "octop:minimal-agent-folders-collapsed";
+const FOLDER_COLLAPSED_KEY = "voyagestar:minimal-agent-folders-collapsed";
 
 function loadCollapsedFolders(): Set<string> {
   try {
@@ -52,7 +52,7 @@ function saveCollapsedFolders(collapsed: Set<string>) {
 }
 
 interface MinimalAgentSessionNavProps {
-  agents: OctopAgent[];
+  agents: VoyagestarAgent[];
   activeId: string | null;
   activeAgentId: string | null;
   /** Live sessions for the currently active agent (keeps nav in sync). */
@@ -332,7 +332,7 @@ export default function MinimalAgentSessionNav({
   const refreshAgentPreview = useCallback(async (agentId: string) => {
     if (!agentId) return;
     try {
-      const rows = await octopThreadsApi.list(
+      const rows = await voyagestarThreadsApi.list(
         agentId,
         MINIMAL_AGENT_SESSION_PREVIEW,
       );
@@ -359,7 +359,7 @@ export default function MinimalAgentSessionNav({
         agentKey.split(",").map(async (id) => {
           if (!id) return [id, [] as Session[]] as const;
           try {
-            const rows = await octopThreadsApi.list(
+            const rows = await voyagestarThreadsApi.list(
               id,
               MINIMAL_AGENT_SESSION_PREVIEW,
             );
@@ -453,7 +453,7 @@ export default function MinimalAgentSessionNav({
         return;
       }
       try {
-        await octopThreadsApi.delete(agentId, sessionId);
+        await voyagestarThreadsApi.delete(agentId, sessionId);
         patchLocal(agentId, (prev) => prev.filter((s) => s.id !== sessionId));
       } catch {
         /* ignore */
@@ -469,7 +469,7 @@ export default function MinimalAgentSessionNav({
       if (agentId === activeAgentId) {
         onRenameActive(sessionId, next);
       } else {
-        void octopThreadsApi.rename(agentId, sessionId, next).catch(() => {});
+        void voyagestarThreadsApi.rename(agentId, sessionId, next).catch(() => {});
       }
       patchLocal(agentId, (prev) =>
         prev.map((s) => (s.id === sessionId ? { ...s, name: next } : s)),
@@ -483,7 +483,7 @@ export default function MinimalAgentSessionNav({
       if (agentId === activeAgentId) {
         onPinActive(sessionId, pinned);
       } else {
-        void octopThreadsApi
+        void voyagestarThreadsApi
           .patch(agentId, sessionId, { pinned })
           .catch(() => {});
       }

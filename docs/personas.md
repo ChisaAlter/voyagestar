@@ -2,12 +2,12 @@
 
 Each agent has an optional MBTI persona (`persona_mbti` column on the
 `agents` row). The persona profile is rendered into the agent's
-`SOUL.md` (via `octop.infra.agents.persona.render_soul_template`) at
+`SOUL.md` (via `voyagestar.infra.agents.persona.render_soul_template`) at
 boot. If the user also sets a `system_prompt` on the agent row, it is
 **appended** to the persona — the persona file is the backbone, the
 user prompt is the trim.
 
-If `persona_mbti` is `NULL` or the empty string, octop falls back to
+If `persona_mbti` is `NULL` or the empty string, voyagestar falls back to
 the built-in `_DEFAULT_SOUL_TEMPLATE` (warm, direct, competent tone).
 
 ## Where the 16 codes live
@@ -16,12 +16,12 @@ Persona content is now data, not files:
 
 | Resource | Location |
 |----------|----------|
-| 16 `MBTIProfile` records | [`src/octop/infra/agents/mbti_profiles.py`](../src/octop/infra/agents/mbti_profiles.py) |
+| 16 `MBTIProfile` records | [`src/voyagestar/infra/agents/mbti_profiles.py`](../src/voyagestar/infra/agents/mbti_profiles.py) |
 | Public API (`get_profile`, `get_all_profiles`, `MBTIProfile`, `MBTIDimensions`, `MBTIBehaviorMapping`) | same module |
-| SOUL.md rendering | [`src/octop/infra/agents/persona.py`](../src/octop/infra/agents/persona.py) |
+| SOUL.md rendering | [`src/voyagestar/infra/agents/persona.py`](../src/voyagestar/infra/agents/persona.py) |
 | Persisted agent field | `agents.persona_mbti` (string, e.g. `"INTJ"`) |
 
-The legacy `src/octop/infra/agents/personas/*.md` directory is gone —
+The legacy `src/voyagestar/infra/agents/personas/*.md` directory is gone —
 persona content is now structured dataclasses with explicit
 `summary_zh` / `summary_en` / `behavior_*` fields, so it can be
 localized without shipping 16 separate Markdown files.
@@ -111,7 +111,7 @@ curl -X PUT http://127.0.0.1:8088/api/agents/architect/mbti \
   -d '{ "code": "INTJ" }'
 ```
 
-The CLI exposes the same path via `octop agent create --persona-mbti INTJ`.
+The CLI exposes the same path via `voyagestar agent create --persona-mbti INTJ`.
 
 ## Customising
 

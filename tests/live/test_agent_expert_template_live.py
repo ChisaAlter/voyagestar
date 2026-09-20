@@ -1,6 +1,6 @@
 """Live tests for expert template file copy via :class:`AgentManager`.
 
-Uses bundled templates under ``src/octop/infra/agents/experts/library/`` (exported
+Uses bundled templates under ``src/voyagestar/infra/agents/experts/library/`` (exported
 expert packs). Requires ``.env`` with ``OPENAI_*`` for agent boot.
 
 Run::
@@ -14,9 +14,9 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.agents.experts.catalog import Expert, ExpertCatalog, default_library_root
-from octop.infra.agents.manager import AgentCreateSpec
-from octop.infra.agents.workspace_dir import DEFAULT_SYSTEM_FILES_PATH
+from voyagestar.infra.agents.experts.catalog import Expert, ExpertCatalog, default_library_root
+from voyagestar.infra.agents.manager import AgentCreateSpec
+from voyagestar.infra.agents.workspace_dir import DEFAULT_SYSTEM_FILES_PATH
 
 pytestmark = pytest.mark.live
 

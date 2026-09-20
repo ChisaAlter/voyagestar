@@ -5,11 +5,11 @@
 version: "3"
 
 info:
-  companyName: "Octop"
-  productName: "Octop"
-  productIdentifier: "com.tencent.octop"
-  description: "Octop desktop shell"
-  copyright: "(c) 2026, Octop"
+  companyName: "Voyagestar"
+  productName: "Voyagestar Sanctum"
+  productIdentifier: "com.tencent.voyagestar"
+  description: "Voyagestar Sanctum desktop shell"
+  copyright: "(c) 2026, Voyagestar"
   comments: "Wails v3 + green portable"
   version: "0.9.26"
 

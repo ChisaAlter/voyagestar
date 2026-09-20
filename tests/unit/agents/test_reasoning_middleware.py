@@ -2,7 +2,7 @@ from langchain.agents.middleware import ModelRequest
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 
-from octop.infra.agents.middleware import reasoning
+from voyagestar.infra.agents.middleware import reasoning
 
 
 def test_reasoning_middleware_updates_openai_field_and_extra_body(monkeypatch) -> None:

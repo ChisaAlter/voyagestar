@@ -9,11 +9,11 @@ import pytest
 from harness_agent.backends import resolve_backend
 from harness_agent.backends.workspace import BackendWorkspace
 
-from octop.infra.agents.experts.catalog import ExpertCatalog, default_library_root
+from voyagestar.infra.agents.experts.catalog import ExpertCatalog, default_library_root
 
 
 def test_bootstrap_main_spec_en_locale_uses_english_label() -> None:
-    from octop.infra.agents.experts.catalog import (
+    from voyagestar.infra.agents.experts.catalog import (
         build_create_spec_from_expert,
     )
 

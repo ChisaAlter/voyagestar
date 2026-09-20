@@ -1,8 +1,8 @@
-# Octop Installer for Windows (PowerShell)
+# Voyagestar Installer for Windows (PowerShell)
 # Usage: irm <url>/install.ps1 | iex
 #    or: .\install.ps1 [-Version X.Y.Z] [-FromSource] [-SourceDir DIR] [-Extras "browser"]
 #
-# Installs Octop into ~/.octop with a uv-managed Python environment.
+# Installs Voyagestar into ~/.voyagestar with a uv-managed Python environment.
 
 & {
 param(
@@ -16,19 +16,19 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$OctopHome     = if ($env:OCTOP_HOME) { $env:OCTOP_HOME } else { Join-Path $HOME ".octop" }
-$OctopVenv     = Join-Path $OctopHome "venv"
-$OctopBin      = Join-Path $OctopHome "bin"
+$VoyagestarHome     = if ($env:VOYAGESTAR_HOME) { $env:VOYAGESTAR_HOME } else { Join-Path $HOME ".voyagestar" }
+$VoyagestarVenv     = Join-Path $VoyagestarHome "venv"
+$VoyagestarBin      = Join-Path $VoyagestarHome "bin"
 $PythonVersion = "3.12"
-$OctopRepo     = if ($env:OCTOP_REPO) { $env:OCTOP_REPO } else { "https://github.com/TencentCloud/Octop.git" }
+$VoyagestarRepo     = if ($env:VOYAGESTAR_REPO) { $env:VOYAGESTAR_REPO } else { "https://github.com/ChisaAlter/voyagestar.git" }
 
-function Write-Info { param([string]$Message) Write-Host "[octop] " -ForegroundColor Green  -NoNewline; Write-Host $Message }
-function Write-Warn { param([string]$Message) Write-Host "[octop] " -ForegroundColor Yellow -NoNewline; Write-Host $Message }
-function Stop-WithError { param([string]$Message) Write-Host "[octop] ERROR: $Message" -ForegroundColor Red; exit 1 }
+function Write-Info { param([string]$Message) Write-Host "[voyagestar] " -ForegroundColor Green  -NoNewline; Write-Host $Message }
+function Write-Warn { param([string]$Message) Write-Host "[voyagestar] " -ForegroundColor Yellow -NoNewline; Write-Host $Message }
+function Stop-WithError { param([string]$Message) Write-Host "[voyagestar] ERROR: $Message" -ForegroundColor Red; exit 1 }
 
 if ($Help) {
     @"
-Octop Installer for Windows
+Voyagestar Installer for Windows
 
 Usage: .\install.ps1 [OPTIONS]
 
@@ -45,13 +45,13 @@ to install it, or install later from the dashboard. If a system Chrome already
 exists, that download is skipped even with -Extras browser.
 
 Environment:
-  OCTOP_HOME            Installation directory (default: ~/.octop)
-  OCTOP_REPO            Git clone URL for -FromSource without -SourceDir
+  VOYAGESTAR_HOME            Installation directory (default: ~/.voyagestar)
+  VOYAGESTAR_REPO            Git clone URL for -FromSource without -SourceDir
 "@
     exit 0
 }
 
-Write-Host "[octop] Installing Octop into $OctopHome" -ForegroundColor Green
+Write-Host "[voyagestar] Installing Voyagestar into $VoyagestarHome" -ForegroundColor Green
 
 $policy = Get-ExecutionPolicy
 if ($policy -eq "Restricted") {
@@ -139,21 +139,21 @@ function Ensure-Uv {
 
 Ensure-Uv
 
-if (Test-Path $OctopVenv) {
+if (Test-Path $VoyagestarVenv) {
     Write-Info "Existing environment found, upgrading..."
 } else {
     Write-Info "Creating Python $PythonVersion environment..."
 }
 
-uv venv $OctopVenv --python $PythonVersion --quiet --clear
+uv venv $VoyagestarVenv --python $PythonVersion --quiet --clear
 if ($LASTEXITCODE -ne 0) { Stop-WithError "Failed to create virtual environment" }
 
-$VenvPython = Join-Path $OctopVenv "Scripts\python.exe"
+$VenvPython = Join-Path $VoyagestarVenv "Scripts\python.exe"
 if (-not (Test-Path $VenvPython)) { Stop-WithError "Failed to create virtual environment" }
 $pyVersion = & $VenvPython --version 2>&1
 Write-Info "Python environment ready ($pyVersion)"
 
-# TEMP: mcp 2.x breaks langchain-mcp-adapters; pin until published octop pulls harness-agent>=0.9.18.
+# TEMP: mcp 2.x breaks langchain-mcp-adapters; pin until published voyagestar pulls harness-agent>=0.9.18.
 function Pin-McpCompat {
     Write-Info "Pinning mcp<2 (langchain-mcp-adapters compat; temporary)..."
     uv pip install "mcp>=1.27.1,<2" --python $VenvPython --quiet
@@ -164,7 +164,7 @@ function Pin-McpCompat {
 
 function Test-Install {
     Write-Info "Verifying installation..."
-    & $VenvPython -c "from octop.infra.agents.manager import AgentManager" 2>$null
+    & $VenvPython -c "from voyagestar.infra.agents.manager import AgentManager" 2>$null
     if ($LASTEXITCODE -ne 0) { Stop-WithError "Install verification failed: core import error" }
     Write-Info "Install verification passed"
 }
@@ -183,7 +183,7 @@ $script:ConsoleAvailable = $false
 
 function Prepare-Console {
     param([string]$RepoDir)
-    $consoleDest = Join-Path $RepoDir "src\octop\dashboard"
+    $consoleDest = Join-Path $RepoDir "src\voyagestar\dashboard"
     if (Test-Path (Join-Path $consoleDest "index.html")) {
         $script:ConsoleAvailable = $true
         return
@@ -212,7 +212,7 @@ function Prepare-Console {
     }
 }
 
-$VenvOctop = Join-Path $OctopVenv "Scripts\octop.exe"
+$VenvVoyagestar = Join-Path $VoyagestarVenv "Scripts\voyagestar.exe"
 
 if ($FromSource) {
     if ($SourceDir) {
@@ -224,9 +224,9 @@ if ($FromSource) {
         if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
             Stop-WithError "git required for -FromSource. Install from https://git-scm.com/"
         }
-        $cloneDir = Join-Path $env:TEMP "octop-install-$(Get-Random)"
+        $cloneDir = Join-Path $env:TEMP "voyagestar-install-$(Get-Random)"
         try {
-            git clone --depth 1 $OctopRepo $cloneDir
+            git clone --depth 1 $VoyagestarRepo $cloneDir
             Prepare-Console $cloneDir
             uv pip install "${cloneDir}${ExtrasSuffix}" --python $VenvPython
         } finally {
@@ -235,8 +235,8 @@ if ($FromSource) {
     }
 } else {
     # PEP 508: extras must sit between name and version specifier
-    # (octop[browser]==x.y.z); octop==x.y.z[browser] is an invalid requirement.
-    $package = if ($Version) { "octop${ExtrasSuffix}==$Version" } else { "octop${ExtrasSuffix}" }
+    # (voyagestar[browser]==x.y.z); voyagestar==x.y.z[browser] is an invalid requirement.
+    $package = if ($Version) { "voyagestar${ExtrasSuffix}==$Version" } else { "voyagestar${ExtrasSuffix}" }
     Write-Info "Installing ${package} from PyPI..."
     $installArgs = @("--python", $VenvPython, "--quiet")
     if ($Version -match '(dev|a|b|rc)') { $installArgs += "--prerelease=explicit" }
@@ -246,11 +246,11 @@ if ($FromSource) {
 Pin-McpCompat
 Test-Install
 
-if (-not (Test-Path $VenvOctop)) { Stop-WithError "Installation failed: octop CLI not found in venv" }
-Write-Info "Octop installed successfully"
+if (-not (Test-Path $VenvVoyagestar)) { Stop-WithError "Installation failed: voyagestar CLI not found in venv" }
+Write-Info "Voyagestar installed successfully"
 
 if (-not $script:ConsoleAvailable) {
-    $check = & $VenvPython -c "import importlib.resources, octop; p=importlib.resources.files('octop')/'dashboard'/'index.html'; print('yes' if p.is_file() else 'no')" 2>&1
+    $check = & $VenvPython -c "import importlib.resources, voyagestar; p=importlib.resources.files('voyagestar')/'dashboard'/'index.html'; print('yes' if p.is_file() else 'no')" 2>&1
     if ($check -eq "yes") { $script:ConsoleAvailable = $true }
 }
 
@@ -304,36 +304,36 @@ if (-not $wantPlaywrightChromium) {
     }
 }
 
-New-Item -ItemType Directory -Path $OctopBin -Force | Out-Null
+New-Item -ItemType Directory -Path $VoyagestarBin -Force | Out-Null
 
-$wrapperPs1 = Join-Path $OctopBin "octop.ps1"
+$wrapperPs1 = Join-Path $VoyagestarBin "voyagestar.ps1"
 @'
 $ErrorActionPreference = "Stop"
-$OctopHome = if ($env:OCTOP_HOME) { $env:OCTOP_HOME } else { Join-Path $HOME ".octop" }
-$RealBin = Join-Path $OctopHome "venv\Scripts\octop.exe"
+$VoyagestarHome = if ($env:VOYAGESTAR_HOME) { $env:VOYAGESTAR_HOME } else { Join-Path $HOME ".voyagestar" }
+$RealBin = Join-Path $VoyagestarHome "venv\Scripts\voyagestar.exe"
 if (-not (Test-Path $RealBin)) {
-    Write-Error "Octop environment not found at $OctopHome\venv"
+    Write-Error "Voyagestar environment not found at $VoyagestarHome\venv"
     exit 1
 }
 & $RealBin @args
 '@ | Set-Content -Path $wrapperPs1 -Encoding UTF8
 
-$cmdWrapper = Join-Path $OctopBin "octop.cmd"
+$cmdWrapper = Join-Path $VoyagestarBin "voyagestar.cmd"
 @'
 @echo off
-set "OCTOP_HOME=%OCTOP_HOME%"
-if "%OCTOP_HOME%"=="" set "OCTOP_HOME=%USERPROFILE%\.octop"
-set "REAL_BIN=%OCTOP_HOME%\venv\Scripts\octop.exe"
+set "VOYAGESTAR_HOME=%VOYAGESTAR_HOME%"
+if "%VOYAGESTAR_HOME%"=="" set "VOYAGESTAR_HOME=%USERPROFILE%\.voyagestar"
+set "REAL_BIN=%VOYAGESTAR_HOME%\venv\Scripts\voyagestar.exe"
 if not exist "%REAL_BIN%" (
-    echo Error: Octop environment not found at %OCTOP_HOME%\venv >&2
+    echo Error: Voyagestar environment not found at %VOYAGESTAR_HOME%\venv >&2
     exit /b 1
 )
 "%REAL_BIN%" %*
 '@ | Set-Content -Path $cmdWrapper -Encoding UTF8
 
-Write-Info "Wrappers created in $OctopBin"
+Write-Info "Wrappers created in $VoyagestarBin"
 
-$targetPath = $OctopBin
+$targetPath = $VoyagestarBin
 $registryPath = "HKCU:\Environment"
 $pathSavedForNewSessions = $false
 try {
@@ -356,9 +356,9 @@ if ($env:Path -notlike "*$targetPath*") {
 }
 
 Write-Host ""
-Write-Host "Octop installed successfully!" -ForegroundColor Green
+Write-Host "Voyagestar installed successfully!" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Install location:  $OctopHome"
+Write-Host "  Install location:  $VoyagestarHome"
 Write-Host "  Python:            $pyVersion"
 if ($script:ConsoleAvailable) {
     Write-Host "  Web UI:            available" -ForegroundColor Green
@@ -366,16 +366,16 @@ if ($script:ConsoleAvailable) {
     Write-Host "  Web UI:            not available" -ForegroundColor Yellow
 }
 Write-Host ""
-Write-Host "If 'octop' is not found in this session, run:"
+Write-Host "If 'voyagestar' is not found in this session, run:"
 Write-Host "  `$env:Path = `"$targetPath;`$env:Path`"" -ForegroundColor White
 if ($pathSavedForNewSessions) {
     Write-Host "(Saved to User PATH; new terminals pick it up automatically.)"
 }
 Write-Host ""
 Write-Host "Then run:"
-Write-Host "  octop init" -ForegroundColor White
-Write-Host "  octop run" -ForegroundColor White
-Write-Host "  octop service start" -ForegroundColor White
+Write-Host "  voyagestar init" -ForegroundColor White
+Write-Host "  voyagestar run" -ForegroundColor White
+Write-Host "  voyagestar service start" -ForegroundColor White
 Write-Host "  http://127.0.0.1:8088" -ForegroundColor White
 
 } @args

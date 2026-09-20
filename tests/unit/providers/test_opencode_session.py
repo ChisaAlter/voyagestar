@@ -9,13 +9,13 @@ from unittest.mock import patch
 
 import pytest
 
-from octop.infra.agents.providers.opencode_session import (
+from voyagestar.infra.agents.providers.opencode_session import (
     OPENCODE_SESSION_HEADER,
     ensure_opencode_session_header,
     is_opencode_go_base_url,
 )
-from octop.infra.agents.providers.probe import build_probe_chat_model
-from octop.infra.agents.providers.store import ProviderStore
+from voyagestar.infra.agents.providers.probe import build_probe_chat_model
+from voyagestar.infra.agents.providers.store import ProviderStore
 
 GO_OPENAI_URL = "https://opencode.ai/zen/go/v1"
 GO_ANTHROPIC_URL = "https://opencode.ai/zen/go"

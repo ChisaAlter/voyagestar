@@ -28,9 +28,9 @@ import { useTranslation } from "react-i18next";
 import Markdown from "../../../components/Markdown/LazyMarkdown";
 import {
   CHAT_HISTORY_PAGE_SIZE,
-  octopThreadsApi,
-  type OctopThread,
-} from "../../../api/modules/octopThreads";
+  voyagestarThreadsApi,
+  type VoyagestarThread,
+} from "../../../api/modules/voyagestarThreads";
 import {
   extractText,
   filterDialogueHistoryMessages,
@@ -72,13 +72,13 @@ function channelLabel(channel: string, t: (key: string) => string): string {
 }
 
 interface ConversationThreadCardProps {
-  thread: OctopThread;
+  thread: VoyagestarThread;
   selected: boolean;
   deleting: boolean;
   channelLabel: string;
   timeZone: string;
-  onView: (thread: OctopThread) => void;
-  onDelete: (thread: OctopThread) => void;
+  onView: (thread: VoyagestarThread) => void;
+  onDelete: (thread: VoyagestarThread) => void;
 }
 
 function ConversationThreadCard({
@@ -154,9 +154,9 @@ export default function ConversationRecords({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const serverTimezone = useServerTimezone();
-  const [threads, setThreads] = useState<OctopThread[]>([]);
+  const [threads, setThreads] = useState<VoyagestarThread[]>([]);
   const [listLoading, setListLoading] = useState(false);
-  const [selectedThread, setSelectedThread] = useState<OctopThread | null>(
+  const [selectedThread, setSelectedThread] = useState<VoyagestarThread | null>(
     null,
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -174,7 +174,7 @@ export default function ConversationRecords({
   const loadThreads = useCallback(async () => {
     setListLoading(true);
     try {
-      const list = await octopThreadsApi.list(agentId, 100);
+      const list = await voyagestarThreadsApi.list(agentId, 100);
       list.sort((a, b) => b.last_active - a.last_active);
       setThreads(list);
     } catch {
@@ -203,7 +203,7 @@ export default function ConversationRecords({
 
   const fetchThreadHistory = useCallback(
     async (threadId: string, offset: number) => {
-      const history = await octopThreadsApi.history(agentId, threadId, {
+      const history = await voyagestarThreadsApi.history(agentId, threadId, {
         limit: CHAT_HISTORY_PAGE_SIZE,
         offset,
       });
@@ -217,7 +217,7 @@ export default function ConversationRecords({
   );
 
   const openThread = useCallback(
-    async (thread: OctopThread) => {
+    async (thread: VoyagestarThread) => {
       setSelectedThread(thread);
       setDrawerOpen(true);
       setHistoryLoading(true);
@@ -297,10 +297,10 @@ export default function ConversationRecords({
   }, [resetHistoryState]);
 
   const handleDelete = useCallback(
-    async (thread: OctopThread) => {
+    async (thread: VoyagestarThread) => {
       setDeletingId(thread.thread_id);
       try {
-        await octopThreadsApi.delete(agentId, thread.thread_id);
+        await voyagestarThreadsApi.delete(agentId, thread.thread_id);
         message.success(t("memory.conversationDeleteSuccess"));
         if (selectedThread?.thread_id === thread.thread_id) {
           closeDrawer();
@@ -318,7 +318,7 @@ export default function ConversationRecords({
   );
 
   const confirmDelete = useCallback(
-    (thread: OctopThread) => {
+    (thread: VoyagestarThread) => {
       showConfirmModal(
         {
           title: t("memory.conversationDeleteConfirm"),
@@ -353,7 +353,7 @@ export default function ConversationRecords({
     return threads.slice(start, start + cardPageSize);
   }, [threads, cardPage, cardPageSize]);
 
-  const columns: ColumnsType<OctopThread> = useMemo(
+  const columns: ColumnsType<VoyagestarThread> = useMemo(
     () => [
       {
         title: t("memory.conversationColumns.threadId"),
@@ -529,7 +529,7 @@ export default function ConversationRecords({
           mobileList
         ) : (
           <Card className={styles.conversationTableCard} bordered={false}>
-            <Table<OctopThread>
+            <Table<VoyagestarThread>
               className={styles.conversationTable}
               rowKey="thread_id"
               loading={listLoading}

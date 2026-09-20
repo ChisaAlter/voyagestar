@@ -7,14 +7,14 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.users.identity import Role
-from octop.infra.users.manager import UserManager
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.users.identity import Role
+from voyagestar.infra.users.manager import UserManager
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _insert_sso_provider(manager: UserManager, *, kind: str = "oidc") -> int:
@@ -28,11 +28,11 @@ def _insert_sso_provider(manager: UserManager, *, kind: str = "oidc") -> int:
 
 @pytest.fixture
 async def manager(tmp_path: Path) -> UserManager:
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     return UserManager(services)
 
 
@@ -47,7 +47,7 @@ async def test_create_user_writes_db(manager: UserManager):
 
 async def test_duplicate_username_rejected(manager: UserManager):
     await manager.create(username="a", password="TestPass12", role=Role.USER)
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.create(username="a", password="TestPass34", role=Role.USER)
     assert ei.value.code is ErrorCode.USERNAME_TAKEN
 
@@ -93,7 +93,7 @@ async def test_create_duplicate_email_rejected(manager: UserManager):
     await manager.create(
         username="a", password="TestPass12", role=Role.USER, email="dup@example.com"
     )
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.create(
             username="b", password="TestPass34", role=Role.USER, email="DUP@example.com"
         )
@@ -124,7 +124,7 @@ async def test_authenticate_rejects_null_password_hash(manager: UserManager):
 
 async def test_change_password_rejects_null_password_hash(manager: UserManager):
     manager._services.user_repo.create(username="sso_user", password_hash=None, role="user")
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.change_password("sso_user", "any", "NewPass12")
     assert ei.value.code is ErrorCode.AUTH_FAILED
 
@@ -226,7 +226,7 @@ async def test_sso_disabled_user_is_rejected(manager: UserManager):
     )
     await manager.disable(user.username)
 
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.resolve_or_create_sso_user(
             provider_id=provider_id,
             subject="sub-1",
@@ -251,7 +251,7 @@ async def test_bind_sso_identity_links_current_user_and_rejects_taken_identity(
         subject="union-bob",
         claims={"name": "Bob Feishu"},
     )
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.bind_sso_identity(
             user_id=local.id,
             provider_id=provider_id,
@@ -308,7 +308,7 @@ async def test_unbind_sso_identity_requires_password(manager: UserManager):
         subject="sub-1",
         claims={"preferred_username": "ssoonly"},
     )
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.unbind_sso_identity(user_id=user.id, kind="feishu")
     assert ei.value.code is ErrorCode.SSO_UNBIND_REQUIRES_PASSWORD
 
@@ -329,13 +329,13 @@ async def test_authenticate_locks_after_max_failures(manager: UserManager):
     max_attempts = manager._login_max_attempts
     for _ in range(max_attempts - 1):
         assert await manager.authenticate("a", "bad") is None
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.authenticate("a", "bad")
     assert ei.value.code is ErrorCode.LOGIN_LOCKED
-    with pytest.raises(OctopError) as ei2:
+    with pytest.raises(VoyagestarError) as ei2:
         await manager.authenticate("a", "bad")
     assert ei2.value.code is ErrorCode.LOGIN_LOCKED
-    with pytest.raises(OctopError) as ei3:
+    with pytest.raises(VoyagestarError) as ei3:
         await manager.authenticate("a", "TestPass12")
     assert ei3.value.code is ErrorCode.LOGIN_LOCKED
 
@@ -345,9 +345,9 @@ async def test_reset_password_clears_lockout(manager: UserManager):
     max_attempts = manager._login_max_attempts
     for _ in range(max_attempts - 1):
         assert await manager.authenticate("a", "bad") is None
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         await manager.authenticate("a", "bad")
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         await manager.authenticate("a", "TestPass12")
     await manager.reset_password("a", "NewPass12")
     user = await manager.authenticate("a", "NewPass12")
@@ -375,27 +375,27 @@ async def test_change_password(manager: UserManager):
 
 async def test_change_password_wrong_old(manager: UserManager):
     await manager.create(username="a", password="OldPass12", role=Role.USER)
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.change_password("a", "wrong", "NewPass12")
     assert ei.value.code is ErrorCode.AUTH_FAILED
 
 
 async def test_change_password_rejects_same_as_old(manager: UserManager):
     await manager.create(username="a", password="OldPass12", role=Role.USER)
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.change_password("a", "OldPass12", "OldPass12")
     assert ei.value.code is ErrorCode.PASSWORD_SAME_AS_OLD
 
 
 async def test_change_password_rejects_weak_new(manager: UserManager):
     await manager.create(username="a", password="OldPass12", role=Role.USER)
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.change_password("a", "OldPass12", "12345678")
     assert ei.value.code is ErrorCode.PASSWORD_TOO_WEAK
 
 
 async def test_create_rejects_weak_password(manager: UserManager):
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         await manager.create(username="a", password="pw", role=Role.USER)
     assert ei.value.code is ErrorCode.PASSWORD_TOO_WEAK
 
@@ -422,7 +422,7 @@ async def test_enable_restores_memory(manager: UserManager):
 async def test_remove_deletes_db_and_dir(manager: UserManager, tmp_path: Path):
     await manager.create(username="a", password="TestPass12", role=Role.USER)
     await manager.remove("a")
-    assert (tmp_path / ".octop" / "users" / "a").exists() is False
+    assert (tmp_path / ".voyagestar" / "users" / "a").exists() is False
     assert manager.get("a") is None
 
 
@@ -433,13 +433,13 @@ async def test_count(manager: UserManager):
 
 
 async def test_boot_loads_existing_users(tmp_path: Path):
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     # Pre-populate via repo
-    from octop.infra.users.password import hash_password
+    from voyagestar.infra.users.password import hash_password
 
     services.user_repo.create(username="legacy", password_hash=hash_password("pw"), role="user")
     manager = UserManager(services)
@@ -449,12 +449,12 @@ async def test_boot_loads_existing_users(tmp_path: Path):
 
 async def test_boot_loads_users(tmp_path: Path):
     """UserManager.boot() loads user identity objects (agents are now global)."""
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
-    from octop.infra.users.password import hash_password
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
+    from voyagestar.infra.users.password import hash_password
 
     uid = services.user_repo.create(
         username="alice", password_hash=hash_password("pw"), role="user"

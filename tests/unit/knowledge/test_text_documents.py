@@ -8,18 +8,18 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.knowledge import KnowledgeRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.knowledge.files import document_path
-from octop.infra.knowledge.service import KnowledgeService
-from octop.infra.utils.paths import PathLayout
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.knowledge import KnowledgeRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.knowledge.files import document_path
+from voyagestar.infra.knowledge.service import KnowledgeService
+from voyagestar.infra.utils.paths import PathLayout
 
 
 @pytest.fixture
 def services(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> SimpleNamespace:
-    monkeypatch.setenv("OCTOP_HOME", str(tmp_path / ".octop"))
+    monkeypatch.setenv("VOYAGESTAR_HOME", str(tmp_path / ".voyagestar"))
     paths = PathLayout.from_env()
     paths.ensure_root()
     db = SqlitePool(paths.db)
@@ -43,7 +43,7 @@ def test_create_and_update_text_document(
     services: SimpleNamespace, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(
-        "octop.infra.knowledge.service.assert_knowledge_usable",
+        "voyagestar.infra.knowledge.service.assert_knowledge_usable",
         lambda *_a, **_k: None,
     )
     svc = KnowledgeService(services)
@@ -77,7 +77,7 @@ def test_upload_spreadsheet_documents(
     services: SimpleNamespace, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(
-        "octop.infra.knowledge.service.assert_knowledge_usable",
+        "voyagestar.infra.knowledge.service.assert_knowledge_usable",
         lambda *_a, **_k: None,
     )
     svc = KnowledgeService(services)
@@ -138,7 +138,7 @@ def test_image_upload_requires_ocr(
     services: SimpleNamespace, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(
-        "octop.infra.knowledge.service.assert_knowledge_usable",
+        "voyagestar.infra.knowledge.service.assert_knowledge_usable",
         lambda *_a, **_k: None,
     )
     svc = KnowledgeService(services)

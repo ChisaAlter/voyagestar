@@ -1,7 +1,7 @@
 ---
 name: publish
 description: >-
-  Publish the Octop Python package: cut a release branch from develop, bump
+  Publish the Voyagestar Python package: cut a release branch from develop, bump
   version, update CHANGELOG, open a PR to main; after merge, Actions tag on
   main (PyPI / Docker Hub + GHCR) and sync main into develop. Use when the user asks
   to publish, release, bump version, cut a release, or run /publish.
@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 # Publish
 
-自动化 Octop Python 包的完整发布流程。
+自动化 Voyagestar Python 包的完整发布流程。
 
 **开始时宣告：** "正在使用 publish 技能发布版本 {VERSION}。"
 
@@ -24,7 +24,7 @@ disable-model-invocation: true
 | `VERSION_FILE` | `pyproject.toml` | 包含版本号的文件 |
 | `VERSION_PATTERN` | `^\s*version\s*=\s*"[^"]+"` | 匹配版本行的正则表达式 |
 | `README_FILE` | `README.md` | 含 shields.io 版本徽标的文件（badge 版本号同步升级） |
-| `INIT_VERSION_FILE` | `src/octop/__init__.py` | 含运行时常量 `__version__` 的文件（缺失则跳过并提示） |
+| `INIT_VERSION_FILE` | `src/voyagestar/__init__.py` | 含运行时常量 `__version__` 的文件（缺失则跳过并提示） |
 | `TAG_PREFIX` | `v` | Git tag 前缀；工作流监听 `v*`，生成 `v0.1.14` 风格标签 |
 | `REMOTE` | `origin` | Git 远程仓库名 |
 | `INTEGRATION_BRANCH` | `develop` | 日常集成分支；release 必须从最新 tip 切出 |
@@ -190,9 +190,9 @@ git checkout -B {RELEASE_BRANCH_PREFIX}{version} {REMOTE}/{INTEGRATION_BRANCH}
    # 用 Edit 工具将 `version-X.Y.Z-orange` 替换为 `version-A.B.C-orange`
    ```
    文件不存在则跳过并提示（不中止）。
-3. `INIT_VERSION_FILE`（`src/octop/__init__.py`）— 运行时常量 `__version__`：
+3. `INIT_VERSION_FILE`（`src/voyagestar/__init__.py`）— 运行时常量 `__version__`：
    ```bash
-   grep -n '__version__' src/octop/__init__.py
+   grep -n '__version__' src/voyagestar/__init__.py
    # 用 Edit 工具将 `__version__ = "X.Y.Z"` 替换为 `"A.B.C"`
    ```
    文件不存在则跳过并提示（不中止）。

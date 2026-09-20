@@ -4,14 +4,14 @@ import {
   buildNavSections,
   isGroupedNavKey,
 } from "./sidebarNav";
-import type { OctopUser } from "../api/modules/auth";
+import type { VoyagestarUser } from "../api/modules/auth";
 
 const adminUser = {
   id: 1,
   username: "admin",
   role: "admin",
   permissions: ["*"],
-} as OctopUser;
+} as VoyagestarUser;
 
 describe("sidebarNav", () => {
   it("marks catalog keys as grouped", () => {

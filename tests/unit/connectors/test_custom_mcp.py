@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.connectors.builder import build_mcp_server_configs_for_user, mcp_server_name
-from octop.infra.connectors.custom_mcp import (
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.connectors.builder import build_mcp_server_configs_for_user, mcp_server_name
+from voyagestar.infra.connectors.custom_mcp import (
     CUSTOM_MCP_KIND,
     enabled_harness_configs,
     extract_servers,
@@ -16,18 +16,18 @@ from octop.infra.connectors.custom_mcp import (
     normalize_server_spec,
     validate_servers_map,
 )
-from octop.infra.connectors.service import ConnectorService
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.connectors import ConnectorRepo
-from octop.infra.db.repos.secrets import SecretRepo
-from octop.infra.db.repos.settings import SettingsRepo
-from octop.infra.utils.ulid import new_ulid
+from voyagestar.infra.connectors.service import ConnectorService
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.connectors import ConnectorRepo
+from voyagestar.infra.db.repos.secrets import SecretRepo
+from voyagestar.infra.db.repos.settings import SettingsRepo
+from voyagestar.infra.utils.ulid import new_ulid
 
 
 @pytest.fixture
 def db(tmp_path: Path) -> SqlitePool:
-    pool = SqlitePool(tmp_path / "octop.db")
+    pool = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(pool)
     return pool
 
@@ -38,7 +38,7 @@ def svc(db: SqlitePool) -> ConnectorService:
         repo=ConnectorRepo(db),
         secret_repo=SecretRepo(db),
         settings_repo=SettingsRepo(db),
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
 
 
@@ -298,7 +298,7 @@ def test_build_mcp_configs_merges_enabled_custom(svc: ConnectorService, db: Sqli
         user_id=uid,
         agent_id="agent-1",
         agent_user_id=uid,
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
         log=False,
     )
     assert set(configs) == {"a"}
@@ -376,7 +376,7 @@ def test_list_default_open_mcp_server_names(svc: ConnectorService, db: SqlitePoo
         mcp_server_name=mcp_server_name("tencent-docs", iid),
         config_json='{"default_open": true}',
     )
-    from octop.infra.connectors.crypto import encrypt_credentials
+    from voyagestar.infra.connectors.crypto import encrypt_credentials
 
     blob = encrypt_credentials(svc._secret_repo, {"token": "t", "instance_id": iid})
     svc._repo.upsert_credentials(instance_id=iid, blob=blob)
@@ -433,7 +433,7 @@ async def test_ensure_fresh_custom_servers_marks_reauth_when_refresh_fails_expir
         resource="https://example.com/mcp",
     )
     with patch(
-        "octop.infra.connectors.service.refresh_custom_mcp_oauth",
+        "voyagestar.infra.connectors.service.refresh_custom_mcp_oauth",
         new_callable=AsyncMock,
         side_effect=ValueError("refresh failed"),
     ):
@@ -477,7 +477,7 @@ async def test_ensure_fresh_custom_servers_keeps_valid_token_when_refresh_fails(
         resource="https://example.com/mcp",
     )
     with patch(
-        "octop.infra.connectors.service.refresh_custom_mcp_oauth",
+        "voyagestar.infra.connectors.service.refresh_custom_mcp_oauth",
         new_callable=AsyncMock,
         side_effect=ValueError("refresh failed"),
     ):

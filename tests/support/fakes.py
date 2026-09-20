@@ -1,4 +1,4 @@
-"""Reusable test doubles for octop."""
+"""Reusable test doubles for voyagestar."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ class FakeHarnessAgent:
                 system_files_path=system_files_path,
             )
         else:
-            self._workspace_dir = Path(tempfile.mkdtemp(prefix="octop-fake-ws-"))
+            self._workspace_dir = Path(tempfile.mkdtemp(prefix="voyagestar-fake-ws-"))
             self._backend = _FakeBackend()
             self._workspace = BackendWorkspace(self._backend, self._workspace_dir)
         self.config = SimpleNamespace(
@@ -156,10 +156,10 @@ description: General-purpose agent
         )
 
     async def list_subagent_summaries(self) -> list[dict[str, Any]]:
-        from octop.infra.utils.frontmatter import parse_frontmatter
+        from voyagestar.infra.utils.frontmatter import parse_frontmatter
 
         paths: set[str] = set()
-        for root in ("agents", ".octop/agents"):
+        for root in ("agents", ".voyagestar/agents"):
             agents_dir = self._workspace_dir / root
             if agents_dir.is_dir():
                 for fpath in agents_dir.glob("*.md"):
@@ -220,8 +220,8 @@ description: General-purpose agent
         tests, or the real disk-backed backend). Enumerate from whichever store holds
         them so the listed summaries match what the routers persisted.
         """
-        from octop.infra.skills.presentation import apply_skill_presentation
-        from octop.infra.utils.frontmatter import parse_frontmatter
+        from voyagestar.infra.skills.presentation import apply_skill_presentation
+        from voyagestar.infra.utils.frontmatter import parse_frontmatter
 
         collected: dict[str, str] = {}
 
@@ -242,7 +242,12 @@ description: General-purpose agent
                     collected[fpath] = data
 
         # Real disk-backed workspace (e.g. when use_workspace_dir was called).
-        for root in ("skills", "_builtin_skills", ".octop/skills", ".octop/_builtin_skills"):
+        for root in (
+            "skills",
+            "_builtin_skills",
+            ".voyagestar/skills",
+            ".voyagestar/_builtin_skills",
+        ):
             disk_root = self._workspace_dir / root
             if disk_root.is_dir():
                 for fpath in disk_root.rglob("*.md"):
@@ -354,7 +359,7 @@ class _FakeHarnessGraph:
 
 
 class _FakeBackend:
-    """In-memory backend supporting the harness BackendProtocol surface used by Octop routers."""
+    """In-memory backend supporting the harness BackendProtocol surface used by Voyagestar routers."""
 
     def __init__(self) -> None:
         self._files: dict[str, bytes] = {}

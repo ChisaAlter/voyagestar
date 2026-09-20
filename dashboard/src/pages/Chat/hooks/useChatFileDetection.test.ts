@@ -39,9 +39,9 @@ describe("collectChatFilePaths", () => {
       toolMsg({
         name: "write_file",
         arguments: JSON.stringify({ content: "hello" }),
-        output: "Wrote /home/wally/.octop/agents/A1/outbound/notes.md",
+        output: "Wrote /home/wally/.voyagestar/agents/A1/outbound/notes.md",
       }),
     ]);
-    expect(paths).toEqual(["/home/wally/.octop/agents/A1/outbound/notes.md"]);
+    expect(paths).toEqual(["/home/wally/.voyagestar/agents/A1/outbound/notes.md"]);
   });
 });

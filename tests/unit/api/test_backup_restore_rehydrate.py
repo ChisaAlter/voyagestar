@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from octop.api.routers import backup as backup_router
-from octop.infra.backup.auto import BACKUP_LOCK
-from octop.infra.backup.store import BackupFileInfo
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.api.routers import backup as backup_router
+from voyagestar.infra.backup.auto import BACKUP_LOCK
+from voyagestar.infra.backup.store import BackupFileInfo
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 
 @pytest.mark.asyncio
@@ -23,7 +23,7 @@ async def test_restore_backup_file_rehydrates_providers_channels_and_cron(
     reload_cron = AsyncMock()
     restored: dict[str, Any] = {
         "schema_version": 1,
-        "octop_version": "0.0.0",
+        "voyagestar_version": "0.0.0",
         "agents": 1,
         "workspace_files": 2,
         "restore_config": True,
@@ -48,7 +48,7 @@ async def test_restore_backup_file_rehydrates_providers_channels_and_cron(
     server.app_runtime.cron_manager.reload_from_db = reload_cron
 
     result = await backup_router.restore_backup_file(
-        filename="octop-backup.tar.gz",
+        filename="voyagestar-backup.tar.gz",
         restore_config=True,
         user=MagicMock(id=1, username="admin"),
         server=server,
@@ -58,7 +58,7 @@ async def test_restore_backup_file_rehydrates_providers_channels_and_cron(
     reload_channels.assert_awaited_once_with()
     reload_cron.assert_awaited_once_with()
     assert result["ok"] is True
-    assert result["name"] == "octop-backup.tar.gz"
+    assert result["name"] == "voyagestar-backup.tar.gz"
     assert result["agents"] == 1
 
 
@@ -68,7 +68,7 @@ async def test_restore_backup_file_skips_rehydrate_without_runtime(
 ) -> None:
     restored: dict[str, Any] = {
         "schema_version": 1,
-        "octop_version": "0.0.0",
+        "voyagestar_version": "0.0.0",
         "agents": 0,
         "workspace_files": 0,
         "restore_config": False,
@@ -89,7 +89,7 @@ async def test_restore_backup_file_skips_rehydrate_without_runtime(
     server.app_runtime = None
 
     result = await backup_router.restore_backup_file(
-        filename="octop-backup.tar.gz",
+        filename="voyagestar-backup.tar.gz",
         restore_config=False,
         user=MagicMock(id=1, username="admin"),
         server=server,
@@ -122,7 +122,7 @@ async def test_rehydrate_reloads_channels_and_cron_even_if_provider_rehydrate_fa
 async def test_create_backup_offloads_to_thread(monkeypatch: pytest.MonkeyPatch) -> None:
     """Manual create must not run tar/sqlite work on the event loop."""
     entry = BackupFileInfo(
-        name="octop-backup-20260101T000000Z.tar.gz",
+        name="voyagestar-backup-20260101T000000Z.tar.gz",
         size=12,
         modified_at="2026-01-01T00:00:00+00:00",
         created_at="2026-01-01T00:00:00+00:00",
@@ -153,7 +153,7 @@ async def test_create_backup_offloads_to_thread(monkeypatch: pytest.MonkeyPatch)
 @pytest.mark.asyncio
 async def test_create_backup_passes_selected_content(monkeypatch: pytest.MonkeyPatch) -> None:
     entry = BackupFileInfo(
-        name="octop-backup-20260101T000000Z.tar.gz",
+        name="voyagestar-backup-20260101T000000Z.tar.gz",
         size=12,
         modified_at="2026-01-01T00:00:00+00:00",
         created_at="2026-01-01T00:00:00+00:00",
@@ -184,7 +184,7 @@ async def test_create_backup_passes_selected_content(monkeypatch: pytest.MonkeyP
 async def test_create_backup_rejects_when_lock_held() -> None:
     await BACKUP_LOCK.acquire()
     try:
-        with pytest.raises(OctopError) as exc_info:
+        with pytest.raises(VoyagestarError) as exc_info:
             await backup_router.create_backup(_=None, server=MagicMock(services=MagicMock()))
         assert exc_info.value.code == ErrorCode.BACKUP_IN_PROGRESS
     finally:
@@ -196,9 +196,9 @@ async def test_restore_backup_rejects_when_lock_held(monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(backup_router, "normalize_backup_filename", lambda name: name)
     await BACKUP_LOCK.acquire()
     try:
-        with pytest.raises(OctopError) as exc_info:
+        with pytest.raises(VoyagestarError) as exc_info:
             await backup_router.restore_backup_file(
-                filename="octop-backup.tar.gz",
+                filename="voyagestar-backup.tar.gz",
                 restore_config=True,
                 user=MagicMock(id=1, username="admin"),
                 server=MagicMock(services=MagicMock()),
@@ -210,7 +210,7 @@ async def test_restore_backup_rejects_when_lock_held(monkeypatch: pytest.MonkeyP
 
 @pytest.mark.asyncio
 async def test_backup_status_reports_idle_and_busy() -> None:
-    from octop.infra.backup.auto import hold_backup_lock
+    from voyagestar.infra.backup.auto import hold_backup_lock
 
     idle = await backup_router.get_backup_status(_=None)
     assert idle == {"busy": False, "operation": None}

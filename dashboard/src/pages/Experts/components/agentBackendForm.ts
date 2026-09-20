@@ -23,7 +23,7 @@ export interface FilesystemDefaults {
   default_root_dir: string;
   allow_outside_home: boolean;
   tree_root: string;
-  /** True when the Octop server process runs inside a container. */
+  /** True when the Voyagestar server process runs inside a container. */
   in_container?: boolean;
 }
 
@@ -87,7 +87,7 @@ export function isHostRootDir(rootDir?: string | null): boolean {
 }
 
 /**
- * Mirror of Octop ``_backend_supports_host_skill_packages`` for local UI gates.
+ * Mirror of Voyagestar ``_backend_supports_host_skill_packages`` for local UI gates.
  *
  * Host root ``/`` or ``root_dir`` equal to the agent workspace root may mount
  * packages; scoped project roots and non-local backends may not.

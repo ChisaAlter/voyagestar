@@ -1,15 +1,15 @@
 import { request } from "../request";
 
-export interface OctopTimezoneSettings {
+export interface VoyagestarTimezoneSettings {
   timezone: string;
 }
 
-export interface OctopUploadSettings {
+export interface VoyagestarUploadSettings {
   max_upload_mb: number;
   max_upload_bytes: number;
 }
 
-export interface OctopCapabilitiesSettings {
+export interface VoyagestarCapabilitiesSettings {
   mobile: { enabled: boolean; backend: string };
 }
 
@@ -40,11 +40,11 @@ export interface CaptchaSettingsPut {
   providers?: Record<string, CaptchaPairBody>;
 }
 
-export const octopSettingsApi = {
-  timezone: () => request<OctopTimezoneSettings>("/settings/timezone"),
-  upload: () => request<OctopUploadSettings>("/settings/upload"),
+export const voyagestarSettingsApi = {
+  timezone: () => request<VoyagestarTimezoneSettings>("/settings/timezone"),
+  upload: () => request<VoyagestarUploadSettings>("/settings/upload"),
   capabilities: () =>
-    request<OctopCapabilitiesSettings>("/settings/capabilities", {
+    request<VoyagestarCapabilitiesSettings>("/settings/capabilities", {
       cache: "no-store",
     }),
   captcha: () => request<CaptchaSettings>("/settings/captcha"),

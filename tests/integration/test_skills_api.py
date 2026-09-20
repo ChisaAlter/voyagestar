@@ -20,7 +20,7 @@ SAMPLE_SKILL = """---
 name: file-reader
 description: Read and summarize text files
 metadata:
-  octop:
+  voyagestar:
     emoji: 📄
 ---
 # File Reader
@@ -32,7 +32,7 @@ BUILTIN_SKILL = """---
 name: web-search
 description: Search the web for information
 metadata:
-  octop:
+  voyagestar:
     emoji: 🔍
 ---
 # Web Search
@@ -89,13 +89,13 @@ async def test_create_then_list(env: Any) -> None:
     assert "file-reader" in names
 
 
-async def test_list_localizes_octop_presentation_metadata(env: Any) -> None:
+async def test_list_localizes_voyagestar_presentation_metadata(env: Any) -> None:
     c, _srv, auth, aid = env
     content = """---
 name: pdf-reader
 description: Agent trigger description
 metadata:
-  octop:
+  voyagestar:
     label:
       zh: PDF 阅读
       en: PDF Reader
@@ -190,7 +190,7 @@ async def test_delete_builtin_skill_rejected(env: Any) -> None:
     assert r.status_code == 404
 
 
-async def test_octop_skill_manager_detail_and_delete_protection(env: Any) -> None:
+async def test_voyagestar_skill_manager_detail_and_delete_protection(env: Any) -> None:
     c, _srv, auth, aid = env
 
     r = await c.get(f"/api/agents/{aid}/skills/skill-manager", headers=auth)
@@ -328,7 +328,7 @@ UPDATED_SKILL = """---
 name: file-reader
 description: Updated description
 metadata:
-  octop:
+  voyagestar:
     emoji: 📘
 ---
 # File Reader Updated
@@ -507,7 +507,7 @@ async def test_put_rejects_removed_skill(env: Any) -> None:
 
 async def test_import_skill_from_url(env: Any, monkeypatch: pytest.MonkeyPatch) -> None:
     c, srv, auth, aid = env
-    from octop.infra.skills import skills_hub
+    from voyagestar.infra.skills import skills_hub
 
     uploads = [
         (
@@ -573,7 +573,7 @@ async def test_import_rejects_adapter_upload_outside_skill_root(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     c, _srv, auth, aid = env
-    from octop.infra.skills import skills_hub
+    from voyagestar.infra.skills import skills_hub
 
     def _fake_resolve(**_kwargs: object) -> skills_hub.BundleResolveResult:
         return skills_hub.BundleResolveResult(

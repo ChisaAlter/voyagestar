@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a defect or unexpected behavior in Octop
+about: Report a defect or unexpected behavior in Voyagestar
 title: "[bug] "
 labels: bug
 ---
@@ -21,7 +21,7 @@ labels: bug
 
 ## Environment
 
-- `octop` version:
+- `voyagestar` version:
 - Python version:
 - OS:
 - Install method: pip / Docker / source

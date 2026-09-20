@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Spin } from "antd";
 import { clearAuthToken, getAuthToken } from "../api/request";
-import { authApi, type OctopUser } from "../api/modules/auth";
+import { authApi, type VoyagestarUser } from "../api/modules/auth";
 import { applyUserLocale } from "../utils/locale";
 import { CurrentUserProvider } from "../hooks/useCurrentUser";
 
@@ -12,7 +12,7 @@ interface AuthGuardProps {
 
 /**
  * Gate every protected route on (a) the initial admin existing and
- * (b) a valid JWT in localStorage. Octop always requires auth — there is
+ * (b) a valid JWT in localStorage. Voyagestar always requires auth — there is
  * no "password protection disabled" mode like finnie had.
  *
  * Always wait for ``/api/setup/status`` (and ``/auth/me`` when a token
@@ -28,7 +28,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
-  const [user, setUser] = useState<OctopUser | null>(null);
+  const [user, setUser] = useState<VoyagestarUser | null>(null);
 
   useEffect(() => {
     let cancelled = false;

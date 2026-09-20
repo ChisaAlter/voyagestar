@@ -9,8 +9,8 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from octop.infra.cron.trigger import build_trigger
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.infra.cron.trigger import build_trigger
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 
 def test_interval_seconds():
@@ -87,18 +87,18 @@ def test_date_iso():
 
 
 def test_unknown_kind_raises():
-    with pytest.raises(OctopError) as ei:
+    with pytest.raises(VoyagestarError) as ei:
         build_trigger("webhook:foo")
     assert ei.value.code is ErrorCode.CRON_TRIGGER_INVALID
 
 
 def test_missing_colon_raises():
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         build_trigger("interval60")
 
 
 def test_malformed_cron_raises():
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         build_trigger("cron:not a cron")
 
 
@@ -113,5 +113,5 @@ def test_malformed_cron_raises():
     ],
 )
 def test_cron_rejects_invalid_weekday(weekday: str):
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         build_trigger(f"cron:0 9 * * {weekday}")

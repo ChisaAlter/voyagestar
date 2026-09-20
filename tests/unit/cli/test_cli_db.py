@@ -7,12 +7,12 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from octop.cli.main import cli
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.utils.paths import PathLayout
-from octop.infra.utils.ulid import new_ulid
+from voyagestar.cli.main import cli
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.utils.paths import PathLayout
+from voyagestar.infra.utils.ulid import new_ulid
 
 
 @pytest.fixture
@@ -33,12 +33,12 @@ def _bootstrap(fake_home: Path) -> None:
 
 def test_list_agents_offline(fake_home: Path) -> None:
     _bootstrap(fake_home)
-    paths = PathLayout(fake_home / ".octop")
+    paths = PathLayout(fake_home / ".voyagestar")
     db = SqlitePool(paths.db)
     AgentRepo(db).create(agent_id="ag1", user_id=1, name="Bot")
     db.close()
 
-    from octop.cli.support.db import list_agents_offline
+    from voyagestar.cli.support.db import list_agents_offline
 
     rows = list_agents_offline(as_user="alice")
     assert len(rows) == 1
@@ -47,7 +47,7 @@ def test_list_agents_offline(fake_home: Path) -> None:
 
 def test_list_threads_offline(fake_home: Path) -> None:
     _bootstrap(fake_home)
-    paths = PathLayout(fake_home / ".octop")
+    paths = PathLayout(fake_home / ".voyagestar")
     db = SqlitePool(paths.db)
     AgentRepo(db).create(agent_id="ag1", user_id=1, name="Bot")
     tid = new_ulid()
@@ -61,7 +61,7 @@ def test_list_threads_offline(fake_home: Path) -> None:
     )
     db.close()
 
-    from octop.cli.support.db import list_threads_offline
+    from voyagestar.cli.support.db import list_threads_offline
 
     rows = list_threads_offline(agent_id="ag1", as_user="alice", limit=10)
     assert len(rows) == 1
@@ -71,7 +71,7 @@ def test_list_threads_offline(fake_home: Path) -> None:
 
 def test_agent_list_offline_flag(fake_home: Path) -> None:
     _bootstrap(fake_home)
-    paths = PathLayout(fake_home / ".octop")
+    paths = PathLayout(fake_home / ".voyagestar")
     db = SqlitePool(paths.db)
     AgentRepo(db).create(agent_id="ag1", user_id=1, name="Bot")
     db.close()

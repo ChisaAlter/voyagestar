@@ -7,13 +7,13 @@ import importlib
 import click
 from click.testing import CliRunner
 
-from octop.cli.main import cli
-from octop.cli.registry import COMMANDS
+from voyagestar.cli.main import cli
+from voyagestar.cli.registry import COMMANDS
 
 
 def test_all_registry_attrs_are_click_commands() -> None:
     for name, (module_path, attr, _help) in COMMANDS.items():
-        mod = importlib.import_module(module_path, package="octop.cli")
+        mod = importlib.import_module(module_path, package="voyagestar.cli")
         assert hasattr(mod, attr), f"{name}: module {module_path} missing attr {attr!r}"
         result = getattr(mod, attr)
         assert isinstance(result, click.Command), (

@@ -6,21 +6,24 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.backend.adapter import row_to_backend_spec, storage_backend_kind_agent_resolvable
-from octop.infra.backend.resolver import (
+from voyagestar.infra.backend.adapter import (
+    row_to_backend_spec,
+    storage_backend_kind_agent_resolvable,
+)
+from voyagestar.infra.backend.resolver import (
     backend_spec_supports_execution,
     collect_named_storage_backend_refs,
     find_agents_using_storage_backend,
     resolve_agent_backend_spec,
 )
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.backends import BackendRepo, BackendRow
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.backends import BackendRepo, BackendRow
 
 
 @pytest.fixture
 def repo(tmp_path: Path) -> BackendRepo:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     return BackendRepo(db)
 
@@ -90,7 +93,7 @@ def test_storage_backend_kind_agent_resolvable() -> None:
 
 
 def test_row_to_backend_spec_opensandbox() -> None:
-    from octop.infra.backend.adapter import storage_spec_previewable
+    from voyagestar.infra.backend.adapter import storage_spec_previewable
 
     row = BackendRow(
         id=1,
@@ -129,7 +132,7 @@ def test_row_to_backend_spec_docker() -> None:
         secret_key=None,
         bucket="python:3.12-slim",
         region=None,
-        config_json='{"allow_network": false, "memory": "512m", "sandbox_scope": "user", "sandbox_prefix": "octop_sandbox"}',
+        config_json='{"allow_network": false, "memory": "512m", "sandbox_scope": "user", "sandbox_prefix": "voyagestar_sandbox"}',
         note=None,
         enabled=1,
         created_at=0,
@@ -141,12 +144,12 @@ def test_row_to_backend_spec_docker() -> None:
         "allow_network": False,
         "memory": "512m",
         "sandbox_scope": "user",
-        "sandbox_prefix": "octop_sandbox",
+        "sandbox_prefix": "voyagestar_sandbox",
     }
 
 
 def test_enrich_docker_backend_spec_defaults() -> None:
-    from octop.infra.backend.docker_spec import (
+    from voyagestar.infra.backend.docker_spec import (
         docker_spec_previewable,
         enrich_docker_backend_spec,
     )
@@ -155,7 +158,7 @@ def test_enrich_docker_backend_spec_defaults() -> None:
         {"type": "docker", "image": "python:3.12-slim"},
         agent_id="ZE6GR2",
     )
-    assert agent["sandbox_prefix"] == "octop_sandbox"
+    assert agent["sandbox_prefix"] == "voyagestar_sandbox"
     assert agent["sandbox_scope"] == "agent"
     assert agent["agent_id"] == "ZE6GR2"
     assert docker_spec_previewable(agent) is False
@@ -182,15 +185,15 @@ def test_enrich_docker_backend_spec_defaults() -> None:
 
 
 def test_inject_docker_global_environment_sets_file() -> None:
-    from octop.infra.backend.docker_spec import inject_docker_global_environment
+    from voyagestar.infra.backend.docker_spec import inject_docker_global_environment
 
     spec = inject_docker_global_environment(
         {"type": "docker", "environment": {"FOO": "from-spec"}},
-        "/data/octop/env",
+        "/data/voyagestar/env",
     )
-    assert spec["environment_file"] == "/data/octop/env"
+    assert spec["environment_file"] == "/data/voyagestar/env"
     assert spec["environment"] == {"FOO": "from-spec"}
-    local = inject_docker_global_environment({"type": "local_shell"}, "/data/octop/env")
+    local = inject_docker_global_environment({"type": "local_shell"}, "/data/voyagestar/env")
     assert "environment_file" not in local
 
 

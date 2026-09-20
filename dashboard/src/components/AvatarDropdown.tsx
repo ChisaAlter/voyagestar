@@ -41,7 +41,7 @@ import { useUserRole } from "../hooks/useUserRole";
 import { useIsMobile } from "../hooks/useIsMobile";
 import ThemeSwitcher from "./ThemeSwitcher";
 import PaletteSwitcher from "./PaletteSwitcher";
-import type { OctopUser } from "../api/modules/auth";
+import type { VoyagestarUser } from "../api/modules/auth";
 import { useLayoutMode } from "../context/LayoutModeContext";
 import type { LayoutMode } from "../layouts/layoutModeStorage";
 import { userCan } from "../utils/permissions";
@@ -50,7 +50,7 @@ import dingtalkIcon from "../assets/channels/dingtalk.svg";
 import wecomIcon from "../assets/channels/wecom.svg";
 import styles from "./AvatarDropdown.module.less";
 
-const GITHUB_URL = "https://github.com/TencentCloud/Octop";
+const GITHUB_URL = "https://github.com/ChisaAlter/voyagestar";
 const APP_OAUTH_KINDS = new Set(["feishu", "dingtalk", "wecom"]);
 
 function oauthProviderIcon(kind: string): ReactNode {
@@ -67,8 +67,8 @@ function oauthProviderIcon(kind: string): ReactNode {
 }
 
 interface AvatarDropdownProps {
-  user: OctopUser | null;
-  onUserChange?: (u: OctopUser) => void;
+  user: VoyagestarUser | null;
+  onUserChange?: (u: VoyagestarUser) => void;
   /**
    * ``sidebar`` — brand-rail footer trigger (avatar [+ name when expanded]).
    * Default keeps a plain avatar button (legacy header style).

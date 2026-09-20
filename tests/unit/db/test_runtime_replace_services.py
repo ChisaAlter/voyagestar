@@ -4,19 +4,19 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from octop.config import OctopConfig
-from octop.infra.agents.manager import AgentManager
-from octop.infra.cron.delivery import CronDeliveryService
-from octop.infra.cron.manager import CronManager
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.gateway.gateway import Gateway
-from octop.infra.proactive.scheduler import ProactiveCareScheduler
-from octop.infra.proactive.service import ProactiveCareService
-from octop.infra.server import AppRuntime
-from octop.infra.users.manager import UserManager
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.agents.manager import AgentManager
+from voyagestar.infra.cron.delivery import CronDeliveryService
+from voyagestar.infra.cron.manager import CronManager
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.gateway.gateway import Gateway
+from voyagestar.infra.proactive.scheduler import ProactiveCareScheduler
+from voyagestar.infra.proactive.service import ProactiveCareService
+from voyagestar.infra.server import AppRuntime
+from voyagestar.infra.users.manager import UserManager
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _services(tmp_path: Path, name: str):
@@ -24,7 +24,7 @@ def _services(tmp_path: Path, name: str):
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    cfg = OctopConfig()
+    cfg = VoyagestarConfig()
     return build_shared_services(db=db, paths=paths, config=cfg), cfg, paths
 
 
@@ -75,7 +75,7 @@ def test_replace_services_retargets_user_and_provider_repos(tmp_path: Path) -> N
 
 def test_rebind_module_delegates_retarget_to_app_runtime() -> None:
     """db.rebind must not own runtime private-field surgery."""
-    src = Path(__file__).resolve().parents[3] / "src/octop/infra/db/rebind.py"
+    src = Path(__file__).resolve().parents[3] / "src/voyagestar/infra/db/rebind.py"
     text = src.read_text(encoding="utf-8")
     assert "replace_services" in text
     assert "_retarget_runtime" not in text

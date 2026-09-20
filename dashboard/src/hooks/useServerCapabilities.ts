@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { octopSettingsApi } from "../api/modules/settings";
+import { voyagestarSettingsApi } from "../api/modules/settings";
 
 /** Coalesce Header + Sidebar mounts so first paint hits capabilities once. */
 let inFlight: Promise<boolean> | null = null;
 
 async function loadMobileEnabled(): Promise<boolean> {
   if (inFlight) return inFlight;
-  inFlight = octopSettingsApi
+  inFlight = voyagestarSettingsApi
     .capabilities()
     .then((data) => Boolean(data.mobile?.enabled))
     .catch(() => false)

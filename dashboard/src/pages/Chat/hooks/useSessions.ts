@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useSyncExternalStore } from "react";
-import { octopThreadsApi } from "../../../api/modules/octopThreads";
+import { voyagestarThreadsApi } from "../../../api/modules/voyagestarThreads";
 import * as chatStore from "./chatStore";
 import { onSessionEvent } from "./chatStore";
 import { formatThreadTitle } from "../utils/threadTitle";
@@ -139,7 +139,7 @@ export async function fetchAndSyncSessionArtifacts(
 ): Promise<string[]> {
   if (!agentId || !threadId) return [];
   try {
-    const history = await octopThreadsApi.history(agentId, threadId, {
+    const history = await voyagestarThreadsApi.history(agentId, threadId, {
       limit: 1,
       offset: 0,
     });
@@ -239,7 +239,7 @@ async function fetchSessionsPage(
   agentId: string,
   limit: number,
 ): Promise<{ sessions: Session[]; hasMore: boolean }> {
-  const rows = await octopThreadsApi.list(agentId, limit + 1);
+  const rows = await voyagestarThreadsApi.list(agentId, limit + 1);
   const hasMore = rows.length > limit;
   const sessions = sortSessions(rows.slice(0, limit).map(toSession));
   return { sessions, hasMore };
@@ -464,7 +464,7 @@ export function useSessions(agentId: string | null) {
       channelType: "dashboard",
     };
     setModuleSessions((prev) => sortSessions([placeholder, ...prev]));
-    const resolvedId = octopThreadsApi
+    const resolvedId = voyagestarThreadsApi
       .create(agentId)
       .then((created) => {
         markPendingThread(created.thread_id);
@@ -496,7 +496,7 @@ export function useSessions(agentId: string | null) {
     async (id: string) => {
       if (!agentId || !id) return false;
       try {
-        await octopThreadsApi.delete(agentId, id);
+        await voyagestarThreadsApi.delete(agentId, id);
         setModuleSessions((prev) => prev.filter((s) => s.id !== id));
         chatStore.removeSession(id);
         chatStore.emitSessionEvent({ kind: "sessionDeleted", sessionId: id });
@@ -514,7 +514,7 @@ export function useSessions(agentId: string | null) {
         sortSessions(prev.map((s) => (s.id === id ? { ...s, pinned } : s))),
       );
       if (agentId) {
-        void octopThreadsApi.patch(agentId, id, { pinned }).catch(() => {});
+        void voyagestarThreadsApi.patch(agentId, id, { pinned }).catch(() => {});
       }
     },
     [agentId],
@@ -528,7 +528,7 @@ export function useSessions(agentId: string | null) {
         prev.map((s) => (s.id === id ? { ...s, name: next } : s)),
       );
       if (agentId) {
-        void octopThreadsApi.rename(agentId, id, next).catch(() => {});
+        void voyagestarThreadsApi.rename(agentId, id, next).catch(() => {});
       }
     },
     [agentId],

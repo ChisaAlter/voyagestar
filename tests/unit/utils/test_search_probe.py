@@ -5,7 +5,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from octop.infra.utils import search_probe
+from voyagestar.infra.utils import search_probe
 
 
 def _patch_client(monkeypatch: pytest.MonkeyPatch, handler: httpx.MockTransport) -> None:

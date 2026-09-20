@@ -80,7 +80,7 @@ export interface WeixinConfig extends BaseChannelConfig {
   accounts: WeixinAccountConfig[];
 }
 
-export interface OctopBotConfig extends BaseChannelConfig {
+export interface VoyagestarBotConfig extends BaseChannelConfig {
   api_key: string;
   api_keys: string[];
   api_base_url: string;
@@ -99,7 +99,7 @@ export interface ChannelConfig {
   dashboard: DashboardConfig;
   wecom: WeComConfig;
   weixin: WeixinConfig;
-  octopbot: OctopBotConfig;
+  voyagestarbot: VoyagestarBotConfig;
 }
 
 export type SingleChannelConfig =
@@ -111,4 +111,4 @@ export type SingleChannelConfig =
   | DashboardConfig
   | WeComConfig
   | WeixinConfig
-  | OctopBotConfig;
+  | VoyagestarBotConfig;

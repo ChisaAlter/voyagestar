@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   mergePatchedToolOutput,
-  parseOctopToolOutput,
+  parseVoyagestarToolOutput,
 } from "./parseToolOutput";
 import {
   clearToolRenderers,
@@ -15,22 +15,22 @@ function Dummy(_: ToolRenderProps) {
   return null;
 }
 
-describe("parseOctopToolOutput", () => {
-  it("parses octop_ui envelope", () => {
+describe("parseVoyagestarToolOutput", () => {
+  it("parses voyagestar_ui envelope", () => {
     const raw = JSON.stringify({
-      octop_ui: { renderer: "demo_card", version: 1 },
+      voyagestar_ui: { renderer: "demo_card", version: 1 },
       data: { count: 2 },
       text: "hi",
     });
-    const parsed = parseOctopToolOutput(raw);
+    const parsed = parseVoyagestarToolOutput(raw);
     expect(parsed.isJson).toBe(true);
-    expect(parsed.octopUi).toEqual({ renderer: "demo_card", version: 1 });
+    expect(parsed.voyagestarUi).toEqual({ renderer: "demo_card", version: 1 });
     expect(parsed.data).toEqual({ count: 2 });
     expect(parsed.text).toBe("hi");
   });
 
   it("keeps plain text", () => {
-    const parsed = parseOctopToolOutput("hello");
+    const parsed = parseVoyagestarToolOutput("hello");
     expect(parsed.isJson).toBe(false);
     expect(parsed.text).toBe("hello");
   });
@@ -39,13 +39,13 @@ describe("parseOctopToolOutput", () => {
 describe("mergePatchedToolOutput", () => {
   it("merges data into existing envelope", () => {
     const prev = JSON.stringify({
-      octop_ui: { renderer: "demo_card" },
+      voyagestar_ui: { renderer: "demo_card" },
       data: { count: 1 },
       text: "x",
     });
     const next = mergePatchedToolOutput(prev, { count: 3 });
     expect(JSON.parse(next)).toEqual({
-      octop_ui: { renderer: "demo_card" },
+      voyagestar_ui: { renderer: "demo_card" },
       data: { count: 3 },
       text: "x",
     });
@@ -53,7 +53,7 @@ describe("mergePatchedToolOutput", () => {
 });
 
 describe("resolveToolRenderer", () => {
-  it("matches by octop_ui.renderer then tool name", () => {
+  it("matches by voyagestar_ui.renderer then tool name", () => {
     clearToolRenderers();
     registerToolRenderer({
       id: "demo_card",
@@ -64,14 +64,14 @@ describe("resolveToolRenderer", () => {
     const byHint = resolveToolRenderer({
       toolName: "other",
       pluginId: "demo-ui-card",
-      parsed: parseOctopToolOutput(
-        JSON.stringify({ octop_ui: { renderer: "demo_card" }, data: {} }),
+      parsed: parseVoyagestarToolOutput(
+        JSON.stringify({ voyagestar_ui: { renderer: "demo_card" }, data: {} }),
       ),
     });
     expect(byHint?.id).toBe("demo_card");
     const byTool = resolveToolRenderer({
       toolName: "demo_ui_card",
-      parsed: parseOctopToolOutput("plain"),
+      parsed: parseVoyagestarToolOutput("plain"),
     });
     expect(byTool?.id).toBe("demo_card");
     clearToolRenderers();

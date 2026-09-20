@@ -9,24 +9,24 @@ import httpx
 import jwt
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.auth.sso.crypto import encrypt_secret
-from octop.infra.auth.sso.providers.feishu import FeishuAdapter
-from octop.infra.auth.sso.service import SsoService
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.users.manager import UserManager
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.auth.sso.crypto import encrypt_secret
+from voyagestar.infra.auth.sso.providers.feishu import FeishuAdapter
+from voyagestar.infra.auth.sso.service import SsoService
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.users.manager import UserManager
+from voyagestar.infra.utils.paths import PathLayout
 
 
 @pytest.fixture
 def service(tmp_path):
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     return SsoService(services, UserManager(services))
 
 
@@ -53,7 +53,7 @@ def test_feishu_authorize_url_omits_scope_and_uses_region_hosts(service: SsoServ
         state="st",
         nonce="ignored",
         code_challenge="challenge",
-        redirect_uri="https://octop.example/api/auth/oauth/callback",
+        redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
     )
     assert "accounts.larksuite.com" in url
     query = httpx.QueryParams(url.split("?", 1)[1])
@@ -103,12 +103,12 @@ def test_feishu_complete_login_reads_v2_token_without_data_wrapper(
         kwargs.pop("transport", None)
         return real_client(*args, transport=httpx.MockTransport(handler), **kwargs)
 
-    with patch("octop.infra.auth.sso.service.httpx.Client", side_effect=factory):
+    with patch("voyagestar.infra.auth.sso.service.httpx.Client", side_effect=factory):
         subject, claims = adapter.complete_login(
             "auth-code",
             row=row,
             login_state=login_state,  # type: ignore[arg-type]
-            redirect_uri="https://octop.example/api/auth/oauth/callback",
+            redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
         )
 
     assert subject == "on_union"
@@ -159,12 +159,12 @@ def test_feishu_complete_login_unwraps_envelope_and_falls_back_to_open_id(
         kwargs.pop("transport", None)
         return real_client(*args, transport=httpx.MockTransport(handler), **kwargs)
 
-    with patch("octop.infra.auth.sso.service.httpx.Client", side_effect=factory):
+    with patch("voyagestar.infra.auth.sso.service.httpx.Client", side_effect=factory):
         subject, claims = adapter.complete_login(
             "auth-code",
             row=row,
             login_state=login_state,  # type: ignore[arg-type]
-            redirect_uri="https://octop.example/api/auth/oauth/callback",
+            redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
         )
 
     assert subject == "ou_open"
@@ -188,14 +188,14 @@ def test_feishu_token_envelope_error_is_value_error(service: SsoService) -> None
 
     login_state = type("State", (), {"code_verifier": "pkce"})()
     with (
-        patch("octop.infra.auth.sso.service.httpx.Client", side_effect=factory),
+        patch("voyagestar.infra.auth.sso.service.httpx.Client", side_effect=factory),
         pytest.raises(ValueError, match="invalid scope"),
     ):
         adapter.complete_login(
             "auth-code",
             row=row,
             login_state=login_state,  # type: ignore[arg-type]
-            redirect_uri="https://octop.example/api/auth/oauth/callback",
+            redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
         )
 
 
@@ -216,12 +216,12 @@ def test_feishu_missing_subject_is_invalid_token(service: SsoService) -> None:
 
     login_state = type("State", (), {"code_verifier": "pkce"})()
     with (
-        patch("octop.infra.auth.sso.service.httpx.Client", side_effect=factory),
+        patch("voyagestar.infra.auth.sso.service.httpx.Client", side_effect=factory),
         pytest.raises(jwt.InvalidTokenError),
     ):
         adapter.complete_login(
             "auth-code",
             row=row,
             login_state=login_state,  # type: ignore[arg-type]
-            redirect_uri="https://octop.example/api/auth/oauth/callback",
+            redirect_uri="https://voyagestar.example/api/auth/oauth/callback",
         )

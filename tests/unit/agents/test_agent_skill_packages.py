@@ -7,22 +7,22 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.agents.manager import AgentManager, skill_package_ids_list
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.agents.manager import AgentManager, skill_package_ids_list
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.utils.paths import PathLayout
 
 
 @pytest.fixture
 def manager(tmp_path: Path) -> AgentManager:
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     return AgentManager(repos=services.repos, paths=services.paths)
 
 
@@ -77,11 +77,11 @@ async def test_persist_skill_package_ids_rejects_non_host_root_backend(
         agent_id=agent_id,
         user_id=None,
         name="agent",
-        config_json='{"backend":{"type":"local_shell","root_dir":"/tmp/octop","virtual_mode":true}}',
+        config_json='{"backend":{"type":"local_shell","root_dir":"/tmp/voyagestar","virtual_mode":true}}',
     )
     manager._repos.skill_package_repo.create(id=package_id, name="Package", created_by="1")
 
-    with pytest.raises(OctopError) as exc_info:
+    with pytest.raises(VoyagestarError) as exc_info:
         await manager.persist_skill_package_ids(agent_id, [package_id])
 
     assert exc_info.value.code is ErrorCode.SKILL_PACKAGE_BACKEND_UNSUPPORTED
@@ -90,9 +90,9 @@ async def test_persist_skill_package_ids_rejects_non_host_root_backend(
 def test_assert_backend_supports_skill_packages_rejects_non_host_root(
     manager: AgentManager,
 ) -> None:
-    with pytest.raises(OctopError) as exc_info:
+    with pytest.raises(VoyagestarError) as exc_info:
         manager.assert_backend_supports_skill_packages(
-            {"type": "local_shell", "root_dir": "/tmp/octop", "virtual_mode": True}
+            {"type": "local_shell", "root_dir": "/tmp/voyagestar", "virtual_mode": True}
         )
     assert exc_info.value.code is ErrorCode.SKILL_PACKAGE_BACKEND_UNSUPPORTED
 
@@ -195,7 +195,7 @@ async def test_persist_skill_package_ids_rejects_unknown_package(
 ) -> None:
     manager._repos.agent_repo.create(agent_id="AGENT01", user_id=None, name="agent")
 
-    with pytest.raises(OctopError) as exc_info:
+    with pytest.raises(VoyagestarError) as exc_info:
         await manager.persist_skill_package_ids("AGENT01", ["MISSING"])
 
     assert exc_info.value.code is ErrorCode.SKILL_PACKAGE_NOT_FOUND
@@ -305,10 +305,10 @@ async def test_refresh_agents_for_package_hot_syncs_only_mounted_agents(
 async def test_list_skill_summaries_relabels_mounted_package_skills(
     manager: AgentManager,
 ) -> None:
-    """Harness lists package dirs as workspace; Octop marks mounted package slugs."""
+    """Harness lists package dirs as workspace; Voyagestar marks mounted package slugs."""
     from unittest.mock import AsyncMock, MagicMock
 
-    from octop.infra.skills.skill_package_store import SkillPackageStore
+    from voyagestar.infra.skills.skill_package_store import SkillPackageStore
 
     agent_id = "AGENT01"
     package_id = "PACK01"

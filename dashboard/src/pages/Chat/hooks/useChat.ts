@@ -701,13 +701,13 @@ async function loadThreadHistory(
   projectionLoading: boolean;
   retryAfterMs: number;
 }> {
-  const { octopThreadsApi, CHAT_HISTORY_PAGE_SIZE } = await import(
-    "../../../api/modules/octopThreads"
+  const { voyagestarThreadsApi, CHAT_HISTORY_PAGE_SIZE } = await import(
+    "../../../api/modules/voyagestarThreads"
   );
   const { syncSessionArtifacts } = await import("./useSessions");
   const limit = params.limit ?? CHAT_HISTORY_PAGE_SIZE;
   const offset = params.offset ?? 0;
-  const history = await octopThreadsApi.history(agentId, threadId, {
+  const history = await voyagestarThreadsApi.history(agentId, threadId, {
     limit,
     offset,
     cursor: params.cursor,

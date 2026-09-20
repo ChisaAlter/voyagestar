@@ -35,7 +35,7 @@ import styles from "./Sidebar.module.less";
 import { typeSize } from "../utils/mobileTypeScale";
 import { DESKTOP_DRAG_REGION_CLASS } from "../utils/desktopChrome";
 
-const NAV_GROUPS_STORAGE_KEY = "octop:sidebar-nav-groups";
+const NAV_GROUPS_STORAGE_KEY = "voyagestar:sidebar-nav-groups";
 /** Minimal settings pane: skip the "设置" group header (duplicates the pane title). */
 const MINIMAL_SETTINGS_HIDDEN_HEADERS = new Set(["nav.settings"]);
 
@@ -458,7 +458,7 @@ export default function Sidebar({
     <>
       <img
         src={isRailCollapsed ? "/pwa-192.png" : wordmarkSrc}
-        alt="Octop"
+        alt="Voyagestar"
         style={{
           height: isRailCollapsed ? 32 : isMobile ? 38 : 36,
           width: isRailCollapsed ? 32 : "auto",

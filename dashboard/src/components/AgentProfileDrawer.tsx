@@ -10,7 +10,7 @@ import { Collapse, Drawer, Spin, Tag } from "antd";
 import { ChevronLeft } from "lucide-react";
 import { request } from "../api/request";
 import { withFromWorkspace } from "../utils/fromWorkspace";
-import type { OctopAgent } from "../context/AgentContext";
+import type { VoyagestarAgent } from "../context/AgentContext";
 import { isAgentChatReady } from "../utils/agentError";
 import {
   listAgentSubagents,
@@ -96,7 +96,7 @@ function ProfileEntityCard({
 
 interface AgentProfileDrawerProps {
   open: boolean;
-  agent: OctopAgent | null;
+  agent: VoyagestarAgent | null;
   isMobile?: boolean;
   onClose: () => void;
 }

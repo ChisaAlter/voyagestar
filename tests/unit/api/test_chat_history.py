@@ -11,8 +11,8 @@ from unittest.mock import MagicMock, call
 import pytest
 from langchain_core.messages import HumanMessage
 
-from octop.api.routers.chat import history as history_mod
-from octop.api.routers.chat.serialize import (
+from voyagestar.api.routers.chat import history as history_mod
+from voyagestar.api.routers.chat.serialize import (
     HISTORY_DEFAULT_LIMIT,
     HISTORY_MAX_LIMIT,
     _clamp_history_limit,
@@ -20,12 +20,12 @@ from octop.api.routers.chat.serialize import (
     _load_checkpoint_messages,
     _slice_message_page,
 )
-from octop.infra.db.repos.thread_messages import (
+from voyagestar.infra.db.repos.thread_messages import (
     ThreadProjectionCandidate,
     ThreadProjectionSummary,
 )
-from octop.infra.db.repos.threads import ThreadRow
-from octop.infra.gateway.threads import thread_row_has_messages
+from voyagestar.infra.db.repos.threads import ThreadRow
+from voyagestar.infra.gateway.threads import thread_row_has_messages
 
 
 def test_clamp_history_limit() -> None:

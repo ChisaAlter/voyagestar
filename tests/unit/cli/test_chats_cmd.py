@@ -1,4 +1,4 @@
-"""Tests for the `octop chats` group."""
+"""Tests for the `voyagestar chats` group."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from octop.cli.main import cli
+from voyagestar.cli.main import cli
 
 
 def test_chats_group_help_lists_all_subcommands() -> None:
@@ -18,7 +18,7 @@ def test_chats_group_help_lists_all_subcommands() -> None:
 
 
 def test_chats_list_requires_agent(monkeypatch: pytest.MonkeyPatch) -> None:
-    import octop.cli.support.ctx as ctx_mod
+    import voyagestar.cli.support.ctx as ctx_mod
 
     def _missing(_agent: str | None) -> str:
         click.echo("error: --agent is required", err=True)
@@ -37,7 +37,7 @@ def test_chats_list_uses_offline_db(monkeypatch: pytest.MonkeyPatch) -> None:
         captured.update(kwargs)
         return [{"thread_id": "t1", "title": "hi", "is_active": True}]
 
-    from octop.cli.support import db as db_mod
+    from voyagestar.cli.support import db as db_mod
 
     monkeypatch.setattr(db_mod, "list_threads_offline", fake_list_threads_offline)
     runner = CliRunner()
@@ -55,7 +55,7 @@ def test_chats_update_sends_title(monkeypatch: pytest.MonkeyPatch) -> None:
         captured["title"] = title
         return {"thread_id": thread_id, "title": title}
 
-    from octop.cli.support import offline_ops as offline_mod
+    from voyagestar.cli.support import offline_ops as offline_mod
 
     monkeypatch.setattr(offline_mod, "resolve_cron_user_id", lambda *_a, **_k: 1)
     monkeypatch.setattr(offline_mod, "update_thread_offline", fake_update_thread_offline)

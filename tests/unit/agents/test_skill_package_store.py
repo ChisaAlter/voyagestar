@@ -6,17 +6,17 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.skill_packages import SkillPackageRepo
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.skills.skill_package_store import SkillPackageStore
-from octop.infra.users.identity import Role, User
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.skill_packages import SkillPackageRepo
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.skills.skill_package_store import SkillPackageStore
+from voyagestar.infra.users.identity import Role, User
 
 
 @pytest.fixture
 def db(tmp_path: Path) -> SqlitePool:
-    pool = SqlitePool(tmp_path / "octop.db")
+    pool = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(pool)
     return pool
 
@@ -48,7 +48,7 @@ def test_write_and_delete_skill_updates_disk_summaries_and_count(
             (
                 "SKILL.md",
                 (
-                    "---\nname: PDF\nmetadata:\n  octop:\n"
+                    "---\nname: PDF\nmetadata:\n  voyagestar:\n"
                     "    display_name: PDF Reader\n"
                     "    emoji: '📄'\n"
                     "    icon_url: https://cdn.example.com/pdf.png\n"
@@ -92,7 +92,7 @@ def test_write_and_delete_skill_updates_disk_summaries_and_count(
         ("delete_skill", "../unsafe", None),
     ],
 )
-def test_skill_validation_errors_are_mapped_to_octop_errors(
+def test_skill_validation_errors_are_mapped_to_voyagestar_errors(
     store: SkillPackageStore,
     method: str,
     slug: str,
@@ -100,7 +100,7 @@ def test_skill_validation_errors_are_mapped_to_octop_errors(
 ) -> None:
     row = store.create(name="P", description="", created_by="42")
 
-    with pytest.raises(OctopError) as exc_info:
+    with pytest.raises(VoyagestarError) as exc_info:
         if method == "write_skill":
             assert files is not None
             store.write_skill(row.id, slug, files)
@@ -135,7 +135,7 @@ def test_write_skill_recreates_empty_directories(store: SkillPackageStore) -> No
     assert list((skill_dir / "ai").iterdir()) == []
 
 
-def test_list_skill_summaries_localizes_octop_metadata(store: SkillPackageStore) -> None:
+def test_list_skill_summaries_localizes_voyagestar_metadata(store: SkillPackageStore) -> None:
     row = store.create(name="P", description="", created_by="42")
     store.write_skill(
         row.id,
@@ -148,7 +148,7 @@ def test_list_skill_summaries_localizes_octop_metadata(store: SkillPackageStore)
                     "name: pdf-reader\n"
                     "description: Agent trigger\n"
                     "metadata:\n"
-                    "  octop:\n"
+                    "  voyagestar:\n"
                     "    label:\n"
                     "      zh: PDF 阅读\n"
                     "      en: PDF Reader\n"
@@ -204,6 +204,6 @@ def test_assert_can_mutate_allows_creator_and_admin_only(
     store.assert_can_mutate(row, creator)
     store.assert_can_mutate(row, admin)
 
-    with pytest.raises(OctopError) as exc_info:
+    with pytest.raises(VoyagestarError) as exc_info:
         store.assert_can_mutate(row, other)
     assert exc_info.value.code is ErrorCode.FORBIDDEN

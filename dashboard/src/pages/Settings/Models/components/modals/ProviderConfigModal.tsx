@@ -1,7 +1,7 @@
 /**
  * ProviderConfigModal — edit existing provider + manage models + Ollama support.
  *
- * Extends the original octop ProviderConfigModal with:
+ * Extends the original voyagestar ProviderConfigModal with:
  *   - Embedded ModelListEditor for per-model enable/disable/add/delete
  *   - Ollama section (only shown when kind=openai and name/base_url suggests Ollama)
  *     with local model list, download, and delete UI

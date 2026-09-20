@@ -9,9 +9,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from click.testing import CliRunner
 
-from octop.cli.main import cli
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.users import UserRepo
+from voyagestar.cli.main import cli
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.users import UserRepo
 
 
 def _bootstrap() -> None:
@@ -23,12 +23,12 @@ def _bootstrap() -> None:
     assert result.exit_code == 0, result.output
 
 
-def test_set_skill_enabled_persists_disabled_list(tmp_octop_home: Path) -> None:
-    from octop.cli.support.db import open_cli_services
-    from octop.cli.support.skills import set_skill_enabled
+def test_set_skill_enabled_persists_disabled_list(tmp_voyagestar_home: Path) -> None:
+    from voyagestar.cli.support.db import open_cli_services
+    from voyagestar.cli.support.skills import set_skill_enabled
 
     _bootstrap()
-    with open_cli_services(home=tmp_octop_home) as svc:
+    with open_cli_services(home=tmp_voyagestar_home) as svc:
         uid = UserRepo(svc.db).get_by_username("alice")
         assert uid is not None
         AgentRepo(svc.db).create(
@@ -40,7 +40,7 @@ def test_set_skill_enabled_persists_disabled_list(tmp_octop_home: Path) -> None:
 
     set_skill_enabled("ag1", "pdf", enabled=True)
 
-    with open_cli_services(home=tmp_octop_home) as svc:
+    with open_cli_services(home=tmp_voyagestar_home) as svc:
         row = svc.agent_repo.get("ag1")
         assert row is not None
         cfg = json.loads(row.config_json or "{}")
@@ -48,7 +48,7 @@ def test_set_skill_enabled_persists_disabled_list(tmp_octop_home: Path) -> None:
 
 
 def test_list_skills_offline_delegates_to_embedded_server() -> None:
-    from octop.cli.support import skills as skills_mod
+    from voyagestar.cli.support import skills as skills_mod
 
     sample = [{"slug": "docx", "name": "docx", "enabled": True, "kind": "workspace"}]
 
@@ -63,7 +63,7 @@ def test_list_skills_offline_delegates_to_embedded_server() -> None:
 
 def test_skills_list_cli_no_login(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        "octop.cli.support.skills.list_skills_offline",
+        "voyagestar.cli.support.skills.list_skills_offline",
         lambda _aid: [{"slug": "docx", "name": "docx", "enabled": True, "kind": "workspace"}],
     )
     runner = CliRunner()

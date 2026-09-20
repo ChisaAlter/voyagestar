@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop.infra.agents.plugin_tool_defaults import (
+from voyagestar.infra.agents.plugin_tool_defaults import (
     agent_plugin_enabled,
     expand_plugin_tools_default_on,
     merge_plugins_enabled_settings,

@@ -6,20 +6,20 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import DatabaseConfig, OctopConfig, load_config
-from octop.infra.db.factory import open_database
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.setup.password_file import read_password
-from octop.infra.utils.paths import PathLayout
-from tests.support.app import octop_client
+from tests.support.app import voyagestar_client
 from tests.support.auth import bootstrap_admin, wizard_token
+from voyagestar.config import DatabaseConfig, VoyagestarConfig, load_config
+from voyagestar.infra.db.factory import open_database
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.setup.password_file import read_password
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def _seed_occupied_sqlite(home, *, relative_path: str = "occupied.db") -> None:
     """Create a sibling SQLite control-plane DB that already has one user."""
     paths = PathLayout(home)
-    cfg = OctopConfig(
+    cfg = VoyagestarConfig(
         database=DatabaseConfig(driver="sqlite", sqlite_path=relative_path),
         database_in_file=True,
     )
@@ -66,11 +66,11 @@ async def test_setup_database_sqlite_bind(patched_app_client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_deferred_verify_password_then_bind(tmp_octop_home: Path) -> None:
+async def test_deferred_verify_password_then_bind(tmp_voyagestar_home: Path) -> None:
     """Greenfield: password works with no pool; /setup/database binds once."""
-    async with octop_client(tmp_octop_home, bind_database=False) as (client, srv):
+    async with voyagestar_client(tmp_voyagestar_home, bind_database=False) as (client, srv):
         assert srv.database_bound is False
-        assert not (tmp_octop_home / "octop.db").exists()
+        assert not (tmp_voyagestar_home / "voyagestar.db").exists()
 
         status = await client.get("/api/setup/status")
         assert status.status_code == 200
@@ -83,7 +83,7 @@ async def test_deferred_verify_password_then_bind(tmp_octop_home: Path) -> None:
         assert health.status_code == 200
         assert health.json()["db"] is False
 
-        pw = read_password(tmp_octop_home.parent)
+        pw = read_password(tmp_voyagestar_home.parent)
         assert pw is not None
         verified = await client.post("/api/setup/verify-password", json={"password": pw})
         assert verified.status_code == 200, verified.text
@@ -100,11 +100,11 @@ async def test_deferred_verify_password_then_bind(tmp_octop_home: Path) -> None:
 
         applied = await client.post(
             "/api/setup/database",
-            json={"driver": "sqlite", "sqlite_path": "octop.db"},
+            json={"driver": "sqlite", "sqlite_path": "voyagestar.db"},
         )
         assert applied.status_code == 200, applied.text
         assert srv.database_bound is True
-        assert (tmp_octop_home / "octop.db").is_file()
+        assert (tmp_voyagestar_home / "voyagestar.db").is_file()
 
         status2 = await client.get("/api/setup/status")
         assert status2.json()["database_bound"] is True
@@ -151,6 +151,6 @@ async def test_setup_database_refused_after_admin(patched_app_client) -> None:
     await bootstrap_admin(client, home)
     r = await client.post(
         "/api/setup/database",
-        json={"driver": "sqlite", "sqlite_path": "octop.db"},
+        json={"driver": "sqlite", "sqlite_path": "voyagestar.db"},
     )
     assert r.status_code == 410

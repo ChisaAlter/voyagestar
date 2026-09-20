@@ -7,14 +7,14 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from octop.infra.agents.default_agent import (
+from voyagestar.infra.agents.default_agent import (
     DEFAULT_EXPERT_ID,
     SETUP_DEFAULT_AGENT_ID,
     bootstrap_default_agent,
     default_home_local_backend,
 )
-from octop.infra.agents.experts.catalog import ExpertCatalog, default_library_root
-from octop.infra.errors import OctopError
+from voyagestar.infra.agents.experts.catalog import ExpertCatalog, default_library_root
+from voyagestar.infra.errors import VoyagestarError
 
 
 @pytest.fixture(scope="module")
@@ -96,5 +96,5 @@ async def test_bootstrap_requires_catalog() -> None:
     registry = MagicMock()
     registry.get_row.return_value = None
     registry.list_agents.return_value = []
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         await bootstrap_default_agent(registry, None, user_id=1, locale="zh")

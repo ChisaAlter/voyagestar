@@ -9,24 +9,24 @@ import httpx
 import jwt
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.auth.sso.crypto import decrypt_secret
-from octop.infra.auth.sso.service import SsoService
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.users.identity import Role, User
-from octop.infra.users.manager import UserManager
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.auth.sso.crypto import decrypt_secret
+from voyagestar.infra.auth.sso.service import SsoService
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.users.identity import Role, User
+from voyagestar.infra.users.manager import UserManager
+from voyagestar.infra.utils.paths import PathLayout
 
 
 @pytest.fixture
 def service(tmp_path):
-    paths = PathLayout(tmp_path / ".octop")
+    paths = PathLayout(tmp_path / ".voyagestar")
     paths.ensure_root()
     db = SqlitePool(paths.db)
     run_migrations(db)
-    services = build_shared_services(db=db, paths=paths, config=OctopConfig())
+    services = build_shared_services(db=db, paths=paths, config=VoyagestarConfig())
     return SsoService(services, UserManager(services))
 
 
@@ -79,7 +79,7 @@ def discovery_client(handler):
             **kwargs,  # type: ignore[arg-type]
         )
 
-    return patch("octop.infra.auth.sso.service.httpx.Client", side_effect=factory)
+    return patch("voyagestar.infra.auth.sso.service.httpx.Client", side_effect=factory)
 
 
 @pytest.mark.parametrize(
@@ -114,7 +114,7 @@ def test_put_config_encrypts_with_supplied_secret_repo_and_redacts_for_admin(
     service: SsoService,
 ) -> None:
     with patch(
-        "octop.infra.auth.sso.service.encrypt_secret", return_value=b"ciphertext"
+        "voyagestar.infra.auth.sso.service.encrypt_secret", return_value=b"ciphertext"
     ) as encrypt:
         result = service.put_config(
             {
@@ -129,7 +129,7 @@ def test_put_config_encrypts_with_supplied_secret_repo_and_redacts_for_admin(
 
     assert encrypt.call_args.args == (service._services.secret_repo, "top-secret")
     assert result["has_client_secret"] is True
-    assert service.get_config_for_admin(public_base="https://octop.example") == {
+    assert service.get_config_for_admin(public_base="https://voyagestar.example") == {
         "enabled": True,
         "display_name": "Company Login",
         "issuer": "https://issuer.example/",
@@ -137,7 +137,7 @@ def test_put_config_encrypts_with_supplied_secret_repo_and_redacts_for_admin(
         "scopes": "openid profile email",
         "dashboard_origin": None,
         "has_client_secret": True,
-        "redirect_uri": "https://octop.example/api/auth/oidc/callback",
+        "redirect_uri": "https://voyagestar.example/api/auth/oidc/callback",
     }
     assert "client_secret" not in result
     assert service._services.sso_repo.get_provider().client_secret_enc == b"ciphertext"
@@ -165,7 +165,7 @@ def test_put_config_encrypts_secret_and_empty_secret_keeps_previous_value(
 
 def test_start_login_when_disabled_raises(service: SsoService) -> None:
     with pytest.raises(ValueError, match="disabled"):
-        service.start_login(redirect_after="/chat", public_base="https://octop.example")
+        service.start_login(redirect_after="/chat", public_base="https://voyagestar.example")
 
 
 def test_start_login_persists_pkce_state_and_uses_s256(service: SsoService) -> None:
@@ -184,7 +184,7 @@ def test_start_login_persists_pkce_state_and_uses_s256(service: SsoService) -> N
 
     with discovery_client(handler):
         started = service.start_login(
-            redirect_after="https://attacker.example", public_base="https://octop.example"
+            redirect_after="https://attacker.example", public_base="https://voyagestar.example"
         )
 
     query = httpx.QueryParams(started["authorization_url"].split("?", 1)[1])
@@ -196,7 +196,7 @@ def test_start_login_persists_pkce_state_and_uses_s256(service: SsoService) -> N
     assert persisted.code_verifier
     assert query["code_challenge"]
     assert query["code_challenge_method"] == "S256"
-    assert query["redirect_uri"] == "https://octop.example/api/auth/oidc/callback"
+    assert query["redirect_uri"] == "https://voyagestar.example/api/auth/oidc/callback"
     assert persisted.redirect_after == "/chat"
     assert service._services.sso_repo.take_login_state(query["state"]) is None
 
@@ -213,21 +213,21 @@ async def test_callback_error_redirect_prefers_dashboard_origin(service: SsoServ
 @pytest.mark.asyncio
 async def test_callback_maps_denied_bad_state_and_invalid_token(service: SsoService) -> None:
     denied = await service.handle_callback(
-        code=None, state=None, error="access_denied", public_base="https://octop.example"
+        code=None, state=None, error="access_denied", public_base="https://voyagestar.example"
     )
     bad_state = await service.handle_callback(
-        code="code", state="unknown", error=None, public_base="https://octop.example"
+        code="code", state="unknown", error=None, public_base="https://voyagestar.example"
     )
-    assert denied.url == "https://octop.example/login?oidc_error=denied"
-    assert bad_state.url == "https://octop.example/login?oidc_error=state"
+    assert denied.url == "https://voyagestar.example/login?oidc_error=denied"
+    assert bad_state.url == "https://voyagestar.example/login?oidc_error=state"
 
     provider = configure_provider(service)
     add_login_state(service, provider.id)
     with patch.object(service, "_exchange_claims", side_effect=jwt.InvalidTokenError):
         invalid = await service.handle_callback(
-            code="code", state="valid-state", error=None, public_base="https://octop.example"
+            code="code", state="valid-state", error=None, public_base="https://voyagestar.example"
         )
-    assert invalid.url == "https://octop.example/login?oidc_error=invalid_token"
+    assert invalid.url == "https://voyagestar.example/login?oidc_error=invalid_token"
 
 
 @pytest.mark.asyncio
@@ -254,7 +254,7 @@ async def test_callback_exchanges_code_and_attaches_login_code(service: SsoServi
     with (
         discovery_client(handler),
         patch(
-            "octop.infra.auth.sso.service.verify_id_token",
+            "voyagestar.infra.auth.sso.service.verify_id_token",
             return_value={
                 "sub": "subject-123",
                 "email": "member@example.com",
@@ -263,17 +263,17 @@ async def test_callback_exchanges_code_and_attaches_login_code(service: SsoServi
         ),
     ):
         started = service.start_login(
-            redirect_after="/settings", public_base="https://octop.example"
+            redirect_after="/settings", public_base="https://voyagestar.example"
         )
         state = httpx.QueryParams(started["authorization_url"].split("?", 1)[1])["state"]
         result = await service.handle_callback(
             code="authorization-code",
             state=state,
             error=None,
-            public_base="https://octop.example",
+            public_base="https://voyagestar.example",
         )
 
-    assert result.url.startswith("https://octop.example/login/oidc/complete#code=")
+    assert result.url.startswith("https://voyagestar.example/login/oidc/complete#code=")
     assert "redirect=%2Fsettings" in result.url
     assert requests[-1].url == httpx.URL("https://issuer.example/token")
     assert requests[-1].method == "POST"
@@ -309,20 +309,22 @@ async def test_callback_verifies_id_token_against_discovery_issuer(
     with (
         discovery_client(handler),
         patch(
-            "octop.infra.auth.sso.service.verify_id_token",
+            "voyagestar.infra.auth.sso.service.verify_id_token",
             return_value={"sub": "subject-123"},
         ) as verify,
     ):
-        started = service.start_login(redirect_after="/chat", public_base="https://octop.example")
+        started = service.start_login(
+            redirect_after="/chat", public_base="https://voyagestar.example"
+        )
         state = httpx.QueryParams(started["authorization_url"].split("?", 1)[1])["state"]
         result = await service.handle_callback(
             code="authorization-code",
             state=state,
             error=None,
-            public_base="https://octop.example",
+            public_base="https://voyagestar.example",
         )
 
-    assert result.url.startswith("https://octop.example/login/oidc/complete#code=")
+    assert result.url.startswith("https://voyagestar.example/login/oidc/complete#code=")
     assert verify.call_args.kwargs["issuer"] == discovery_issuer
 
 
@@ -393,10 +395,10 @@ def test_start_login_for_kind_oidc_keeps_oidc_redirect(service: SsoService) -> N
 
     with discovery_client(handler):
         started = service.start_login_for_kind(
-            "oidc", redirect_after="/chat", public_base="https://octop.example"
+            "oidc", redirect_after="/chat", public_base="https://voyagestar.example"
         )
     query = httpx.QueryParams(started["authorization_url"].split("?", 1)[1])
-    assert query["redirect_uri"] == "https://octop.example/api/auth/oidc/callback"
+    assert query["redirect_uri"] == "https://voyagestar.example/api/auth/oidc/callback"
 
 
 @pytest.mark.asyncio
@@ -413,7 +415,7 @@ async def test_callback_bind_links_current_user(service: SsoService) -> None:
             code="code",
             state="valid-state",
             error=None,
-            public_base="https://octop.example",
+            public_base="https://voyagestar.example",
         )
     assert "bind=1" in result.url
     row = service._services.user_repo.get(user_id)
@@ -438,6 +440,6 @@ async def test_callback_bind_rejects_identity_owned_by_another_user(
             code="code",
             state="valid-state",
             error=None,
-            public_base="https://octop.example",
+            public_base="https://voyagestar.example",
         )
     assert result.url.endswith("/login?oidc_error=identity_taken")

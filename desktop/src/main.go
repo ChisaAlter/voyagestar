@@ -50,7 +50,7 @@ func (a *App) ServiceShutdown() error {
 	cmd := a.cmd
 	a.cmd = nil
 	a.mu.Unlock()
-	stopOctop(cmd)
+	stopVoyagestar(cmd)
 	return nil
 }
 
@@ -141,7 +141,7 @@ func (a *App) applyDashboardPrefs(s Settings) {
 		return
 	}
 	js := fmt.Sprintf(
-		`(function(){try{localStorage.setItem('octop:ui-locale',%s);}catch(e){}})();`,
+		`(function(){try{localStorage.setItem('voyagestar:ui-locale',%s);}catch(e){}})();`,
 		jsonString(string(s.Locale)),
 	)
 	a.window.ExecJS(js)
@@ -164,7 +164,7 @@ func (a *App) boot() {
 	if a.store != nil {
 		locale = a.store.get().Locale
 	}
-	if url := os.Getenv("OCTOP_DESKTOP_URL"); url != "" {
+	if url := os.Getenv("VOYAGESTAR_DESKTOP_URL"); url != "" {
 		a.setStatus(desktopText(locale, copyStatusConnecting))
 		if err := waitHealth(locale, url, 60*time.Second); err != nil {
 			a.setStatus(err.Error())
@@ -181,8 +181,8 @@ func (a *App) boot() {
 	}
 	root := portableDir()
 	a.mu.Lock()
-	stopOctop(a.cmd)
-	cmd, err := startOctop(root, s.Port)
+	stopVoyagestar(a.cmd)
+	cmd, err := startVoyagestar(root, s.Port)
 	a.cmd = cmd
 	a.mu.Unlock()
 	if err != nil {
@@ -332,8 +332,8 @@ func main() {
 	}
 
 	app := application.New(application.Options{
-		Name:        "Octop",
-		Description: "Octop desktop",
+		Name:        "Voyagestar Sanctum",
+		Description: "Voyagestar Sanctum desktop",
 		Services: []application.Service{
 			application.NewService(api),
 		},
@@ -357,7 +357,7 @@ func main() {
 	})
 
 	win := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:                "Octop",
+		Title:                "远航星Sanctum",
 		Width:                1200,
 		Height:               800,
 		URL:                  "/",
@@ -383,7 +383,7 @@ func main() {
 	win.OnWindowEvent(events.Windows.WebViewNavigationCompleted, installDragOverlay)
 	win.OnWindowEvent(events.Linux.WindowLoadFinished, installDragOverlay)
 	settingsWin := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "Octop 设置",
+		Title:            "远航星Sanctum 设置",
 		Width:            settingsWindowWidth,
 		Height:           settingsWindowOuterHeight(),
 		URL:              "/?settings=1",
@@ -427,7 +427,7 @@ func main() {
 
 	tray := app.SystemTray.New()
 	applyTrayIcon(tray)
-	tray.SetTooltip("Octop")
+	tray.SetTooltip("远航星Sanctum")
 	tray.AttachWindow(settingsWin).WindowOffset(6)
 	showSettings := func() { tray.ShowWindow() }
 	if trayLeftClickShowsSettings(runtime.GOOS) {

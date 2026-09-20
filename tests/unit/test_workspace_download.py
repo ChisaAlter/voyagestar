@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from octop.infra.gateway.media.backend_files import (
+from voyagestar.infra.gateway.media.backend_files import (
     normalize_workspace_download_path,
     normalize_workspace_media_path,
     workspace_download_url,
@@ -46,5 +46,9 @@ def test_workspace_download_url_outbound_and_absolute() -> None:
     assert "path=outbound%2Fchart.png" in url
     abs_url = workspace_download_url("agent-1", "/Users/me/x.png")
     assert "path=%2FUsers%2Fme%2Fx.png" in abs_url
-    file_url = workspace_download_url("agent-1", "file:///root/.octop/agents/main/generated/a.pptx")
-    assert "path=file%3A%2F%2F%2Froot%2F.octop%2Fagents%2Fmain%2Fgenerated%2Fa.pptx" in file_url
+    file_url = workspace_download_url(
+        "agent-1", "file:///root/.voyagestar/agents/main/generated/a.pptx"
+    )
+    assert (
+        "path=file%3A%2F%2F%2Froot%2F.voyagestar%2Fagents%2Fmain%2Fgenerated%2Fa.pptx" in file_url
+    )

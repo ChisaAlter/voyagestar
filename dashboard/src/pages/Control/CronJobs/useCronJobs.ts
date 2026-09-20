@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { octopCronApi } from "../../../api/modules/cronjob";
+import { voyagestarCronApi } from "../../../api/modules/cronjob";
 import { useAgent } from "../../../context/AgentContext";
-import type { CronJobSpecOutput, OctopCronRow } from "../../../api/types";
+import type { CronJobSpecOutput, VoyagestarCronRow } from "../../../api/types";
 import { channelFromSessionKey } from "./cronDisplay";
 import { presetToCron, cronToPreset } from "./components/constants";
 import { message } from "@/utils/antdMessage";
@@ -14,7 +14,7 @@ import {
 
 type CronJob = CronJobSpecOutput;
 
-/** Octop-aligned form values for create / edit drawer. */
+/** Voyagestar-aligned form values for create / edit drawer. */
 export interface CronJobFormValues {
   id?: string;
   name: string;
@@ -40,7 +40,7 @@ function promptLabel(prompt: string, id: string): string {
   return text.length > 40 ? `${text.slice(0, 40)}…` : text;
 }
 
-function fromOctop(row: OctopCronRow, timezone: string): CronJob {
+function fromVoyagestar(row: VoyagestarCronRow, timezone: string): CronJob {
   const idx = row.trigger.indexOf(":");
   const kind = idx >= 0 ? row.trigger.slice(0, idx) : "";
   const value = idx >= 0 ? row.trigger.slice(idx + 1) : row.trigger;
@@ -77,14 +77,14 @@ function fromOctop(row: OctopCronRow, timezone: string): CronJob {
     },
     meta: {
       orca_agent_id: row.agent_id,
-      octop_fresh_thread: row.fresh_thread,
-      octop_session_key: row.session_key,
-      octop_model: row.model,
-      octop_task_type: row.task_type,
-      octop_mcp_servers: row.mcp_servers ?? [],
-      octop_last_run_at: row.last_run_at,
-      octop_last_status: row.last_status,
-      octop_last_error: row.last_error,
+      voyagestar_fresh_thread: row.fresh_thread,
+      voyagestar_session_key: row.session_key,
+      voyagestar_model: row.model,
+      voyagestar_task_type: row.task_type,
+      voyagestar_mcp_servers: row.mcp_servers ?? [],
+      voyagestar_last_run_at: row.last_run_at,
+      voyagestar_last_status: row.last_status,
+      voyagestar_last_error: row.last_error,
     },
   };
 }
@@ -123,15 +123,15 @@ export function jobToFormValues(
     task_type: job.task_type === "text" ? "text" : "agent",
     model: defaultModelToForm(
       job.model ??
-        (typeof meta.octop_model === "string" ? meta.octop_model : undefined),
+        (typeof meta.voyagestar_model === "string" ? meta.voyagestar_model : undefined),
     ),
-    fresh_thread: Boolean(meta.octop_fresh_thread),
+    fresh_thread: Boolean(meta.voyagestar_fresh_thread),
     session_key:
-      typeof meta.octop_session_key === "string"
-        ? meta.octop_session_key
+      typeof meta.voyagestar_session_key === "string"
+        ? meta.voyagestar_session_key
         : null,
-    mcp_servers: Array.isArray(meta.octop_mcp_servers)
-      ? (meta.octop_mcp_servers as string[])
+    mcp_servers: Array.isArray(meta.voyagestar_mcp_servers)
+      ? (meta.voyagestar_mcp_servers as string[])
       : [],
     _scheduleMode: matchedPreset ? "preset" : "custom",
     _preset: matchedPreset || "daily_9am",
@@ -147,7 +147,7 @@ function resolveCronExpression(values: CronJobFormValues): string {
   return /^(cron|interval|date):/.test(cron) ? cron : `cron:${cron}`;
 }
 
-function toOctopCreateBody(values: CronJobFormValues) {
+function toVoyagestarCreateBody(values: CronJobFormValues) {
   return {
     name: (values.name || "").trim(),
     trigger: resolveCronExpression(values),
@@ -161,9 +161,9 @@ function toOctopCreateBody(values: CronJobFormValues) {
   };
 }
 
-function toOctopPatchBody(values: CronJobFormValues) {
+function toVoyagestarPatchBody(values: CronJobFormValues) {
   return {
-    ...toOctopCreateBody(values),
+    ...toVoyagestarCreateBody(values),
     enabled: Boolean(values.enabled),
   };
 }
@@ -226,7 +226,7 @@ export function useCronJobs() {
   );
 
   useEffect(() => {
-    void octopCronApi
+    void voyagestarCronApi
       .settings()
       .then((s) => setCronTimezone(s.timezone || "UTC"))
       .catch((error) => {
@@ -293,10 +293,10 @@ export function useCronJobs() {
       }
 
       try {
-        const data = await octopCronApi.list(agentId);
+        const data = await voyagestarCronApi.list(agentId);
         if (gen !== fetchGenRef.current) return;
         const mapped = (data || []).map((row) =>
-          fromOctop(row, timezoneRef.current),
+          fromVoyagestar(row, timezoneRef.current),
         );
         writeJobs(agentId, mapped);
       } catch (error) {
@@ -326,11 +326,11 @@ export function useCronJobs() {
   const createJob = async (values: CronJobFormValues) => {
     if (!activeAgentId) return false;
     try {
-      const created = await octopCronApi.create(
+      const created = await voyagestarCronApi.create(
         activeAgentId,
-        toOctopCreateBody(values),
+        toVoyagestarCreateBody(values),
       );
-      const row = fromOctop(created, cronTimezone);
+      const row = fromVoyagestar(created, cronTimezone);
       patchJobs(activeAgentId, (prev) => [row, ...prev]);
       message.success(t("cronJobs.createdSuccess"));
       return true;
@@ -358,9 +358,9 @@ export function useCronJobs() {
       },
       meta: {
         ...(original?.meta as object),
-        octop_fresh_thread: values.fresh_thread,
-        octop_session_key: values.session_key,
-        octop_model: values.model,
+        voyagestar_fresh_thread: values.fresh_thread,
+        voyagestar_session_key: values.session_key,
+        voyagestar_model: values.model,
       },
     } as CronJob;
     patchJobs(activeAgentId, (prev) =>
@@ -368,12 +368,12 @@ export function useCronJobs() {
     );
 
     try {
-      const updated = await octopCronApi.patch(
+      const updated = await voyagestarCronApi.patch(
         activeAgentId,
         jobId,
-        toOctopPatchBody(values),
+        toVoyagestarPatchBody(values),
       );
-      const row = fromOctop(updated, cronTimezone);
+      const row = fromVoyagestar(updated, cronTimezone);
       patchJobs(activeAgentId, (prev) =>
         prev.map((j) => (j.id === jobId ? row : j)),
       );
@@ -397,7 +397,7 @@ export function useCronJobs() {
     patchJobs(activeAgentId, (prev) => prev.filter((j) => j.id !== jobId));
 
     try {
-      await octopCronApi.delete(activeAgentId, jobId);
+      await voyagestarCronApi.delete(activeAgentId, jobId);
       message.success(t("cronJobs.deletedSuccess"));
       return true;
     } catch (error) {
@@ -419,10 +419,10 @@ export function useCronJobs() {
     );
 
     try {
-      const returned = await octopCronApi.patch(activeAgentId, job.id, {
+      const returned = await voyagestarCronApi.patch(activeAgentId, job.id, {
         enabled: nextEnabled,
       });
-      const row = fromOctop(returned, cronTimezone);
+      const row = fromVoyagestar(returned, cronTimezone);
       patchJobs(activeAgentId, (prev) =>
         prev.map((j) => (j.id === job.id ? row : j)),
       );
@@ -441,7 +441,7 @@ export function useCronJobs() {
   const executeNow = async (jobId: string) => {
     if (!activeAgentId) return false;
     try {
-      await octopCronApi.runNow(activeAgentId, jobId);
+      await voyagestarCronApi.runNow(activeAgentId, jobId);
       await fetchJobs({ soft: true });
       message.success(t("cronJobs.triggeredSuccess"));
       return true;

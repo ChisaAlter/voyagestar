@@ -2,7 +2,7 @@
     "docker-project": {
         "projects": [
             {
-                "name": "octop",
+                "name": "voyagestar",
                 "path": "docker"
             }
         ]
@@ -10,7 +10,7 @@
     "data-share": {
         "shares": [
             {
-                "name": "octop/data"
+                "name": "voyagestar/data"
             }
         ]
     }

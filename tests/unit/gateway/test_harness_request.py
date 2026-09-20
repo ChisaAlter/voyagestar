@@ -10,7 +10,7 @@ from harness_gateway.models import (
     TextContent,
 )
 
-from octop.infra.gateway.process.harness_request import build_content_from_message
+from voyagestar.infra.gateway.process.harness_request import build_content_from_message
 
 
 @pytest.mark.asyncio

@@ -117,8 +117,8 @@ function MermaidBlock({ code }: { code: string }) {
  * to a browser-accessible URL via the /api/workspace/media endpoint.
  *
  * Examples:
- *   file:///home/wally/.octop/workspace/foo.png  → /api/workspace/media?path=foo.png
- *   /home/wally/.octop/workspace/sub/bar.jpg     → /api/workspace/media?path=sub/bar.jpg
+ *   file:///home/wally/.voyagestar/workspace/foo.png  → /api/workspace/media?path=foo.png
+ *   /home/wally/.voyagestar/workspace/sub/bar.jpg     → /api/workspace/media?path=sub/bar.jpg
  *
  * Paths that are already HTTP(S) or data URIs are returned unchanged.
  * Paths outside the workspace are returned unchanged (will fail to load,
@@ -145,8 +145,8 @@ function resolveImageSrc(src: string): string {
     }
   }
 
-  // Match workspace path: ends in /.octop/workspace/<rest>
-  const workspaceMatch = filePath.match(/[/\\]\.octop[/\\]workspace[/\\](.*)/);
+  // Match workspace path: ends in /.voyagestar/workspace/<rest>
+  const workspaceMatch = filePath.match(/[/\\]\.voyagestar[/\\]workspace[/\\](.*)/);
   if (workspaceMatch) {
     const relPath = workspaceMatch[1].replace(/\\/g, "/");
     return `/api/workspace/media?path=${encodeURIComponent(relPath)}`;

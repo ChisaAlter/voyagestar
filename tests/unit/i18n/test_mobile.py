@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop.i18n.loader import all_keys_for_locale
+from voyagestar.i18n.loader import all_keys_for_locale
 
 
 def test_mobile_keys_parity() -> None:

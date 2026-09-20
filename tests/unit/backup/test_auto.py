@@ -7,35 +7,35 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from octop.config import BackupConfig, load_config
-from octop.infra.backup.auto import (
+from voyagestar.config import BackupConfig, load_config
+from voyagestar.infra.backup.auto import (
     AUTO_BACKUP_JOB_ID,
     apply_auto_backup_schedule,
     backup_config_from_payload,
     persist_backup_config,
     to_auto_backup_filename,
 )
-from octop.infra.errors import OctopError
+from voyagestar.infra.errors import VoyagestarError
 
 
 def test_to_auto_backup_filename() -> None:
     assert (
-        to_auto_backup_filename("octop-backup-20260101T000000Z.tar.gz")
-        == "octop-auto-backup-20260101T000000Z.tar.gz"
+        to_auto_backup_filename("voyagestar-backup-20260101T000000Z.tar.gz")
+        == "voyagestar-auto-backup-20260101T000000Z.tar.gz"
     )
     assert (
-        to_auto_backup_filename("octop-auto-backup-20260101T000000Z.tar.gz")
-        == "octop-auto-backup-20260101T000000Z.tar.gz"
+        to_auto_backup_filename("voyagestar-auto-backup-20260101T000000Z.tar.gz")
+        == "voyagestar-auto-backup-20260101T000000Z.tar.gz"
     )
 
 
 def test_backup_config_from_payload_rejects_bad_schedule() -> None:
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         backup_config_from_payload({"schedule": "not-a-trigger", "retention_count": 3})
 
 
 def test_backup_config_from_payload_rejects_bad_retention() -> None:
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         backup_config_from_payload({"schedule": "cron:0 4 * * *", "retention_count": 0})
 
 

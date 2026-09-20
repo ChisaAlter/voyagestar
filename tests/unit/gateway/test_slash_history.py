@@ -8,21 +8,21 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.agents.manager import AgentManager
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.sessions import SessionRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.db.services import build_shared_services
-from octop.infra.gateway.slash import BufferSink, SlashCommand, build_default_dispatcher
-from octop.infra.gateway.slash.ctx import SlashCtx
-from octop.infra.gateway.slash.formatting import format_unix_datetime
-from octop.infra.gateway.slash.handlers.composite import cmd_history
-from octop.infra.gateway.threads import ThreadRegistry
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.agents.manager import AgentManager
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.sessions import SessionRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.gateway.slash import BufferSink, SlashCommand, build_default_dispatcher
+from voyagestar.infra.gateway.slash.ctx import SlashCtx
+from voyagestar.infra.gateway.slash.formatting import format_unix_datetime
+from voyagestar.infra.gateway.slash.handlers.composite import cmd_history
+from voyagestar.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.utils.paths import PathLayout
 
 
 def test_format_unix_datetime_uses_server_timezone() -> None:
@@ -32,7 +32,7 @@ def test_format_unix_datetime_uses_server_timezone() -> None:
 
 
 def _agent_manager(tmp_path: Path, db: SqlitePool) -> AgentManager:
-    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=OctopConfig())
+    services = build_shared_services(db=db, paths=PathLayout(tmp_path), config=VoyagestarConfig())
     manager = AgentManager(repos=services.repos, paths=services.paths, config=services.config)
     manager._harness_manager = MagicMock()
     return manager

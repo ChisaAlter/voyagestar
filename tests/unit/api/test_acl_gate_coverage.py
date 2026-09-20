@@ -5,9 +5,9 @@ from __future__ import annotations
 import ast
 import pathlib
 
-from octop.infra.users.permissions import ALL_PERMISSION_KEYS
+from voyagestar.infra.users.permissions import ALL_PERMISSION_KEYS
 
-API_ROOT = pathlib.Path("src/octop/api")
+API_ROOT = pathlib.Path("src/voyagestar/api")
 
 GATED_FILES = [
     "routers/users.py",

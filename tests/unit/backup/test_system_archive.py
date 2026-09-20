@@ -10,18 +10,18 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import DatabaseConfig
-from octop.infra.backup.manifest import MANIFEST_VERSION, BackupManifest
-from octop.infra.backup.system_archive import create_system_backup, restore_system_backup
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.errors import ErrorCode, OctopError
-from octop.infra.utils.paths import PathLayout
+from voyagestar.config import DatabaseConfig
+from voyagestar.infra.backup.manifest import MANIFEST_VERSION, BackupManifest
+from voyagestar.infra.backup.system_archive import create_system_backup, restore_system_backup
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
+from voyagestar.infra.utils.paths import PathLayout
 
 
 @pytest.fixture
 def layout(tmp_path: Path) -> PathLayout:
-    root = tmp_path / ".octop"
+    root = tmp_path / ".voyagestar"
     root.mkdir()
     return PathLayout(root)
 
@@ -29,25 +29,25 @@ def layout(tmp_path: Path) -> PathLayout:
 def test_manifest_roundtrip_includes_driver_fields() -> None:
     m = BackupManifest(
         manifest_version=1,
-        octop_version="0.0.0",
+        voyagestar_version="0.0.0",
         schema_version=1,
         created_at="t",
         home="/tmp",
-        db_file="db/octop.dump",
+        db_file="db/voyagestar.dump",
         database_driver="postgresql",
         database_dump_format="pg_custom",
     )
     loaded = BackupManifest.load_text(m.to_json())
     assert loaded.database_driver == "postgresql"
     assert loaded.database_dump_format == "pg_custom"
-    assert loaded.db_file == "db/octop.dump"
+    assert loaded.db_file == "db/voyagestar.dump"
 
 
 def test_legacy_manifest_defaults_plugins_omitted() -> None:
     loaded = BackupManifest.from_dict(
         {
             "manifest_version": 1,
-            "octop_version": "0.0.0",
+            "voyagestar_version": "0.0.0",
             "schema_version": 1,
             "created_at": "t",
             "home": "/tmp",
@@ -167,7 +167,7 @@ def test_backup_packs_config_workspace_dir(layout: PathLayout, tmp_path: Path) -
 
 
 def test_backup_skips_unwritable_workspace_dir(layout: PathLayout, tmp_path: Path) -> None:
-    """Stale host paths (e.g. former /root/.octop/agents/…) must not abort backup."""
+    """Stale host paths (e.g. former /root/.voyagestar/agents/…) must not abort backup."""
     pool = SqlitePool(layout.db)
     run_migrations(pool)
     reachable = layout.ensure_agent_workspace("ok01")
@@ -253,10 +253,10 @@ def test_default_backup_omits_chats_and_restore_preserves_current_chats(
 
     source_ws = source_layout.ensure_agent_workspace("agent01")
     (source_ws / "SOUL.md").write_text("# source", encoding="utf-8")
-    source_sessions = source_ws / ".octop" / "sessions"
+    source_sessions = source_ws / ".voyagestar" / "sessions"
     source_sessions.mkdir(parents=True)
     (source_sessions / "large.jsonl").write_text("chat", encoding="utf-8")
-    (source_ws / ".octop" / "checkpoints.sqlite").write_bytes(b"chat-db")
+    (source_ws / ".voyagestar" / "checkpoints.sqlite").write_bytes(b"chat-db")
     user_sessions = source_ws / "project" / "sessions"
     user_sessions.mkdir(parents=True)
     (user_sessions / "notes.txt").write_text("keep", encoding="utf-8")
@@ -264,7 +264,7 @@ def test_default_backup_omits_chats_and_restore_preserves_current_chats(
     class Row:
         agent_id = "agent01"
         name = "Agent"
-        config_json = '{"system_files_path": ".octop"}'
+        config_json = '{"system_files_path": ".voyagestar"}'
 
     archive = tmp_path / "without-chats.tar.gz"
     create_system_backup(
@@ -282,8 +282,8 @@ def test_default_backup_omits_chats_and_restore_preserves_current_chats(
     assert manifest["includes_chats"] is False
     assert "workspaces/agent01/SOUL.md" in names
     assert "workspaces/agent01/project/sessions/notes.txt" in names
-    assert "workspaces/agent01/.octop/sessions/large.jsonl" not in names
-    assert "workspaces/agent01/.octop/checkpoints.sqlite" not in names
+    assert "workspaces/agent01/.voyagestar/sessions/large.jsonl" not in names
+    assert "workspaces/agent01/.voyagestar/checkpoints.sqlite" not in names
 
     target_layout = PathLayout(tmp_path / "target")
     target_layout.root.mkdir()
@@ -318,7 +318,7 @@ def test_default_backup_omits_chats_and_restore_preserves_current_chats(
             ") VALUES ('event-1', 'agent01', 'thread-1', 1, 1, 'user', 'keep', '{}')"
         )
 
-    target_sessions = target_layout.ensure_agent_workspace("agent01") / ".octop" / "sessions"
+    target_sessions = target_layout.ensure_agent_workspace("agent01") / ".voyagestar" / "sessions"
     target_sessions.mkdir(parents=True)
     current_log = target_sessions / "current.jsonl"
     current_log.write_text("keep", encoding="utf-8")
@@ -447,7 +447,7 @@ def test_restore_skips_chat_workspace_files_when_manifest_omits_chats(
     class Row:
         agent_id = "agent01"
         name = "Agent"
-        config_json = '{"system_files_path": ".octop"}'
+        config_json = '{"system_files_path": ".voyagestar"}'
 
     archive = tmp_path / "inject-chats.tar.gz"
     create_system_backup(
@@ -468,7 +468,7 @@ def test_restore_skips_chat_workspace_files_when_manifest_omits_chats(
                 f = tf.extractfile(m)
                 assert f is not None
                 members[m.name] = f.read()
-    members["workspaces/agent01/.octop/sessions/injected.jsonl"] = b"overwrite-me"
+    members["workspaces/agent01/.voyagestar/sessions/injected.jsonl"] = b"overwrite-me"
     with tarfile.open(archive, mode="w:gz") as tf:
         for name, blob in members.items():
             info = tarfile.TarInfo(name=name)
@@ -479,7 +479,7 @@ def test_restore_skips_chat_workspace_files_when_manifest_omits_chats(
     target.root.mkdir()
     target_pool = SqlitePool(target.db)
     run_migrations(target_pool)
-    keep = target.ensure_agent_workspace("agent01") / ".octop" / "sessions" / "current.jsonl"
+    keep = target.ensure_agent_workspace("agent01") / ".voyagestar" / "sessions" / "current.jsonl"
     keep.parent.mkdir(parents=True)
     keep.write_text("keep", encoding="utf-8")
     restore_system_backup(
@@ -492,13 +492,13 @@ def test_restore_skips_chat_workspace_files_when_manifest_omits_chats(
     target_pool.close()
     assert keep.read_text(encoding="utf-8") == "keep"
     assert not (
-        target.ensure_agent_workspace("agent01") / ".octop" / "sessions" / "injected.jsonl"
+        target.ensure_agent_workspace("agent01") / ".voyagestar" / "sessions" / "injected.jsonl"
     ).exists()
 
 
 def test_sqlite_strip_chats_reclaims_pages(tmp_path: Path) -> None:
-    from octop.infra.backup.chats import strip_chat_tables_from_sqlite_file
-    from octop.infra.backup.snapshot import snapshot_sqlite_file
+    from voyagestar.infra.backup.chats import strip_chat_tables_from_sqlite_file
+    from voyagestar.infra.backup.snapshot import snapshot_sqlite_file
 
     layout = PathLayout(tmp_path / "home")
     layout.root.mkdir()
@@ -909,7 +909,7 @@ def _make_migration_backup(
         dest=dest,
         include_chats=True,
     )
-    # Rewrite octop_version to signal a LightClaw migration backup.
+    # Rewrite voyagestar_version to signal a LightClaw migration backup.
     members: dict[str, bytes] = {}
     with tarfile.open(dest, mode="r:gz") as tf:
         for m in tf.getmembers():
@@ -918,7 +918,9 @@ def _make_migration_backup(
                 assert f is not None
                 members[m.name] = f.read()
     manifest_obj = json.loads(members["manifest.json"])
-    manifest_obj["octop_version"] = manifest_obj["octop_version"] + "-migrated-from-lightclaw"
+    manifest_obj["voyagestar_version"] = (
+        manifest_obj["voyagestar_version"] + "-migrated-from-lightclaw"
+    )
     members["manifest.json"] = json.dumps(manifest_obj).encode()
     with tarfile.open(dest, mode="w:gz") as tf:
         for name, blob in members.items():
@@ -940,7 +942,7 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
 
     After restore the expected state is:
     - agents from the backup (``agent-lc``) are present.
-    - users table contains only the *current instance* users (``octop_admin``).
+    - users table contains only the *current instance* users (``voyagestar_admin``).
     - the LightClaw user (``lc_user``) is gone — replaced by the current users.
     - JWT secret from the *current* instance is kept (session continuity).
     """
@@ -951,16 +953,16 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
     src_pool = _make_migration_backup(src_layout, migration_archive, username="lc_user")
     src_pool.close()
 
-    # --- target: a fresh Octop instance with its own admin user + JWT ---
+    # --- target: a fresh Voyagestar instance with its own admin user + JWT ---
     tgt_layout = PathLayout(tmp_path / "tgt")
     tgt_layout.root.mkdir()
     tgt_pool = SqlitePool(tgt_layout.db)
     run_migrations(tgt_pool)
-    local_jwt = b"local-octop-jwt-secret-must-survive-restore!!"
+    local_jwt = b"local-voyagestar-jwt-secret-must-survive-restore!!"
     with tgt_pool.connect() as conn:
         conn.execute(
             "INSERT INTO users(username, password_hash, role, created_at) VALUES (?, ?, ?, ?)",
-            ("octop_admin", "admin_hash", "admin", 2),
+            ("voyagestar_admin", "admin_hash", "admin", 2),
         )
         conn.execute(
             "INSERT INTO secrets(k, v, created_at) VALUES (?, ?, ?)",
@@ -981,9 +983,9 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
     with tgt_pool.connect() as conn:
         # The target instance's admin must survive with original password hash.
         row = conn.execute(
-            "SELECT password_hash FROM users WHERE username = ?", ("octop_admin",)
+            "SELECT password_hash FROM users WHERE username = ?", ("voyagestar_admin",)
         ).fetchone()
-        assert row is not None, "octop_admin was deleted — users not preserved"
+        assert row is not None, "voyagestar_admin was deleted — users not preserved"
         assert row[0] == "admin_hash"
 
         # JWT secret from the current instance must survive (not the foreign backup's).
@@ -1000,7 +1002,7 @@ def test_migration_restore_preserves_current_users_and_imported_agents(
             "agent-lc was deleted — upsert strategy triggered CASCADE on agents"
         )
         admin_id = conn.execute(
-            "SELECT id FROM users WHERE username = ?", ("octop_admin",)
+            "SELECT id FROM users WHERE username = ?", ("voyagestar_admin",)
         ).fetchone()[0]
         assert agent_row[1] == admin_id
 
@@ -1028,7 +1030,7 @@ def test_migration_restore_remaps_ownership_to_admin_user_id_2(tmp_path: Path) -
         conn.execute(
             "INSERT INTO users(id, username, password_hash, role, created_at)"
             " VALUES (2, ?, ?, ?, ?)",
-            ("octop_admin", "admin_hash", "admin", 2),
+            ("voyagestar_admin", "admin_hash", "admin", 2),
         )
 
     result = restore_system_backup(
@@ -1045,7 +1047,7 @@ def test_migration_restore_remaps_ownership_to_admin_user_id_2(tmp_path: Path) -
 
     with tgt_pool.connect() as conn:
         users = conn.execute("SELECT id, username FROM users ORDER BY id").fetchall()
-        assert [(r[0], r[1]) for r in users] == [(2, "octop_admin")]
+        assert [(r[0], r[1]) for r in users] == [(2, "voyagestar_admin")]
 
         agent = conn.execute(
             "SELECT user_id FROM agents WHERE agent_id = ?", ("agent-lc",)
@@ -1088,7 +1090,7 @@ def test_migration_restore_remaps_ownership_to_admin_user_id_2(tmp_path: Path) -
 
 
 def test_migration_restore_via_none_autodetect(tmp_path: Path) -> None:
-    """preserve_users=None auto-detects the migration flag from octop_version."""
+    """preserve_users=None auto-detects the migration flag from voyagestar_version."""
     src_layout = PathLayout(tmp_path / "src")
     src_layout.root.mkdir()
     migration_archive = tmp_path / "migration-auto.tar.gz"
@@ -1133,8 +1135,8 @@ def test_restore_repairs_old_physical_schema_with_current_watermark(tmp_path: Pa
         conn.executescript(
             (
                 Path(__file__).resolve().parents[3]
-                / "src/octop/infra/db/migrations/001_initial.sql"
-            ).read_text()
+                / "src/voyagestar/infra/db/migrations/001_initial.sql"
+            ).read_text(encoding="utf-8")
         )
         conn.execute("UPDATE _schema_version SET version = 13")
         conn.execute(
@@ -1221,7 +1223,7 @@ def test_refuse_newer_schema_backup_before_database_replace(
             "VALUES ('still-here', 'hash', 'admin', 1)"
         )
 
-    with pytest.raises(OctopError) as excinfo:
+    with pytest.raises(VoyagestarError) as excinfo:
         restore_system_backup(
             archive,
             paths=layout,
@@ -1273,7 +1275,7 @@ def test_refuse_cross_engine_restore(layout: PathLayout, tmp_path: Path) -> None
             info = tarfile.TarInfo(name=name)
             info.size = len(blob)
             tf.addfile(info, BytesIO(blob))
-    with pytest.raises(OctopError) as excinfo:
+    with pytest.raises(VoyagestarError) as excinfo:
         restore_system_backup(
             archive,
             paths=layout,

@@ -20,7 +20,7 @@ const RemoteDesktopPage = lazy(() => import("../pages/Control/RemoteDesktop"));
 const ModelsPage = lazy(() => import("../pages/Settings/Models"));
 
 // Lazy-loaded pages — Admin
-const OctopAdminUsersPage = lazy(() => import("../pages/Admin/Users"));
+const VoyagestarAdminUsersPage = lazy(() => import("../pages/Admin/Users"));
 const AdminSecurityPage = lazy(() => import("../pages/Settings/Security"));
 const AdvancedSettingsPage = lazy(
   () => import("../pages/Settings/AdvancedSettings"),
@@ -213,7 +213,7 @@ export const routeConfigs: RouteConfig[] = [
   { path: "/admin/models", element: <ModelsPage /> },
 
   // Admin (RequirePermission wrapper applied in MainLayout)
-  { path: "/admin/users", element: <OctopAdminUsersPage /> },
+  { path: "/admin/users", element: <VoyagestarAdminUsersPage /> },
   {
     path: "/admin/sso",
     element: <Navigate to="/admin/users?tab=oidc" replace />,
@@ -253,14 +253,14 @@ export const routeConfigs: RouteConfig[] = [
     path: "/orca/admin/audit",
     element: <Navigate to="/admin/security?tab=audit" replace />,
   },
-  { path: "/octop/cron", element: <Navigate to="/tasks" replace /> },
-  { path: "/octop/channels", element: <Navigate to="/channels" replace /> },
+  { path: "/voyagestar/cron", element: <Navigate to="/tasks" replace /> },
+  { path: "/voyagestar/channels", element: <Navigate to="/channels" replace /> },
   {
-    path: "/octop/admin/users",
+    path: "/voyagestar/admin/users",
     element: <Navigate to="/admin/users" replace />,
   },
   {
-    path: "/octop/admin/audit",
+    path: "/voyagestar/admin/audit",
     element: <Navigate to="/admin/security?tab=audit" replace />,
   },
   {

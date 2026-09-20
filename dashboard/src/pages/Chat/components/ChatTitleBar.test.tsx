@@ -46,6 +46,6 @@ describe("ChatTitleBar", () => {
       />,
     );
 
-    expect(container.querySelector(".octop-desktop-drag")).not.toBeNull();
+    expect(container.querySelector(".voyagestar-desktop-drag")).not.toBeNull();
   });
 });

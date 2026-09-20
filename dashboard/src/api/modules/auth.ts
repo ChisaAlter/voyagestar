@@ -1,9 +1,9 @@
 import { clearSetupRequired, markSetupRequired, request } from "../request";
 
 /**
- * Auth + setup module — adapted to octop's multi-user backend.
+ * Auth + setup module — adapted to voyagestar's multi-user backend.
  *
- * Octop endpoints (spec §11.3):
+ * Voyagestar endpoints (spec §11.3):
  *  - GET  /api/setup/status         → { setup_required }
  *  - POST /api/setup/initial-admin  → 201 { id, username, role }
  *  - POST /api/auth/login           → { access_token, token_type, expires_in, user }
@@ -14,7 +14,7 @@ import { clearSetupRequired, markSetupRequired, request } from "../request";
  * The shape exported below is intentionally a superset that keeps a few
  * legacy fields populated (``setup_done``, ``enabled``, ``has_password``)
  * so existing finnie-derived components compile until they're replaced
- * by the octop settings editors in phase 14.6.
+ * by the voyagestar settings editors in phase 14.6.
  */
 
 export interface AuthStatus {
@@ -22,11 +22,11 @@ export interface AuthStatus {
   setup_required: boolean;
   /** Legacy alias of ``!setup_required`` kept for compat. */
   setup_done: boolean;
-  /** Octop always requires auth; kept true so legacy components don't unguard. */
+  /** Voyagestar always requires auth; kept true so legacy components don't unguard. */
   enabled: boolean;
-  /** Legacy field — octop always uses passwords. */
+  /** Legacy field — voyagestar always uses passwords. */
   has_password: boolean;
-  /** True when ~/.octop/octop-login.txt exists on the server (wizard-only). */
+  /** True when ~/.voyagestar/voyagestar-login.txt exists on the server (wizard-only). */
   wizard_password_exists: boolean;
   /** When false, the wizard skips the CLI bootstrap password step. */
   wizard_password_required: boolean;
@@ -42,7 +42,7 @@ export interface SsoIdentity {
   kind: string;
 }
 
-export interface OctopUser {
+export interface VoyagestarUser {
   id: number;
   username: string;
   role: "admin" | "user";
@@ -61,7 +61,7 @@ export interface LoginResponse {
   access_token: string;
   token_type: string;
   expires_in: number;
-  user: OctopUser;
+  user: VoyagestarUser;
   /** Legacy alias for ``access_token`` so old callers using ``.token`` keep working. */
   token: string;
 }
@@ -105,7 +105,7 @@ interface RawLoginResponse {
   access_token: string;
   token_type: string;
   expires_in: number;
-  user: OctopUser;
+  user: VoyagestarUser;
 }
 
 /** Coalesce AuthGuard / Login / Setup probing the same endpoint in parallel. */
@@ -171,7 +171,7 @@ export const authApi = {
   /** Public captcha widget config for the login form. */
   getCaptcha: () => request<PublicCaptcha>("/auth/captcha"),
 
-  /** Login — octop uses username + password. */
+  /** Login — voyagestar uses username + password. */
   login: async (
     username: string,
     password: string,
@@ -217,7 +217,7 @@ export const authApi = {
 
   /** Unlink one SSO identity by kind. Requires a local password when it is the last login method. */
   unbindOauth: (kind: string) =>
-    request<OctopUser>("/auth/oauth/unbind", {
+    request<VoyagestarUser>("/auth/oauth/unbind", {
       method: "POST",
       body: JSON.stringify({ kind }),
     }),
@@ -236,7 +236,7 @@ export const authApi = {
     request<void>("/auth/logout", { method: "POST" }).catch(() => undefined),
 
   /** Get the current authenticated user. */
-  me: () => request<OctopUser>("/auth/me"),
+  me: () => request<VoyagestarUser>("/auth/me"),
 
   /** Change current user's password. */
   changePassword: (oldPassword: string, newPassword: string) =>
@@ -250,26 +250,26 @@ export const authApi = {
 
   /** Update the current user's display name (PATCH /auth/me). */
   updateProfile: (displayName: string | null) =>
-    request<OctopUser>("/auth/me", {
+    request<VoyagestarUser>("/auth/me", {
       method: "PATCH",
       body: JSON.stringify({ display_name: displayName }),
     }),
 
   // --- Legacy stubs kept so finnie-era components compile ----------------
-  // These call paths are removed in octop's data model; the actual
+  // These call paths are removed in voyagestar's data model; the actual
   // settings UI is rewritten in phase 14.6. Stubs return rejected
   // promises with a clear message to make accidental use loud.
 
-  /** @deprecated Octop always requires auth — there is no first-time set step. */
+  /** @deprecated Voyagestar always requires auth — there is no first-time set step. */
   setPassword: (): Promise<never> =>
     Promise.reject(
-      new Error("setPassword is not supported in octop; use change-password"),
+      new Error("setPassword is not supported in voyagestar; use change-password"),
     ),
 
-  /** @deprecated Octop cannot disable auth. */
+  /** @deprecated Voyagestar cannot disable auth. */
   disableAuth: (): Promise<never> =>
-    Promise.reject(new Error("disableAuth is not supported in octop")),
+    Promise.reject(new Error("disableAuth is not supported in voyagestar")),
 
-  /** @deprecated Octop's setup wizard is single-step; nothing to mark done. */
+  /** @deprecated Voyagestar's setup wizard is single-step; nothing to mark done. */
   markSetupDone: (): Promise<{ ok: boolean }> => Promise.resolve({ ok: true }),
 };

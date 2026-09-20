@@ -1,7 +1,7 @@
 /**
  * Docker host environment panel for the Docker backend drawer.
  *
- * Three install paths: auto / manual script / Octop agent prompt.
+ * Three install paths: auto / manual script / Voyagestar agent prompt.
  */
 import { useCallback, useEffect, useState } from "react";
 import { Button, Spin, Typography } from "antd";
@@ -216,12 +216,12 @@ export function DockerEnvFooter() {
         </div>
       </section>
 
-      {/* 3. Octop agent install */}
+      {/* 3. Voyagestar agent install */}
       <section className={styles.section}>
         <div className={styles.sectionTitle}>
-          {t("storage.dockerEnv.sectionOctop")}
+          {t("storage.dockerEnv.sectionVoyagestar")}
         </div>
-        <p className={styles.sectionDesc}>{t("storage.dockerEnv.octopDesc")}</p>
+        <p className={styles.sectionDesc}>{t("storage.dockerEnv.voyagestarDesc")}</p>
         {env?.agent_prompt ? (
           <pre className={styles.promptBlock}>{env.agent_prompt}</pre>
         ) : null}

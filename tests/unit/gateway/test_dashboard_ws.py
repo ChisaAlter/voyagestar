@@ -11,8 +11,8 @@ from typing import Any
 import pytest
 from harness_gateway.models import ChannelSubject, ImageContent, InboundMessage, TextContent
 
-from octop.infra.gateway.media.tool_media import enrich_media_block_preview
-from octop.infra.gateway.ws import WS_CHANNEL_ID, WebSocketChannel, WebSocketHub
+from voyagestar.infra.gateway.media.tool_media import enrich_media_block_preview
+from voyagestar.infra.gateway.ws import WS_CHANNEL_ID, WebSocketChannel, WebSocketHub
 
 
 def _token(content: str, thread_id: str) -> dict[str, Any]:
@@ -515,9 +515,9 @@ def test_enrich_media_block_preview_file_url() -> None:
 async def test_global_processor_iter_turn_chunks_registers_hitl() -> None:
     from unittest.mock import AsyncMock, MagicMock
 
-    from octop.infra.gateway.hitl.coordinator import HitlChannelCoordinator
-    from octop.infra.gateway.process.processor import GlobalProcessor
-    from octop.infra.gateway.slash.dispatcher import SlashDispatcher
+    from voyagestar.infra.gateway.hitl.coordinator import HitlChannelCoordinator
+    from voyagestar.infra.gateway.process.processor import GlobalProcessor
+    from voyagestar.infra.gateway.slash.dispatcher import SlashDispatcher
 
     async def _stream(*_args: object, **_kwargs: object):
         yield {
@@ -575,16 +575,16 @@ async def test_global_processor_iter_turn_chunks_slash(tmp_path: Path) -> None:
 
     from langchain_core.messages import AIMessage, HumanMessage
 
-    from octop.infra.db.migrate import run_migrations
-    from octop.infra.db.pool import SqlitePool
-    from octop.infra.db.repos.agents import AgentRepo
-    from octop.infra.db.repos.thread_messages import ThreadMessageRepo
-    from octop.infra.db.repos.threads import ThreadRepo
-    from octop.infra.db.repos.users import UserRepo
-    from octop.infra.gateway.process.processor import GlobalProcessor
-    from octop.infra.gateway.slash.dispatcher import build_default_dispatcher
+    from voyagestar.infra.db.migrate import run_migrations
+    from voyagestar.infra.db.pool import SqlitePool
+    from voyagestar.infra.db.repos.agents import AgentRepo
+    from voyagestar.infra.db.repos.thread_messages import ThreadMessageRepo
+    from voyagestar.infra.db.repos.threads import ThreadRepo
+    from voyagestar.infra.db.repos.users import UserRepo
+    from voyagestar.infra.gateway.process.processor import GlobalProcessor
+    from voyagestar.infra.gateway.slash.dispatcher import build_default_dispatcher
 
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     user_id = UserRepo(db).create(username="u", password_hash="hash", role="user")
     agent_repo = AgentRepo(db)

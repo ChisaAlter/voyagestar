@@ -12,7 +12,7 @@ export {
   isPluginUiLoaded,
 } from "./loader";
 export {
-  parseOctopToolOutput,
+  parseVoyagestarToolOutput,
   mergePatchedToolOutput,
 } from "./parseToolOutput";
 export {
@@ -28,7 +28,7 @@ export { ensureBuiltinToolRenderers } from "./ensureBuiltins";
 export { usePluginToolUis } from "./usePluginToolUis";
 export { useToolRendererVersion } from "./useToolRendererVersion";
 export type {
-  OctopPluginUIHost,
+  VoyagestarPluginUIHost,
   ParsedToolOutput,
   PluginUiModule,
   ToolRenderProps,

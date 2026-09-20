@@ -15,8 +15,8 @@ import (
 
 func TestEnsurePortableUsesEmbeddedPackage(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", "")
+	t.Setenv("VOYAGESTAR_HOME", home)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", "")
 
 	zipPath := filepath.Join(t.TempDir(), "embedded.zip")
 	writeTestGreenZip(t, zipPath, "1.0.0")
@@ -38,10 +38,10 @@ func TestEnsurePortableUsesEmbeddedPackage(t *testing.T) {
 
 func TestEnsurePortableUsesBundledPackage(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 
-	zipPath := filepath.Join(t.TempDir(), "Octop-"+greenPlat()+".zip")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", zipPath)
+	zipPath := filepath.Join(t.TempDir(), "Voyagestar-"+greenPlat()+".zip")
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", zipPath)
 	writeTestGreenZip(t, zipPath, "1.0.0")
 
 	var statuses []string
@@ -64,7 +64,7 @@ func TestEnsurePortableUsesBundledPackage(t *testing.T) {
 
 func TestEnsurePortableReplacesOlderRuntime(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 	root := portableDir()
 
 	oldZip := filepath.Join(t.TempDir(), "old.zip")
@@ -79,7 +79,7 @@ func TestEnsurePortableReplacesOlderRuntime(t *testing.T) {
 
 	newZip := filepath.Join(t.TempDir(), "new.zip")
 	writeTestGreenZip(t, newZip, "0.9.32")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", newZip)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", newZip)
 	var statuses []string
 	if err := ensurePortable(LocaleZH, func(status string) { statuses = append(statuses, status) }); err != nil {
 		t.Fatal(err)
@@ -100,7 +100,7 @@ func TestEnsurePortableReplacesOlderRuntime(t *testing.T) {
 
 func TestEnsurePortableUpgradesBundledVersionAfterDatabaseBackup(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 	root := portableDir()
 
 	oldZip := filepath.Join(t.TempDir(), "old.zip")
@@ -108,14 +108,14 @@ func TestEnsurePortableUpgradesBundledVersionAfterDatabaseBackup(t *testing.T) {
 	if err := unzipGreen(oldZip, root); err != nil {
 		t.Fatal(err)
 	}
-	database := filepath.Join(home, "octop.db")
+	database := filepath.Join(home, "voyagestar.db")
 	if err := os.WriteFile(database, []byte("database"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
 	newZip := filepath.Join(t.TempDir(), "new.zip")
 	writeTestGreenZip(t, newZip, "0.9.32")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", newZip)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", newZip)
 
 	previousBackup := runSQLiteBackup
 	runSQLiteBackup = func(_ string, source string, destination string) error {
@@ -132,7 +132,7 @@ func TestEnsurePortableUpgradesBundledVersionAfterDatabaseBackup(t *testing.T) {
 	if got := portableVersion(root); got != "0.9.32" {
 		t.Fatalf("portable version = %q, want 0.9.32", got)
 	}
-	backups, err := filepath.Glob(filepath.Join(home, "backups", "octop-desktop-pre-upgrade-*.db"))
+	backups, err := filepath.Glob(filepath.Join(home, "backups", "voyagestar-desktop-pre-upgrade-*.db"))
 	if err != nil || len(backups) != 1 {
 		t.Fatalf("upgrade backup = %v, err = %v", backups, err)
 	}
@@ -140,7 +140,7 @@ func TestEnsurePortableUpgradesBundledVersionAfterDatabaseBackup(t *testing.T) {
 
 func TestEnsurePortableKeepsRuntimeWhenDatabaseBackupFails(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 	root := portableDir()
 
 	oldZip := filepath.Join(t.TempDir(), "old.zip")
@@ -148,12 +148,12 @@ func TestEnsurePortableKeepsRuntimeWhenDatabaseBackupFails(t *testing.T) {
 	if err := unzipGreen(oldZip, root); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(home, "octop.db"), []byte("database"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(home, "voyagestar.db"), []byte("database"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	newZip := filepath.Join(t.TempDir(), "new.zip")
 	writeTestGreenZip(t, newZip, "0.9.32")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", newZip)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", newZip)
 
 	previousBackup := runSQLiteBackup
 	runSQLiteBackup = func(_, _, _ string) error { return errors.New("backup unavailable") }
@@ -169,7 +169,7 @@ func TestEnsurePortableKeepsRuntimeWhenDatabaseBackupFails(t *testing.T) {
 
 func TestEnsurePortableKeepsNewerExistingRuntime(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 	root := portableDir()
 
 	newZip := filepath.Join(t.TempDir(), "new.zip")
@@ -179,7 +179,7 @@ func TestEnsurePortableKeepsNewerExistingRuntime(t *testing.T) {
 	}
 	if err := os.WriteFile(
 		filepath.Join(root, "VERSION.txt"),
-		[]byte("octop_version=0.9.31\n"),
+		[]byte("voyagestar_version=0.9.31\n"),
 		0o644,
 	); err != nil {
 		t.Fatal(err)
@@ -191,7 +191,7 @@ func TestEnsurePortableKeepsNewerExistingRuntime(t *testing.T) {
 
 	oldZip := filepath.Join(t.TempDir(), "old.zip")
 	writeTestGreenZip(t, oldZip, "0.9.32")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", oldZip)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", oldZip)
 	if err := ensurePortable(LocaleZH, func(string) {}); err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,7 @@ func TestEnsurePortableKeepsNewerExistingRuntime(t *testing.T) {
 
 func TestEnsurePortableKeepsCurrentRuntimeWhenReplacementIsInvalid(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 	root := portableDir()
 
 	currentZip := filepath.Join(t.TempDir(), "current.zip")
@@ -217,7 +217,7 @@ func TestEnsurePortableKeepsCurrentRuntimeWhenReplacementIsInvalid(t *testing.T)
 
 	invalidZip := filepath.Join(t.TempDir(), "invalid.zip")
 	writeVersionOnlyZip(t, invalidZip, "0.9.32")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", invalidZip)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", invalidZip)
 	var statuses []string
 	if err := ensurePortable(LocaleZH, func(status string) { statuses = append(statuses, status) }); err != nil {
 		t.Fatalf("existing runtime should still boot after a failed replacement: %v", err)
@@ -236,7 +236,7 @@ func TestEnsurePortableKeepsCurrentRuntimeWhenReplacementIsInvalid(t *testing.T)
 
 func TestEnsurePortableReplacesLegacyRuntimeWithoutVersionFiles(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 	root := portableDir()
 
 	oldZip := filepath.Join(t.TempDir(), "old.zip")
@@ -253,7 +253,7 @@ func TestEnsurePortableReplacesLegacyRuntimeWithoutVersionFiles(t *testing.T) {
 
 	newZip := filepath.Join(t.TempDir(), "new.zip")
 	writeTestGreenZip(t, newZip, "0.9.32")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", newZip)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", newZip)
 	if err := ensurePortable(LocaleZH, func(string) {}); err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func TestEnsurePortableReplacesLegacyRuntimeWithoutVersionFiles(t *testing.T) {
 func TestBundledPortableVersionFallsBackToMetadata(t *testing.T) {
 	zipPath := filepath.Join(t.TempDir(), "meta-only.zip")
 	writeMetadataOnlyZip(t, zipPath, "0.9.32")
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", zipPath)
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", zipPath)
 	got, err := bundledPortableVersion()
 	if err != nil {
 		t.Fatal(err)
@@ -293,7 +293,7 @@ func TestCompareVersions(t *testing.T) {
 }
 
 func TestBundledPortableZipRequiresMatchingPackage(t *testing.T) {
-	t.Setenv("OCTOP_DESKTOP_PORTABLE_ZIP", filepath.Join(t.TempDir(), "missing.zip"))
+	t.Setenv("VOYAGESTAR_DESKTOP_PORTABLE_ZIP", filepath.Join(t.TempDir(), "missing.zip"))
 	if _, err := bundledPortableZip(); err == nil {
 		t.Fatal("missing bundled package should fail")
 	}
@@ -301,7 +301,7 @@ func TestBundledPortableZipRequiresMatchingPackage(t *testing.T) {
 
 func TestLaunchReadyRejectsFlattenedPythonSymlink(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("OCTOP_HOME", home)
+	t.Setenv("VOYAGESTAR_HOME", home)
 	root := portableDir()
 	if err := os.MkdirAll(filepath.Join(root, "runtime", "bin"), 0o755); err != nil {
 		t.Fatal(err)
@@ -324,7 +324,7 @@ func TestFormatHealthWaitErrorIsActionableChinese(t *testing.T) {
 	}
 	msg := err.Error()
 	for _, needle := range []string{
-		"Octop 服务未在",
+		"Voyagestar 服务未在",
 		"1 分钟",
 		"http://127.0.0.1:8088",
 		"请确认",
@@ -344,10 +344,10 @@ func TestFormatHealthWaitErrorIsActionableChinese(t *testing.T) {
 func TestFormatHealthWaitErrorUsesEnglishWhenLocaleIsEn(t *testing.T) {
 	msg := formatHealthWaitError(LocaleEN, "http://127.0.0.1:8088", time.Minute, errors.New("connection refused"), 0).Error()
 	for _, needle := range []string{
-		"Octop did not become ready within",
+		"Voyagestar did not become ready within",
 		"1 minute",
 		"http://127.0.0.1:8088",
-		"make sure Octop is running",
+		"make sure Voyagestar is running",
 	} {
 		if !strings.Contains(msg, needle) {
 			t.Fatalf("English health error missing %q: %s", needle, msg)
@@ -387,7 +387,7 @@ func TestWaitHealthTimesOutWithFriendlyMessage(t *testing.T) {
 	if strings.Contains(err.Error(), "did not become healthy") {
 		t.Fatalf("should not use the old English diagnostic: %s", err)
 	}
-	if !strings.Contains(err.Error(), "Octop did not become ready within") {
+	if !strings.Contains(err.Error(), "Voyagestar did not become ready within") {
 		t.Fatalf("timeout should follow the desktop locale: %s", err)
 	}
 }
@@ -400,25 +400,25 @@ func writeTestGreenZip(t *testing.T, path, version string) {
 	}
 	w := zip.NewWriter(f)
 	files := []string{
-		"Octop-test/launch.py",
-		"Octop-test/VERSION.txt",
-		"Octop-test/packages/octop-" + version + ".dist-info/METADATA",
+		"Voyagestar-test/launch.py",
+		"Voyagestar-test/VERSION.txt",
+		"Voyagestar-test/packages/voyagestar-" + version + ".dist-info/METADATA",
 	}
 	if runtime.GOOS == "windows" {
-		files = append(files, "Octop-test/runtime/python.exe")
+		files = append(files, "Voyagestar-test/runtime/python.exe")
 	} else {
 		files = append(files,
-			"Octop-test/runtime/bin/python3",
-			"Octop-test/runtime/bin/python3.12",
+			"Voyagestar-test/runtime/bin/python3",
+			"Voyagestar-test/runtime/bin/python3.12",
 		)
 	}
 	for _, name := range files {
 		header := &zip.FileHeader{Name: name, Method: zip.Store}
 		content := []byte("test executable payload")
 		if strings.HasSuffix(name, "/VERSION.txt") {
-			content = []byte("platform=test\noctop_version=" + version + "\n")
+			content = []byte("platform=test\nvoyagestar_version=" + version + "\n")
 		} else if strings.HasSuffix(name, "/METADATA") {
-			content = []byte("Name: octop\nVersion: " + version + "\n")
+			content = []byte("Name: voyagestar\nVersion: " + version + "\n")
 		} else if strings.HasSuffix(name, "/python3") {
 			header.SetMode(os.ModeSymlink | 0o755)
 			content = []byte("python3.12")
@@ -451,11 +451,11 @@ func writeMetadataOnlyZip(t *testing.T, path, version string) {
 		t.Fatal(err)
 	}
 	w := zip.NewWriter(f)
-	entry, err := w.Create("Octop-test/packages/octop-" + version + ".dist-info/METADATA")
+	entry, err := w.Create("Voyagestar-test/packages/voyagestar-" + version + ".dist-info/METADATA")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := entry.Write([]byte("Name: octop\nVersion: " + version + "\n")); err != nil {
+	if _, err := entry.Write([]byte("Name: voyagestar\nVersion: " + version + "\n")); err != nil {
 		t.Fatal(err)
 	}
 	if err := w.Close(); err != nil {
@@ -473,11 +473,11 @@ func writeVersionOnlyZip(t *testing.T, path, version string) {
 		t.Fatal(err)
 	}
 	w := zip.NewWriter(f)
-	entry, err := w.Create("Octop-test/VERSION.txt")
+	entry, err := w.Create("Voyagestar-test/VERSION.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := entry.Write([]byte("octop_version=" + version + "\n")); err != nil {
+	if _, err := entry.Write([]byte("voyagestar_version=" + version + "\n")); err != nil {
 		t.Fatal(err)
 	}
 	if err := w.Close(); err != nil {

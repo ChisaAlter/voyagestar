@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from octop.infra.agents.tool_catalog import (
+from voyagestar.infra.agents.tool_catalog import (
     BUILTIN_TOOL_CATALOG,
     CRITICAL_TOOLS,
     builtin_tool_available,

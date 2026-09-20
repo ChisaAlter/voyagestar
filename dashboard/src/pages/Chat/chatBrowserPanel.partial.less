@@ -248,9 +248,9 @@
 
   /* Stretch plugin cards that use chat-column maxWidth (often inline). */
   .toolUiRendererWrap,
-  [data-octop-tool-renderer],
-  [data-octop-plugin-ui],
-  .octop-builtin-ui-fallback {
+  [data-voyagestar-tool-renderer],
+  [data-voyagestar-plugin-ui],
+  .voyagestar-builtin-ui-fallback {
     display: block;
     width: 100% !important;
     max-width: 100% !important;
@@ -507,17 +507,17 @@
   color: var(--chat-title-color, var(--fn-text-primary));
 }
 
-/* App ConfigProvider uses prefixCls="octop"; keep ant-* as fallback. */
+/* App ConfigProvider uses prefixCls="voyagestar"; keep ant-* as fallback. */
 .fileModalSelect {
   max-width: min(100%, 360px);
 
-  &:global(.octop-select),
+  &:global(.voyagestar-select),
   &:global(.ant-select),
-  &:global(.octop-select-outlined),
+  &:global(.voyagestar-select-outlined),
   &:global(.ant-select-outlined),
-  &:global(.octop-select-borderless),
+  &:global(.voyagestar-select-borderless),
   &:global(.ant-select-borderless) {
-    :global(.octop-select-selector),
+    :global(.voyagestar-select-selector),
     :global(.ant-select-selector) {
       border: none !important;
       border-width: 0 !important;
@@ -528,10 +528,10 @@
     }
   }
 
-  &:global(.octop-select-focused),
+  &:global(.voyagestar-select-focused),
   &:global(.ant-select-focused),
   &:hover {
-    :global(.octop-select-selector),
+    :global(.voyagestar-select-selector),
     :global(.ant-select-selector) {
       border: none !important;
       box-shadow: none !important;

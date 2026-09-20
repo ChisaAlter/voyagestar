@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.gateway.media.backend_files import (
+from voyagestar.infra.gateway.media.backend_files import (
     is_allowed_host_temp_path,
     is_blocked_host_download_path,
 )

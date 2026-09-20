@@ -9,24 +9,24 @@ from pathlib import Path
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.connectors.builder import (
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.connectors.builder import (
     build_http_mcp_spec,
     mcp_server_name,
     normalize_weiyun_mcp_token,
     validate_create_credentials,
 )
-from octop.infra.connectors.catalog import get_catalog_entry
-from octop.infra.connectors.gateway.protocol import handle_mcp_request
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.connectors import ConnectorRepo
-from octop.infra.utils.ulid import new_ulid
+from voyagestar.infra.connectors.catalog import get_catalog_entry
+from voyagestar.infra.connectors.gateway.protocol import handle_mcp_request
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.connectors import ConnectorRepo
+from voyagestar.infra.utils.ulid import new_ulid
 
 
 @pytest.fixture
 def db(tmp_path: Path) -> SqlitePool:
-    pool = SqlitePool(tmp_path / "octop.db")
+    pool = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(pool)
     return pool
 
@@ -48,7 +48,7 @@ def test_build_tencent_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"token": "tok"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["transport"] == "http"
     assert spec["headers"]["Authorization"] == "tok"
@@ -62,7 +62,7 @@ def test_build_weiyun_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"token": "wy-token"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["transport"] == "http"
     assert spec["url"] == "https://www.weiyun.com/api/v3/mcpserver"
@@ -80,7 +80,7 @@ def test_normalize_weiyun_mcp_token():
 
 @pytest.mark.asyncio
 async def test_prepare_probe_credentials_allows_empty_weiyun_token():
-    from octop.infra.connectors.probe import prepare_probe_credentials
+    from voyagestar.infra.connectors.probe import prepare_probe_credentials
 
     creds = await prepare_probe_credentials("tencent-weiyun", {})
     assert creds == {}
@@ -109,21 +109,21 @@ def test_build_notion_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"access_token": "ntn_xxx"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["url"] == "https://mcp.notion.com/mcp"
     assert spec["headers"]["Authorization"] == "Bearer ntn_xxx"
     assert spec["headers"]["Accept"] == "application/json, text/event-stream"
-    assert spec["headers"]["User-Agent"] == "octop-connector/0.1"
+    assert spec["headers"]["User-Agent"] == "voyagestar-connector/0.1"
 
 
 def test_mcp_oauth_remote_catalog_helpers():
-    from octop.infra.connectors.catalog import (
+    from voyagestar.infra.connectors.catalog import (
         get_mcp_oauth_remote,
         is_mcp_oauth_remote,
         mcp_oauth_remote_kinds,
     )
-    from octop.infra.connectors.oauth.mcp import resource_for_kind
+    from voyagestar.infra.connectors.oauth.mcp import resource_for_kind
 
     notion = get_catalog_entry("notion")
     ardot = get_catalog_entry("tencent-ardot")
@@ -143,7 +143,7 @@ def test_mcp_oauth_remote_catalog_helpers():
 
 
 def test_mcp_oauth_scopes_prefer_metadata_then_catalog():
-    from octop.infra.connectors.oauth.registry import _scopes_for_kind
+    from voyagestar.infra.connectors.oauth.registry import _scopes_for_kind
 
     assert _scopes_for_kind("dida365", {"scopes_supported": ["a", "b"]}) == "a b"
     assert _scopes_for_kind("dida365", {}) == "tasks:read tasks:write"
@@ -164,7 +164,7 @@ def test_build_dida365_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"access_token": "dida-tok"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["transport"] == "http"
     assert spec["url"] == "https://mcp.dida365.com"
@@ -173,7 +173,7 @@ def test_build_dida365_remote_spec():
 
 
 def test_weknora_catalog_and_credentials():
-    from octop.infra.connectors.catalog import catalog_entry_to_dict
+    from voyagestar.infra.connectors.catalog import catalog_entry_to_dict
 
     entry = get_catalog_entry("weknora")
     assert entry is not None
@@ -224,7 +224,7 @@ def test_dify_builds_streamable_http_spec():
         entry=entry,
         instance_id="x",
         creds=creds,
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec == {
         "transport": "http",
@@ -239,7 +239,7 @@ def test_dify_rejects_non_server_url():
 
 
 def test_dify_server_code_is_redacted_from_logs():
-    from octop.infra.connectors.builder import _redact_mcp_configs_for_log
+    from voyagestar.infra.connectors.builder import _redact_mcp_configs_for_log
 
     redacted = _redact_mcp_configs_for_log(
         {
@@ -265,7 +265,7 @@ def test_didi_builds_streamable_http_spec_from_user_key():
         entry=entry,
         instance_id="x",
         creds=creds,
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec == {
         "transport": "http",
@@ -280,7 +280,7 @@ def test_didi_requires_api_key():
 
 
 def test_didi_mcp_key_is_redacted_from_logs():
-    from octop.infra.connectors.builder import _redact_mcp_configs_for_log
+    from voyagestar.infra.connectors.builder import _redact_mcp_configs_for_log
 
     redacted = _redact_mcp_configs_for_log(
         {
@@ -295,7 +295,7 @@ def test_didi_mcp_key_is_redacted_from_logs():
 
 @pytest.mark.asyncio
 async def test_didi_probe_uses_streamable_http(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     seen: dict[str, object] = {}
 
@@ -307,14 +307,14 @@ async def test_didi_probe_uses_streamable_http(monkeypatch: pytest.MonkeyPatch):
             "tools": [{"name": "maps_textsearch", "description": ""}],
         }
 
-    monkeypatch.setattr("octop.infra.connectors.probe.probe_streamable_http_mcp", _probe)
+    monkeypatch.setattr("voyagestar.infra.connectors.probe.probe_streamable_http_mcp", _probe)
     entry = get_catalog_entry("didi")
     assert entry is not None
     result = await probe_connector(
         entry,
         {"api_key": "mcp-key"},
         instance_id="probe",
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert result["ok"] is True
     assert seen == {
@@ -325,7 +325,7 @@ async def test_didi_probe_uses_streamable_http(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_custom_field_preview_redacts_secrets():
-    from octop.api.routers.connectors import _credentials_preview
+    from voyagestar.api.routers.connectors import _credentials_preview
 
     weknora = _credentials_preview(
         "weknora",
@@ -350,7 +350,7 @@ def test_custom_field_preview_redacts_secrets():
 
 
 def test_gateway_weknora_tools_and_search(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.gateway.adapters import weknora
+    from voyagestar.infra.connectors.gateway.adapters import weknora
 
     calls: list[tuple[str, str, dict[str, object] | None]] = []
 
@@ -405,7 +405,7 @@ def test_gateway_weknora_tools_and_search(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.mark.asyncio
 async def test_dify_probe_uses_streamable_http(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     seen: dict[str, object] = {}
 
@@ -413,14 +413,14 @@ async def test_dify_probe_uses_streamable_http(monkeypatch: pytest.MonkeyPatch):
         seen.update(url=url, headers=headers, kind=kind)
         return {"ok": True, "tool_count": 1, "tools": [{"name": "run", "description": ""}]}
 
-    monkeypatch.setattr("octop.infra.connectors.probe.probe_streamable_http_mcp", _probe)
+    monkeypatch.setattr("voyagestar.infra.connectors.probe.probe_streamable_http_mcp", _probe)
     entry = get_catalog_entry("dify")
     assert entry is not None
     result = await probe_connector(
         entry,
         {"mcp_url": "https://dify.example.com/mcp/server/code/mcp"},
         instance_id="probe",
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert result["ok"] is True
     assert seen == {
@@ -434,7 +434,7 @@ async def test_dify_probe_uses_streamable_http(monkeypatch: pytest.MonkeyPatch):
 async def test_detect_local_weknora_uses_fixed_loopback(monkeypatch: pytest.MonkeyPatch):
     import httpx
 
-    from octop.infra.connectors import probe
+    from voyagestar.infra.connectors import probe
 
     seen: list[str] = []
     real_client = httpx.AsyncClient
@@ -464,7 +464,7 @@ async def test_detect_local_weknora_returns_not_found_on_unhealthy_host(
 ):
     import httpx
 
-    from octop.infra.connectors import probe
+    from voyagestar.infra.connectors import probe
 
     real_client = httpx.AsyncClient
 
@@ -514,13 +514,13 @@ def test_gateway_ima_tool_call_dispatch():
 
 
 def test_gateway_probe_rejects_bad_ima_credentials(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     def _boom(_creds: dict[str, object]) -> None:
         raise ValueError("skill auth failed")
 
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.tencent_ima.probe_credentials",
+        "voyagestar.infra.connectors.gateway.adapters.tencent_ima.probe_credentials",
         _boom,
     )
     entry = get_catalog_entry("tencent-ima")
@@ -530,7 +530,7 @@ def test_gateway_probe_rejects_bad_ima_credentials(monkeypatch: pytest.MonkeyPat
             entry,
             {"api_key": "bad", "client_id": "bad"},
             instance_id="probe",
-            config=OctopConfig(),
+            config=VoyagestarConfig(),
         )
     )
     assert out["ok"] is False
@@ -538,10 +538,10 @@ def test_gateway_probe_rejects_bad_ima_credentials(monkeypatch: pytest.MonkeyPat
 
 
 def test_gateway_probe_accepts_valid_ima_credentials(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.tencent_ima.probe_credentials",
+        "voyagestar.infra.connectors.gateway.adapters.tencent_ima.probe_credentials",
         lambda _creds: None,
     )
     entry = get_catalog_entry("tencent-ima")
@@ -551,7 +551,7 @@ def test_gateway_probe_accepts_valid_ima_credentials(monkeypatch: pytest.MonkeyP
             entry,
             {"api_key": "k", "client_id": "c"},
             instance_id="probe",
-            config=OctopConfig(),
+            config=VoyagestarConfig(),
         )
     )
     assert out["ok"] is True
@@ -605,10 +605,10 @@ def test_ima_list_notes_uses_list_note_api(monkeypatch: pytest.MonkeyPatch):
             return _Resp()
 
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.tencent_ima.httpx.Client",
+        "voyagestar.infra.connectors.gateway.adapters.tencent_ima.httpx.Client",
         _Client,
     )
-    from octop.infra.connectors.gateway.adapters.tencent_ima import (
+    from voyagestar.infra.connectors.gateway.adapters.tencent_ima import (
         call_tool as _ima_call_tool,
     )
 
@@ -665,10 +665,10 @@ def test_weread_shelf_uses_agent_gateway(monkeypatch: pytest.MonkeyPatch):
             return _Resp()
 
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.wechat_reading.httpx.Client",
+        "voyagestar.infra.connectors.gateway.adapters.wechat_reading.httpx.Client",
         _Client,
     )
-    from octop.infra.connectors.gateway.adapters.wechat_reading import shelf as _weread_shelf
+    from voyagestar.infra.connectors.gateway.adapters.wechat_reading import shelf as _weread_shelf
 
     out = _weread_shelf({"api_key": "wrk-abc"})
     assert '"books"' in out
@@ -703,14 +703,14 @@ def test_tencent_news_rejects_empty_api_key():
 def test_http_error_message_baidu_auth_fail():
     import httpx
 
-    from octop.infra.connectors.probe import http_error_message
+    from voyagestar.infra.connectors.probe import http_error_message
 
     r = httpx.Response(400, json={"errno": 2003, "show_msg": "auth fail:token fail"})
     assert http_error_message(r) == "auth fail:token fail"
 
 
 def test_static_probe_tools_weiyun():
-    from octop.infra.connectors.probe import static_probe_tools
+    from voyagestar.infra.connectors.probe import static_probe_tools
 
     tools = static_probe_tools("tencent-weiyun")
     assert len(tools) >= 1
@@ -724,7 +724,7 @@ def test_build_gateway_mcp_spec():
         entry=entry,
         instance_id="inst1",
         creds={"api_key": "k", "client_id": "c", "internal_token": "tok"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["transport"] == "http"
     assert "/api/internal/mcp/tencent-ima/inst1" in spec["url"]
@@ -732,7 +732,7 @@ def test_build_gateway_mcp_spec():
 
 
 def test_build_gateway_langchain_tools():
-    from octop.infra.connectors.gateway.langchain import build_gateway_langchain_tools
+    from voyagestar.infra.connectors.gateway.langchain import build_gateway_langchain_tools
 
     entry = get_catalog_entry("tencent-ima")
     assert entry is not None
@@ -747,7 +747,7 @@ def test_build_gateway_langchain_tools():
 
 
 def test_gateway_search_news_passes_query(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.gateway.langchain import build_gateway_langchain_tools
+    from voyagestar.infra.connectors.gateway.langchain import build_gateway_langchain_tools
 
     captured: dict[str, object] = {}
 
@@ -756,7 +756,7 @@ def test_gateway_search_news_passes_query(monkeypatch: pytest.MonkeyPatch):
         return "[]"
 
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.tencent_news.search_news",
+        "voyagestar.infra.connectors.gateway.adapters.tencent_news.search_news",
         _fake_news,
     )
     entry = get_catalog_entry("tencent-news")
@@ -779,7 +779,7 @@ def test_tencent_news_search_body_matches_official_cli(monkeypatch: pytest.Monke
 
     import httpx
 
-    from octop.infra.connectors.gateway.adapters import tencent_news
+    from voyagestar.infra.connectors.gateway.adapters import tencent_news
 
     captured: dict[str, object] = {}
 
@@ -826,13 +826,13 @@ def test_tencent_news_search_body_matches_official_cli(monkeypatch: pytest.Monke
 
 
 def test_tencent_news_probe_rejects_bad_api_key(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     def _boom(_creds: dict[str, object]) -> None:
         raise ValueError("腾讯新闻 API Key 无效: verifyAPIKey failed")
 
     monkeypatch.setattr(
-        "octop.infra.connectors.gateway.adapters.tencent_news.probe_credentials",
+        "voyagestar.infra.connectors.gateway.adapters.tencent_news.probe_credentials",
         _boom,
     )
     entry = get_catalog_entry("tencent-news")
@@ -842,7 +842,7 @@ def test_tencent_news_probe_rejects_bad_api_key(monkeypatch: pytest.MonkeyPatch)
             entry,
             {"api_key": "bad"},
             instance_id="probe",
-            config=OctopConfig(),
+            config=VoyagestarConfig(),
         )
     )
     assert out["ok"] is False
@@ -889,7 +889,7 @@ def test_mail_provider_netease_yeah_uses_yeah_hosts():
 
 
 def test_catalog_entry_dict_has_no_tools():
-    from octop.infra.connectors.catalog import catalog_entry_to_dict, get_catalog_entry
+    from voyagestar.infra.connectors.catalog import catalog_entry_to_dict, get_catalog_entry
 
     entry = get_catalog_entry("tencent-ima")
     assert entry is not None
@@ -899,7 +899,7 @@ def test_catalog_entry_dict_has_no_tools():
 
 
 def test_every_catalog_entry_has_category():
-    from octop.infra.connectors.catalog import get_catalog_entry, list_catalog
+    from voyagestar.infra.connectors.catalog import get_catalog_entry, list_catalog
 
     allowed = {
         "office",
@@ -926,7 +926,7 @@ def test_every_catalog_entry_has_category():
 
 
 def test_oauth_ready_notion():
-    from octop.infra.connectors.oauth import oauth_ready_for_kind
+    from voyagestar.infra.connectors.oauth import oauth_ready_for_kind
 
     class _Settings:
         def get(self, _key: str) -> str:
@@ -961,14 +961,14 @@ def test_yuandian_api_key_prefix():
 
 
 def test_meituan_travel_requires_query():
-    from octop.infra.connectors.gateway.adapters import meituan_travel
+    from voyagestar.infra.connectors.gateway.adapters import meituan_travel
 
     with pytest.raises(ValueError, match="query"):
         meituan_travel.call_tool({"api_key": "a" * 32}, "travel_query", {"city": "北京"})
 
 
 def test_meituan_travel_probe_is_format_only():
-    from octop.infra.connectors.gateway.adapters import meituan_travel
+    from voyagestar.infra.connectors.gateway.adapters import meituan_travel
 
     with pytest.raises(ValueError, match="格式"):
         meituan_travel.probe_credentials({"api_key": "short"})
@@ -978,7 +978,7 @@ def test_meituan_travel_probe_is_format_only():
 
 
 def test_yuandian_tools_and_required_args():
-    from octop.infra.connectors.gateway.adapters import yuandian
+    from voyagestar.infra.connectors.gateway.adapters import yuandian
 
     names = {t["name"] for t in yuandian.list_tools()}
     assert names == {
@@ -1005,7 +1005,7 @@ def test_qq_music_api_key_prefix():
 
 
 def test_ctrip_wendao_token_format():
-    from octop.infra.connectors.gateway.adapters import ctrip_wendao
+    from voyagestar.infra.connectors.gateway.adapters import ctrip_wendao
 
     with pytest.raises(ValueError, match="Token"):
         ctrip_wendao.probe_credentials({"api_key": "short"})
@@ -1013,7 +1013,7 @@ def test_ctrip_wendao_token_format():
 
 
 def test_baidu_map_search_place_requires_region():
-    from octop.infra.connectors.gateway.adapters import baidu_map
+    from voyagestar.infra.connectors.gateway.adapters import baidu_map
 
     tools = {t["name"]: t for t in baidu_map.list_tools()}
     assert "region" in tools["search_place"]["inputSchema"]["required"]
@@ -1026,7 +1026,7 @@ def test_baidu_map_search_place_requires_region():
 
 
 def test_fliggy_exposes_only_nl_search_tools():
-    from octop.infra.connectors.gateway.adapters import fliggy
+    from voyagestar.infra.connectors.gateway.adapters import fliggy
 
     names = {t["name"] for t in fliggy.list_tools()}
     assert names == {"fliggy_ai_search", "fliggy_fast_search"}
@@ -1058,7 +1058,7 @@ def test_mcp_args_model_drops_nulls_before_validation():
 
 
 def test_new_gateway_probe_rejects_bad_credentials(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     cases = (
         ("qq-music", "QQ 音乐 API Key 无效"),
@@ -1071,7 +1071,7 @@ def test_new_gateway_probe_rejects_bad_credentials(monkeypatch: pytest.MonkeyPat
             raise ValueError(message)
 
         monkeypatch.setattr(
-            f"octop.infra.connectors.gateway.adapters.{kind.replace('-', '_')}.probe_credentials",
+            f"voyagestar.infra.connectors.gateway.adapters.{kind.replace('-', '_')}.probe_credentials",
             _boom,
         )
         entry = get_catalog_entry(kind)
@@ -1081,7 +1081,7 @@ def test_new_gateway_probe_rejects_bad_credentials(monkeypatch: pytest.MonkeyPat
                 entry,
                 {"api_key": "bad"},
                 instance_id="probe",
-                config=OctopConfig(),
+                config=VoyagestarConfig(),
             )
         )
         assert out["ok"] is False, kind
@@ -1089,7 +1089,7 @@ def test_new_gateway_probe_rejects_bad_credentials(monkeypatch: pytest.MonkeyPat
 
 
 def test_probe_notion_routes_to_streamable(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     captured: dict[str, object] = {}
 
@@ -1103,7 +1103,7 @@ def test_probe_notion_routes_to_streamable(monkeypatch: pytest.MonkeyPatch):
             "tools": [{"name": "notion-search", "description": "Search"}],
         }
 
-    monkeypatch.setattr("octop.infra.connectors.probe.probe_streamable_http_mcp", _fake)
+    monkeypatch.setattr("voyagestar.infra.connectors.probe.probe_streamable_http_mcp", _fake)
     entry = get_catalog_entry("notion")
     assert entry is not None
 
@@ -1112,7 +1112,7 @@ def test_probe_notion_routes_to_streamable(monkeypatch: pytest.MonkeyPatch):
             entry,
             {"access_token": "ntn_tok"},
             instance_id="probe",
-            config=OctopConfig(),
+            config=VoyagestarConfig(),
         )
     )
     assert captured["kind"] == "notion"
@@ -1136,7 +1136,7 @@ def test_build_tencent_meeting_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"token": "tok"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["transport"] == "http"
     assert spec["url"] == "https://mcp.meeting.tencent.com/mcp/wemeet-open/v1"
@@ -1153,7 +1153,7 @@ def test_build_tencent_ardot_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"access_token": "ardot-tok"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["transport"] == "http"
     assert spec["url"] == "https://ardot.tencent.com/mcp"
@@ -1170,7 +1170,7 @@ def test_tencent_ardot_oauth_credentials():
 
 
 def test_probe_tencent_ardot_routes_to_streamable(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     captured: dict[str, object] = {}
 
@@ -1184,7 +1184,7 @@ def test_probe_tencent_ardot_routes_to_streamable(monkeypatch: pytest.MonkeyPatc
             "tools": [{"name": "fetch_editor_state", "description": "Editor state"}],
         }
 
-    monkeypatch.setattr("octop.infra.connectors.probe.probe_streamable_http_mcp", _fake)
+    monkeypatch.setattr("voyagestar.infra.connectors.probe.probe_streamable_http_mcp", _fake)
     entry = get_catalog_entry("tencent-ardot")
     assert entry is not None
 
@@ -1193,7 +1193,7 @@ def test_probe_tencent_ardot_routes_to_streamable(monkeypatch: pytest.MonkeyPatc
             entry,
             {"access_token": "ardot-tok"},
             instance_id="probe",
-            config=OctopConfig(),
+            config=VoyagestarConfig(),
         )
     )
     assert captured["kind"] == "tencent-ardot"
@@ -1204,7 +1204,7 @@ def test_probe_tencent_ardot_routes_to_streamable(monkeypatch: pytest.MonkeyPatc
 
 
 def test_oauth_ready_tencent_ardot():
-    from octop.infra.connectors.oauth import oauth_ready_for_kind
+    from voyagestar.infra.connectors.oauth import oauth_ready_for_kind
 
     class _Settings:
         def get(self, _key: str) -> str:
@@ -1214,7 +1214,7 @@ def test_oauth_ready_tencent_ardot():
 
 
 def test_ardot_token_exchange_includes_resource(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.oauth import mcp as oauth_mcp
+    from voyagestar.infra.connectors.oauth import mcp as oauth_mcp
 
     captured: dict[str, object] = {}
 
@@ -1275,7 +1275,7 @@ def test_build_youdao_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"token": "api-key"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["transport"] == "sse"
     assert spec["url"] == "https://open.mail.163.com/api/ynote/mcp/sse"
@@ -1287,7 +1287,7 @@ def test_youdao_probe_invalid_api_key(monkeypatch: pytest.MonkeyPatch):
 
     import httpx
 
-    from octop.infra.connectors.probe import probe_youdao_note
+    from voyagestar.infra.connectors.probe import probe_youdao_note
 
     class _FakeResponse(httpx.Response):
         def __init__(self) -> None:
@@ -1311,7 +1311,7 @@ def test_youdao_probe_invalid_api_key(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_probe_youdao_routes_to_sse_probe(monkeypatch: pytest.MonkeyPatch):
-    from octop.infra.connectors.probe import probe_connector
+    from voyagestar.infra.connectors.probe import probe_connector
 
     captured: dict[str, str] = {}
 
@@ -1319,7 +1319,7 @@ def test_probe_youdao_routes_to_sse_probe(monkeypatch: pytest.MonkeyPatch):
         captured["api_key"] = api_key
         return {"ok": True, "tool_count": 1, "tools": [{"name": "list", "description": ""}]}
 
-    monkeypatch.setattr("octop.infra.connectors.probe.probe_youdao_note", _fake)
+    monkeypatch.setattr("voyagestar.infra.connectors.probe.probe_youdao_note", _fake)
     entry = get_catalog_entry("youdao-note")
     assert entry is not None
 
@@ -1328,7 +1328,7 @@ def test_probe_youdao_routes_to_sse_probe(monkeypatch: pytest.MonkeyPatch):
             entry,
             {"token": "yn-key"},
             instance_id="probe",
-            config=OctopConfig(),
+            config=VoyagestarConfig(),
         )
     )
     assert captured["api_key"] == "yn-key"
@@ -1342,7 +1342,7 @@ def test_build_tencent_lexiang_remote_spec():
         entry=entry,
         instance_id="x",
         creds={"api_key": "lx-tok", "company_from": "csig"},
-        config=OctopConfig(),
+        config=VoyagestarConfig(),
     )
     assert spec["url"] == "https://mcp.lexiang-app.com/mcp?company_from=csig&preset=meta"
     assert spec["headers"]["Authorization"] == "Bearer lx-tok"

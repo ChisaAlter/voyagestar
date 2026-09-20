@@ -10,16 +10,16 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from langgraph.config import var_child_runnable_config
 
-from octop.config import OctopConfig
-from octop.infra.cron.delivery import CronDeliveryService
-from octop.infra.cron.manager import CronManager
-from octop.infra.cron.tools import build_cronjob_tools
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.gateway.threads import ThreadRegistry
-from octop.infra.utils.paths import PathLayout
-from octop.infra.utils.ulid import new_ulid
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.cron.delivery import CronDeliveryService
+from voyagestar.infra.cron.manager import CronManager
+from voyagestar.infra.cron.tools import build_cronjob_tools
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.utils.paths import PathLayout
+from voyagestar.infra.utils.ulid import new_ulid
 
 
 @contextmanager
@@ -32,9 +32,9 @@ def _configurable(**kwargs: object):
 
 
 def _make_services(tmp_path: Path):
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
-    return build_shared_services(db=db, paths=PathLayout(tmp_path), config=OctopConfig())
+    return build_shared_services(db=db, paths=PathLayout(tmp_path), config=VoyagestarConfig())
 
 
 def _make_manager(services) -> CronManager:

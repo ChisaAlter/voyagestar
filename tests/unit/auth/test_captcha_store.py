@@ -5,17 +5,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from octop.infra.auth.captcha import snapshot_env
-from octop.infra.auth.captcha.store import SETTINGS_KEY, load_effective, public_config
-from octop.infra.auth.sso.crypto import encrypt_secret
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.secrets import SecretRepo
-from octop.infra.db.repos.settings import SettingsRepo
+from voyagestar.infra.auth.captcha import snapshot_env
+from voyagestar.infra.auth.captcha.store import SETTINGS_KEY, load_effective, public_config
+from voyagestar.infra.auth.sso.crypto import encrypt_secret
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.secrets import SecretRepo
+from voyagestar.infra.db.repos.settings import SettingsRepo
 
 
 def _repos(tmp_path: Path) -> tuple[SettingsRepo, SecretRepo]:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     return SettingsRepo(db), SecretRepo(db)
 
@@ -51,9 +51,9 @@ def test_settings_slider_beats_strong_env(tmp_path: Path) -> None:
     _put_blob(settings, secrets, active="slider", providers={})
     env = snapshot_env(
         {
-            "OCTOP_CAPTCHA_PROVIDER": "turnstile",
-            "OCTOP_CAPTCHA_SITE_KEY": "0xenv",
-            "OCTOP_CAPTCHA_SECRET": "env-secret",
+            "VOYAGESTAR_CAPTCHA_PROVIDER": "turnstile",
+            "VOYAGESTAR_CAPTCHA_SITE_KEY": "0xenv",
+            "VOYAGESTAR_CAPTCHA_SECRET": "env-secret",
         }
     )
     effective = load_effective(settings, secrets, env)
@@ -71,9 +71,9 @@ def test_complete_settings_strong_wins_over_different_env(tmp_path: Path) -> Non
     )
     env = snapshot_env(
         {
-            "OCTOP_CAPTCHA_PROVIDER": "turnstile",
-            "OCTOP_CAPTCHA_SITE_KEY": "0xenv",
-            "OCTOP_CAPTCHA_SECRET": "env-secret",
+            "VOYAGESTAR_CAPTCHA_PROVIDER": "turnstile",
+            "VOYAGESTAR_CAPTCHA_SITE_KEY": "0xenv",
+            "VOYAGESTAR_CAPTCHA_SECRET": "env-secret",
         }
     )
     effective = load_effective(settings, secrets, env)
@@ -87,9 +87,9 @@ def test_incomplete_pair_gap_fills_same_provider_env(tmp_path: Path) -> None:
     settings.set(SETTINGS_KEY, json.dumps({"active": "turnstile", "providers": {}}))
     env = snapshot_env(
         {
-            "OCTOP_CAPTCHA_PROVIDER": "turnstile",
-            "OCTOP_CAPTCHA_SITE_KEY": "0xenv",
-            "OCTOP_CAPTCHA_SECRET": "env-secret",
+            "VOYAGESTAR_CAPTCHA_PROVIDER": "turnstile",
+            "VOYAGESTAR_CAPTCHA_SITE_KEY": "0xenv",
+            "VOYAGESTAR_CAPTCHA_SECRET": "env-secret",
         }
     )
     effective = load_effective(settings, secrets, env)
@@ -121,9 +121,9 @@ def test_unreadable_blob_falls_through_to_env(tmp_path: Path) -> None:
     settings.set(SETTINGS_KEY, "{not-json")
     env = snapshot_env(
         {
-            "OCTOP_CAPTCHA_PROVIDER": "turnstile",
-            "OCTOP_CAPTCHA_SITE_KEY": "0xenv",
-            "OCTOP_CAPTCHA_SECRET": "env-secret",
+            "VOYAGESTAR_CAPTCHA_PROVIDER": "turnstile",
+            "VOYAGESTAR_CAPTCHA_SITE_KEY": "0xenv",
+            "VOYAGESTAR_CAPTCHA_SECRET": "env-secret",
         }
     )
     effective = load_effective(settings, secrets, env)

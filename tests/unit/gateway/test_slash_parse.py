@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from octop.infra.gateway.slash.parser import parse_slash
+from voyagestar.infra.gateway.slash.parser import parse_slash
 
 
 @pytest.mark.parametrize(

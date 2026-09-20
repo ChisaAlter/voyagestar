@@ -1,7 +1,7 @@
 """tests/integration/test_experts_api.py — expert catalog endpoints.
 
 Covers list / detail / one-click create. Uses the bundled library that
-ships with the package (``src/octop/experts/library/``) so the data
+ships with the package (``src/voyagestar/experts/library/``) so the data
 shape matches production exactly.
 """
 
@@ -170,8 +170,8 @@ async def test_create_agent_from_expert_rejects_unknown_package_before_creation(
 
 
 async def test_hub_install_mounts_skill_packages(env: Any, monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.api.routers import experts as experts_router
-    from octop.infra.agents.manager import AgentCreateSpec
+    from voyagestar.api.routers import experts as experts_router
+    from voyagestar.infra.agents.manager import AgentCreateSpec
 
     c, server, auth = env
     package_id = (
@@ -220,7 +220,7 @@ async def test_hub_install_mounts_skill_packages(env: Any, monkeypatch: pytest.M
 async def test_hub_install_rejects_unknown_package_before_creation(
     env: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from octop.api.routers import experts as experts_router
+    from voyagestar.api.routers import experts as experts_router
 
     c, _server, auth = env
     create_called = False

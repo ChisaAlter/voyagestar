@@ -1,6 +1,6 @@
 /**
  * memoryDashboard — talks to the per-agent harness-memory dashboard
- * surface mounted at ``/api/agents/{aid}/memory/*`` (octop router).
+ * surface mounted at ``/api/agents/{aid}/memory/*`` (voyagestar router).
  *
  * Each function maps one-to-one to a backend endpoint. Type defs
  * mirror the wire shape the harness-memory bridge handlers emit
@@ -90,7 +90,7 @@ export interface ListRawEventsBody {
 export type ExtractTriggerMode = "idle" | "interval";
 
 export interface ExtractConfig {
-  /** Missing on older Octop API processes; absence keeps the historical enabled default. */
+  /** Missing on older Voyagestar API processes; absence keeps the historical enabled default. */
   memory_enabled?: boolean;
   extract_on_session_end: boolean;
   extract_trigger_mode: ExtractTriggerMode;

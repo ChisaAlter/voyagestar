@@ -1,8 +1,8 @@
 """tests/integration/test_memory_api.py — dashboard memory router.
 
-End-to-end smoke: build a real OctopServer with a main agent, seed a
+End-to-end smoke: build a real VoyagestarServer with a main agent, seed a
 small graph (entity / candidate / atom / episode / journal) directly
-into the agent memory SQLite (``.octop/memory.sqlite`` for new agents)
+into the agent memory SQLite (``.voyagestar/memory.sqlite`` for new agents)
 via ``harness_memory.Memory``, then drive the FastAPI router and assert
 the JSON shapes.
 
@@ -26,7 +26,7 @@ import pytest
 # this whole file silently skip).
 pytest.importorskip("harness_memory.adapters.bridge.handlers")
 
-from octop.api.common.memory_client import (
+from voyagestar.api.common.memory_client import (
     invalidate_cached_memory,
     memory_db_path_for_cfg,
     memory_namespace,
@@ -122,7 +122,7 @@ def _seed_memory(srv: Any, agent_id: str) -> None:
         [
             RawEvent(
                 id="raw-1",
-                host="octop",
+                host="voyagestar",
                 session_id="sess-1",
                 thread_id="th-1",
                 user="u",
@@ -132,7 +132,7 @@ def _seed_memory(srv: Any, agent_id: str) -> None:
             ),
             RawEvent(
                 id="raw-2",
-                host="octop",
+                host="voyagestar",
                 session_id="sess-1",
                 thread_id="th-1",
                 user="u",

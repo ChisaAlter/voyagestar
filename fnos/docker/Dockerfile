@@ -1,20 +1,20 @@
 # syntax=docker/dockerfile:1
 # =============================================================================
-# Octop — FnOS 专用构建（基于仓库源码，安装全部附加组件）
+# Voyagestar — FnOS 专用构建（基于仓库源码，安装全部附加组件）
 #
 # 与上游 docker/Dockerfile 一致，但显式安装 desktop extra：
 #   - desktop  （mss / pynput / pillow，桌面控制附加组件）
 # Playwright Chromium 不再预装，浏览器自动化可在控制台按需安装。
 #
 # 构建上下文必须为仓库根目录（fnpack / CI 中以仓库根为 context）：
-#   docker build -f fnos/docker/Dockerfile -t ghcr.io/tencentcloud/octop:latest .
+#   docker build -f fnos/docker/Dockerfile -t ghcr.io/chisaalter/voyagestar:latest .
 #
 # 国内加速（可选 build-arg）：
 #   PIP_INDEX_URL / PIP_TRUSTED_HOST / NPM_REGISTRY / APT_MIRROR
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# 阶段 1 — 前端构建（React / TypeScript → src/octop/dashboard）
+# 阶段 1 — 前端构建（React / TypeScript → src/voyagestar/dashboard）
 # ---------------------------------------------------------------------------
 FROM node:20-slim AS frontend-builder
 
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/root/.npm \
 
 COPY dashboard/ ./
 
-RUN mkdir -p ../src/octop/dashboard
+RUN mkdir -p ../src/voyagestar/dashboard
 RUN NODE_ENV=production NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}" npx vite build
 
 # ---------------------------------------------------------------------------
@@ -38,17 +38,17 @@ RUN NODE_ENV=production NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_
 FROM python:3.12-slim AS runtime
 
 LABEL maintainer="TencentCloud OrcaKit"
-LABEL org.opencontainers.image.title="Octop"
+LABEL org.opencontainers.image.title="Voyagestar"
 LABEL org.opencontainers.image.description="Smarter self-hosted AI assistant — multi-user, multi-agent (FnOS build with all addons)."
-LABEL org.opencontainers.image.source="https://github.com/TencentCloud/Octop"
+LABEL org.opencontainers.image.source="https://github.com/ChisaAlter/voyagestar"
 LABEL org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     HOME=/data \
-    OCTOP_BIND_HOST=0.0.0.0 \
-    OCTOP_PORT=8088 \
-    OCTOP_LOG_LEVEL=info \
+    VOYAGESTAR_BIND_HOST=0.0.0.0 \
+    VOYAGESTAR_PORT=8088 \
+    VOYAGESTAR_LOG_LEVEL=info \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=never \
@@ -77,7 +77,7 @@ WORKDIR /app
 # 仅改源码时可复用此层缓存（用 uv pip 安装，避免 uv.lock 冻结冲突）
 COPY pyproject.toml README.md LICENSE ./
 COPY src/ ./src/
-COPY --from=frontend-builder /build/src/octop/dashboard/ ./src/octop/dashboard/
+COPY --from=frontend-builder /build/src/voyagestar/dashboard/ ./src/voyagestar/dashboard/
 
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
@@ -98,12 +98,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ENV PATH="/app/.venv/bin:$PATH" \
     PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
 
-RUN mkdir -p /data/.octop
+RUN mkdir -p /data/.voyagestar
 
 EXPOSE 8088
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
-    CMD ["sh", "-c", "curl -f http://localhost:${OCTOP_PORT:-8088}/api/health || exit 1"]
+    CMD ["sh", "-c", "curl -f http://localhost:${VOYAGESTAR_PORT:-8088}/api/health || exit 1"]
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD []

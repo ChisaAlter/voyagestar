@@ -40,7 +40,7 @@ import {
 import { useAgent } from "../../context/AgentContext";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useCardTableView } from "../../hooks/useCardTableView";
-import type { OctopAgent } from "../../context/AgentContext";
+import type { VoyagestarAgent } from "../../context/AgentContext";
 import { AgentCard } from "./components/AgentCard";
 import { ExpertCard } from "./components/ExpertCard";
 import type { ExpertSummary } from "./components/ExpertCard";
@@ -51,13 +51,13 @@ import CreateFromExpertDrawer, {
 import { PublishedExpertCard } from "./components/PublishedExpertCard";
 import AgentExpertsTable from "./components/AgentExpertsTable";
 import ExpertMarketTab from "./components/ExpertMarketTab";
-import { OctopEmptyMascot } from "../../components/EmptyState";
+import { VoyagestarEmptyMascot } from "../../components/EmptyState";
 import { ownedExperts } from "../../utils/sharedExpert";
 import styles from "./index.module.less";
 
 type TabKey = "my" | "library" | "market";
 type ViewMode = "card" | "table";
-const VIEW_STORAGE_KEY = "octop:experts-view";
+const VIEW_STORAGE_KEY = "voyagestar:experts-view";
 
 function loadViewMode(): ViewMode {
   const stored = localStorage.getItem(VIEW_STORAGE_KEY);
@@ -73,7 +73,7 @@ async function fetchPublishedExperts(): Promise<PublishedExpert[]> {
 }
 
 function installedExpertIdsFromAgents(
-  agents: Pick<OctopAgent, "template_name" | "config">[],
+  agents: Pick<VoyagestarAgent, "template_name" | "config">[],
 ): Set<string> {
   const ids = new Set<string>();
   for (const agent of agents) {
@@ -114,7 +114,7 @@ export default function ExpertsPage() {
     setRefreshing(true);
     try {
       const [agentList, expertList, publishedList] = await Promise.all([
-        request<OctopAgent[]>("/agents"),
+        request<VoyagestarAgent[]>("/agents"),
         fetchExpertLibrary(),
         fetchPublishedExperts(),
       ]);
@@ -195,7 +195,7 @@ export default function ExpertsPage() {
 
   // ── Local agent state (extends AgentContext for optimistic updates) ──
   const ownedAgents = useMemo(() => ownedExperts(agents), [agents]);
-  const [localAgents, setLocalAgents] = useState<OctopAgent[]>(ownedAgents);
+  const [localAgents, setLocalAgents] = useState<VoyagestarAgent[]>(ownedAgents);
   const [newAgentId, setNewAgentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -214,12 +214,12 @@ export default function ExpertsPage() {
   };
 
   // ── Edit Drawer ────────────────────────────────────────────────
-  const [editAgent, setEditAgent] = useState<OctopAgent | null>(null);
+  const [editAgent, setEditAgent] = useState<VoyagestarAgent | null>(null);
 
   const handleEditSaved = useCallback(
     (
       updated: Pick<
-        OctopAgent,
+        VoyagestarAgent,
         | "agent_id"
         | "name"
         | "description"
@@ -300,7 +300,7 @@ export default function ExpertsPage() {
     if (localAgents.length === 0) {
       return (
         <div className={styles.emptyState}>
-          <OctopEmptyMascot />
+          <VoyagestarEmptyMascot />
           <div className={styles.emptyTitle}>{t("experts.emptyMyExperts")}</div>
           <div className={styles.emptyHint}>
             {t("experts.emptyMyExpertsHint")}
@@ -423,7 +423,7 @@ export default function ExpertsPage() {
     if (experts.length === 0 && publishedExperts.length === 0) {
       return (
         <div className={styles.emptyState}>
-          <OctopEmptyMascot />
+          <VoyagestarEmptyMascot />
           <div className={styles.emptyTitle}>{t("experts.emptyLibrary")}</div>
           <div className={styles.emptyHint}>
             {t("experts.emptyLibraryHint")}

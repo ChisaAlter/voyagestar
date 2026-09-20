@@ -5,13 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.threads import ThreadRepo
-from octop.infra.db.repos.trajectory_events import TrajectoryEventRepo
-from octop.infra.db.repos.users import UserRepo
-from octop.infra.trajectory.types import TrajectoryEvent
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.threads import ThreadRepo
+from voyagestar.infra.db.repos.trajectory_events import TrajectoryEventRepo
+from voyagestar.infra.db.repos.users import UserRepo
+from voyagestar.infra.trajectory.types import TrajectoryEvent
 
 
 def _seed_threads(db: SqlitePool, *thread_ids: str, agent_id: str = "A1") -> None:
@@ -57,7 +57,7 @@ def _event(
 
 
 def _repo(tmp_path: Path) -> TrajectoryEventRepo:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     _seed_threads(db, "T1", "T2")
     return TrajectoryEventRepo(db)
@@ -116,7 +116,7 @@ def test_get_delete_and_iter_for_export(tmp_path: Path) -> None:
 
 
 def test_thread_delete_cascades_trajectory_events(tmp_path: Path) -> None:
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
     with db.connect() as conn:
         fks = conn.execute("PRAGMA foreign_key_list(trajectory_events)").fetchall()

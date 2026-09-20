@@ -5,15 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from tests.support.app import ensure_control_plane_bound, write_octop_config
+from tests.support.app import ensure_control_plane_bound, write_voyagestar_config
 
-from octop.api.app import build_app
-from octop.infra.server import OctopServer
+from voyagestar.api.app import build_app
+from voyagestar.infra.server import VoyagestarServer
 
 
-async def test_openapi_has_bearer_security_and_descriptions(tmp_octop_home: Path) -> None:
-    write_octop_config(tmp_octop_home, enable_api_docs=True)
-    srv = OctopServer(home=tmp_octop_home)
+async def test_openapi_has_bearer_security_and_descriptions(tmp_voyagestar_home: Path) -> None:
+    write_voyagestar_config(tmp_voyagestar_home, enable_api_docs=True)
+    srv = VoyagestarServer(home=tmp_voyagestar_home)
     await srv.start()
     await ensure_control_plane_bound(srv)
     try:

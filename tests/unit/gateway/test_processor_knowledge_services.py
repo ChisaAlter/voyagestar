@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from octop.infra.gateway.process.processor import GlobalProcessor
-from octop.infra.gateway.slash.dispatcher import SlashDispatcher
+from voyagestar.infra.gateway.process.processor import GlobalProcessor
+from voyagestar.infra.gateway.slash.dispatcher import SlashDispatcher
 
 
 def test_processor_knowledge_services_include_provider_repo() -> None:

@@ -13,28 +13,28 @@ from harness_agent.backends.workspace import BackendWorkspace
 from harness_gateway.models import FileContent, ImageContent, TextContent
 from PIL import Image
 
-from octop.api.routers.chat.models import ChatTurnBody
-from octop.api.routers.chat.turn import (
+from voyagestar.api.routers.chat.models import ChatTurnBody
+from voyagestar.api.routers.chat.turn import (
     COMPOSER_CTX_KEY,
     INBOUND_ATTACHMENTS_KEY,
     build_dashboard_inbound,
     content_parts_from_dashboard_turn,
 )
-from octop.infra.gateway.media.attachment_hints import (
+from voyagestar.infra.gateway.media.attachment_hints import (
     VISION_MAX_BYTES,
     format_attachment_path_hint,
     hints_from_content_parts,
     inbound_attachments_from_parts,
     materialize_image_part,
 )
-from octop.infra.gateway.media.inbound_store import (
+from voyagestar.infra.gateway.media.inbound_store import (
     resolve_inbound_attachment_path,
     write_inbound,
 )
-from octop.infra.gateway.media.ingress import AgentBackedMediaBackend
-from octop.infra.gateway.process.harness_request import build_content_from_message
-from octop.infra.gateway.threads import ThreadRegistry
-from octop.infra.gateway.ws import WS_CHANNEL_ID
+from voyagestar.infra.gateway.media.ingress import AgentBackedMediaBackend
+from voyagestar.infra.gateway.process.harness_request import build_content_from_message
+from voyagestar.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.gateway.ws import WS_CHANNEL_ID
 
 
 def _workspace(root: str) -> BackendWorkspace:
@@ -132,7 +132,7 @@ async def test_materialize_image_part_from_workspace_path() -> None:
         assert block["workspace_path"] == stored.path
         assert block["image_url"]["url"] == f"workspace://{stored.path}"
         # Bytes are rematerialized only at model-call time.
-        from octop.infra.gateway.media.attachment_hints import expand_workspace_image_ref
+        from voyagestar.infra.gateway.media.attachment_hints import expand_workspace_image_ref
 
         expanded = await expand_workspace_image_ref(block, workspace=workspace)
         url = expanded["image_url"]["url"]
@@ -183,7 +183,7 @@ async def test_file_typed_image_path_still_materializes_via_content_parts() -> N
         img = next(b for b in content if b.get("type") == "image_url")
         assert img["image_url"]["url"].startswith("workspace://")
         assert img["workspace_path"] == stored.path
-        from octop.infra.gateway.media.attachment_hints import expand_workspace_image_ref
+        from voyagestar.infra.gateway.media.attachment_hints import expand_workspace_image_ref
 
         expanded = await expand_workspace_image_ref(img, workspace=workspace)
         assert base64.b64decode(expanded["image_url"]["url"].split(",", 1)[1]) == b"png-bytes"
@@ -207,7 +207,7 @@ async def test_oversized_undecodable_image_stays_path_ref_until_expand() -> None
         assert block is not None
         assert block["type"] == "image_url"
         assert block["workspace_path"] == stored.path
-        from octop.infra.gateway.media.attachment_hints import expand_workspace_image_ref
+        from voyagestar.infra.gateway.media.attachment_hints import expand_workspace_image_ref
 
         expanded = await expand_workspace_image_ref(block, workspace=workspace)
         assert expanded["type"] == "text"
@@ -235,7 +235,7 @@ async def test_oversized_image_is_compressed_on_expand() -> None:
         assert block["type"] == "image_url"
         assert block["image_url"]["url"].startswith("workspace://")
         assert block["workspace_path"] == stored.path
-        from octop.infra.gateway.media.attachment_hints import expand_workspace_image_ref
+        from voyagestar.infra.gateway.media.attachment_hints import expand_workspace_image_ref
 
         expanded = await expand_workspace_image_ref(block, workspace=workspace)
         url = expanded["image_url"]["url"]
@@ -274,7 +274,7 @@ async def test_small_image_is_path_ref_then_byte_identical_on_expand() -> None:
         assert block is not None
         assert block["type"] == "image_url"
         assert block["image_url"]["url"].startswith("workspace://")
-        from octop.infra.gateway.media.attachment_hints import expand_workspace_image_ref
+        from voyagestar.infra.gateway.media.attachment_hints import expand_workspace_image_ref
 
         expanded = await expand_workspace_image_ref(block, workspace=workspace)
         url = expanded["image_url"]["url"]
@@ -300,7 +300,7 @@ def test_inbound_attachments_from_parts() -> None:
 
 
 def test_build_dashboard_inbound_uses_content_parts_not_messages_meta() -> None:
-    from octop.api.routers.chat.turn import PreparedDashboardTurn
+    from voyagestar.api.routers.chat.turn import PreparedDashboardTurn
 
     parts = [
         TextContent(text="hi"),
@@ -336,7 +336,7 @@ def test_build_dashboard_inbound_uses_content_parts_not_messages_meta() -> None:
 def test_serialize_history_exposes_inbound_attachments() -> None:
     from langchain_core.messages import HumanMessage
 
-    from octop.api.routers.chat.serialize import _serialize_history_message
+    from voyagestar.api.routers.chat.serialize import _serialize_history_message
 
     attachments = [
         {
@@ -356,7 +356,7 @@ def test_serialize_history_exposes_inbound_attachments() -> None:
 
 
 def test_content_blocks_need_vision_detects_image_url() -> None:
-    from octop.infra.gateway.media.attachment_hints import content_blocks_need_vision
+    from voyagestar.infra.gateway.media.attachment_hints import content_blocks_need_vision
 
     content = [
         {"type": "text", "text": "what is this?"},

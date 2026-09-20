@@ -9,10 +9,10 @@ from urllib.parse import parse_qs, urlparse
 
 import pytest
 
-from octop.infra.auth.captcha import set_test_siteverify_url
-from octop.infra.auth.captcha.store import EffectiveCaptcha
-from octop.infra.auth.captcha.verify import ensure_captcha
-from octop.infra.errors import ErrorCode, OctopError
+from voyagestar.infra.auth.captcha import set_test_siteverify_url
+from voyagestar.infra.auth.captcha.store import EffectiveCaptcha
+from voyagestar.infra.auth.captcha.verify import ensure_captcha
+from voyagestar.infra.errors import ErrorCode, VoyagestarError
 
 
 def _effective(
@@ -95,7 +95,7 @@ async def test_slider_ignores_token() -> None:
 
 @pytest.mark.asyncio
 async def test_strong_blank_token_is_required() -> None:
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         await ensure_captcha(_effective("turnstile"), "  ")
     assert exc.value.code is ErrorCode.CAPTCHA_REQUIRED
 
@@ -113,7 +113,7 @@ async def test_success_false_fails(siteverify: tuple[str, type[_Siteverify]]) ->
     url, handler = siteverify
     handler.payload = {"success": False}
     set_test_siteverify_url("turnstile", url)
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         await ensure_captcha(_effective("turnstile"), "tok")
     assert exc.value.code is ErrorCode.CAPTCHA_FAILED
 
@@ -123,7 +123,7 @@ async def test_bad_json_fails(siteverify: tuple[str, type[_Siteverify]]) -> None
     url, handler = siteverify
     handler.payload = "not-an-object"  # type: ignore[assignment]
     set_test_siteverify_url("turnstile", url)
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         await ensure_captcha(_effective("turnstile"), "tok")
     assert exc.value.code is ErrorCode.CAPTCHA_FAILED
 
@@ -133,13 +133,13 @@ async def test_v3_score_and_action(siteverify: tuple[str, type[_Siteverify]]) ->
     url, handler = siteverify
     set_test_siteverify_url("recaptcha-v3", url)
     handler.payload = {"success": True, "score": 0.4, "action": "login"}
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         await ensure_captcha(_effective("recaptcha-v3"), "tok")
     assert exc.value.code is ErrorCode.CAPTCHA_FAILED
     handler.payload = {"success": True, "score": 0.5, "action": "login"}
     await ensure_captcha(_effective("recaptcha-v3"), "tok")
     handler.payload = {"success": True, "score": 0.9, "action": "signup"}
-    with pytest.raises(OctopError) as exc2:
+    with pytest.raises(VoyagestarError) as exc2:
         await ensure_captcha(_effective("recaptcha-v3"), "tok")
     assert exc2.value.code is ErrorCode.CAPTCHA_FAILED
 
@@ -179,7 +179,7 @@ async def test_tencent_rejected_response_fails(
     url, handler = siteverify
     handler.payload = {"Response": {"CaptchaCode": 7, "CaptchaMsg": "captcha no match"}}
     set_test_siteverify_url("tencent", url)
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         await ensure_captcha(
             _effective("tencent", site_key="195642000", cam_id="AKIDcam", cam_key="camkey"),
             "tr03ticket:@rand",
@@ -193,7 +193,7 @@ async def test_tencent_malformed_token_fails_before_http(
 ) -> None:
     url, handler = siteverify
     set_test_siteverify_url("tencent", url)
-    with pytest.raises(OctopError) as exc:
+    with pytest.raises(VoyagestarError) as exc:
         await ensure_captcha(_effective("tencent"), "no-randstr")
     assert exc.value.code is ErrorCode.CAPTCHA_FAILED
     assert handler.last_query == {}

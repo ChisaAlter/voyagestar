@@ -6,15 +6,15 @@ import dashboardIcon from "../../../../assets/channels/dashboard.svg";
 import yuanbaoIcon from "../../../../assets/channels/yuanbao.svg";
 import wecomIcon from "../../../../assets/channels/wecom.svg";
 import weixinIcon from "../../../../assets/channels/weixin.svg";
-import octopIcon from "../../../../assets/channels/octop.svg";
+import voyagestarIcon from "../../../../assets/channels/voyagestar.svg";
 import consoleIcon from "../../../../assets/channels/console.svg";
 import telegramIcon from "../../../../assets/channels/telegram.svg";
 import mqttIcon from "../../../../assets/channels/mqtt.png";
 import xiaoyiIcon from "../../../../assets/channels/xiaoyi.png";
 
 /**
- * Catalogue of channel kinds the octop backend's ``ChannelFactory`` knows
- * how to build. Source of truth: ``octop/channels/factory.py``.
+ * Catalogue of channel kinds the voyagestar backend's ``ChannelFactory`` knows
+ * how to build. Source of truth: ``voyagestar/channels/factory.py``.
  */
 export type ChannelKey =
   | "feishu"
@@ -29,10 +29,10 @@ export type ChannelKey =
   | "telegram"
   | "dashboard"
   | "agentchat"
-  | "octopbot";
+  | "voyagestarbot";
 
 /**
- * Channel kinds backed by Octop ``ChannelKind`` / harness-gateway ``BUILTIN_CHANNELS``.
+ * Channel kinds backed by Voyagestar ``ChannelKind`` / harness-gateway ``BUILTIN_CHANNELS``.
  * ``dashboard`` / ``agentchat`` / ``discord`` are intentionally omitted until implemented.
  */
 export const CHANNEL_KEYS: ChannelKey[] = [
@@ -88,7 +88,7 @@ export const CHANNEL_LABEL_KEYS: Record<ChannelKey, string> = {
   telegram: "channels.label_telegram",
   dashboard: "channels.label_dashboard",
   agentchat: "channels.label_agentchat",
-  octopbot: "channels.label_octopbot",
+  voyagestarbot: "channels.label_voyagestarbot",
 };
 
 /** Hardcoded Chinese labels used as fallback when t() returns the key. */
@@ -105,7 +105,7 @@ export const CHANNEL_LABELS: Record<ChannelKey, string> = {
   telegram: "Telegram",
   dashboard: "控制台",
   agentchat: "AgentChat",
-  octopbot: "OctopBot",
+  voyagestarbot: "VoyagestarBot",
 };
 
 export const CHANNEL_ICONS: Record<ChannelKey, string> = {
@@ -121,7 +121,7 @@ export const CHANNEL_ICONS: Record<ChannelKey, string> = {
   telegram: telegramIcon,
   dashboard: dashboardIcon,
   agentchat: consoleIcon,
-  octopbot: octopIcon,
+  voyagestarbot: voyagestarIcon,
 };
 
 /** Brand accent per channel — used for cron task card stripes, badges, etc. */
@@ -138,7 +138,7 @@ export const CHANNEL_COLORS: Record<ChannelKey, string> = {
   discord: "#5865F2",
   dashboard: "#6366F1",
   agentchat: "#64748B",
-  octopbot: "#10B981",
+  voyagestarbot: "#10B981",
 };
 
 export function getChannelColor(channel: string): string {
@@ -157,7 +157,7 @@ export const CHANNEL_URLS: Partial<Record<ChannelKey, string>> = {
   yuanbao: "https://yuanbao.tencent.com/bot",
   wecom: "https://work.weixin.qq.com/wework_admin/frame#/aiHelper/create",
   telegram: "https://t.me/BotFather",
-  octopbot: "https://octop.cloud.tencent.com",
+  voyagestarbot: "https://octop.cloud.tencent.com",
 };
 
 /** A single field of a channel's config form. */
@@ -350,7 +350,7 @@ export const CHANNEL_FIELDS: Partial<Record<ChannelKey, ChannelField[]>> = {
     { name: "token", label: "Token", type: "password", required: true },
     { name: "base_url", label: "Base URL" },
   ],
-  octopbot: [
+  voyagestarbot: [
     { name: "api_key", label: "API Key", type: "password", required: true },
     { name: "api_base_url", label: "API Base URL", required: true },
   ],

@@ -11,15 +11,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from octop.config import OctopConfig
-from octop.infra.cron.delivery import CronDeliveryService
-from octop.infra.cron.manager import CronManager
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.services import build_shared_services
-from octop.infra.gateway.threads import ThreadRegistry
-from octop.infra.utils.paths import PathLayout
-from octop.infra.utils.ulid import new_ulid
+from voyagestar.config import VoyagestarConfig
+from voyagestar.infra.cron.delivery import CronDeliveryService
+from voyagestar.infra.cron.manager import CronManager
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.services import build_shared_services
+from voyagestar.infra.gateway.threads import ThreadRegistry
+from voyagestar.infra.utils.paths import PathLayout
+from voyagestar.infra.utils.ulid import new_ulid
 
 
 def _cron_session_key(agent_id: str, cron_id: str) -> str:
@@ -37,9 +37,9 @@ def _cron_session_key(agent_id: str, cron_id: str) -> str:
 
 
 def _make_services(tmp_path: Path):
-    db = SqlitePool(tmp_path / "octop.db")
+    db = SqlitePool(tmp_path / "voyagestar.db")
     run_migrations(db)
-    return build_shared_services(db=db, paths=PathLayout(tmp_path), config=OctopConfig())
+    return build_shared_services(db=db, paths=PathLayout(tmp_path), config=VoyagestarConfig())
 
 
 def _make_agent(
@@ -171,7 +171,7 @@ async def test_reload_from_db_clears_user_jobs_then_reschedules(tmp_path: Path) 
     stale = MagicMock()
     stale.id = "stale-cron"
     system = MagicMock()
-    system.id = "octop_tls_auto_renew"
+    system.id = "voyagestar_tls_auto_renew"
     mgr._system_job_ids.add(system.id)
     mgr._scheduler.get_jobs = MagicMock(return_value=[stale, system])
 
@@ -314,14 +314,14 @@ async def test_create_writes_audit_entry(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_create_rejects_invalid_trigger(tmp_path: Path) -> None:
-    """create() raises OctopError for a malformed trigger spec."""
-    from octop.infra.errors import OctopError  # noqa: PLC0415
+    """create() raises VoyagestarError for a malformed trigger spec."""
+    from voyagestar.infra.errors import VoyagestarError  # noqa: PLC0415
 
     services = _make_services(tmp_path)
     mgr = _make_manager(services)
     _aid, uid = _make_agent(services)
 
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         await mgr.create(
             cron_id=_cron_id(),
             agent_id="whatever",
@@ -521,18 +521,18 @@ async def test_update_reschedules_when_re_enabled(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_update_raises_for_unknown_id(tmp_path: Path) -> None:
-    from octop.infra.errors import OctopError  # noqa: PLC0415
+    from voyagestar.infra.errors import VoyagestarError  # noqa: PLC0415
 
     services = _make_services(tmp_path)
     mgr = _make_manager(services)
 
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         await mgr.update("no-such-id", prompt="x")
 
 
 @pytest.mark.asyncio
 async def test_update_rejects_invalid_trigger(tmp_path: Path) -> None:
-    from octop.infra.errors import OctopError  # noqa: PLC0415
+    from voyagestar.infra.errors import VoyagestarError  # noqa: PLC0415
 
     services = _make_services(tmp_path)
     aid, uid = _make_agent(services)
@@ -540,7 +540,7 @@ async def test_update_rejects_invalid_trigger(tmp_path: Path) -> None:
     cid = _cron_id()
     await mgr.create(cron_id=cid, agent_id=aid, user_id=uid, trigger="interval:10", prompt="p")
 
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         await mgr.update(cid, trigger="bad::spec")
 
 
@@ -599,12 +599,12 @@ async def test_delete_writes_audit_entry(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_run_now_raises_for_unknown(tmp_path: Path) -> None:
-    from octop.infra.errors import OctopError  # noqa: PLC0415
+    from voyagestar.infra.errors import VoyagestarError  # noqa: PLC0415
 
     services = _make_services(tmp_path)
     mgr = _make_manager(services)
 
-    with pytest.raises(OctopError):
+    with pytest.raises(VoyagestarError):
         await mgr.run_now("no-such-id")
 
 
@@ -624,7 +624,7 @@ async def test_run_now_fires_job(tmp_path: Path) -> None:
         prompt="run",
     )
 
-    with patch("octop.infra.cron.manager.asyncio.ensure_future") as mock_ef:
+    with patch("voyagestar.infra.cron.manager.asyncio.ensure_future") as mock_ef:
         await mgr.run_now(cid)
         mock_ef.assert_called_once()
         coro = mock_ef.call_args[0][0]

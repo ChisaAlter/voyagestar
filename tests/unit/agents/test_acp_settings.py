@@ -7,12 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.agents.acp_settings import ACPSettingsStore
-from octop.infra.db.migrate import run_migrations
-from octop.infra.db.pool import SqlitePool
-from octop.infra.db.repos.agents import AgentRepo
-from octop.infra.db.repos.settings import SettingsRepo
-from octop.infra.db.repos.users import UserRepo
+from voyagestar.infra.agents.acp_settings import ACPSettingsStore
+from voyagestar.infra.db.migrate import run_migrations
+from voyagestar.infra.db.pool import SqlitePool
+from voyagestar.infra.db.repos.agents import AgentRepo
+from voyagestar.infra.db.repos.settings import SettingsRepo
+from voyagestar.infra.db.repos.users import UserRepo
 
 
 @pytest.fixture

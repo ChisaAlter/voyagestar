@@ -15,7 +15,7 @@ const (
 	LocaleEN Locale = "en"
 )
 
-// Settings is persisted at ~/.octop/desktop-settings.json
+// Settings is persisted at ~/.voyagestar/desktop-settings.json
 type Settings struct {
 	Locale         Locale `json:"locale"`
 	Autostart      bool   `json:"autostart"`
@@ -34,23 +34,23 @@ func defaultSettings() Settings {
 	}
 }
 
-func octopHome() string {
-	if v := os.Getenv("OCTOP_HOME"); v != "" {
+func voyagestarHome() string {
+	if v := os.Getenv("VOYAGESTAR_HOME"); v != "" {
 		return v
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return ".octop"
+		return ".voyagestar"
 	}
-	return filepath.Join(home, ".octop")
+	return filepath.Join(home, ".voyagestar")
 }
 
 func portableDir() string {
-	return filepath.Join(octopHome(), "portable")
+	return filepath.Join(voyagestarHome(), "portable")
 }
 
 func settingsPath() string {
-	return filepath.Join(octopHome(), "desktop-settings.json")
+	return filepath.Join(voyagestarHome(), "desktop-settings.json")
 }
 
 type settingsStore struct {
@@ -93,7 +93,7 @@ func (st *settingsStore) save(next Settings) error {
 	if next.Port == 0 {
 		next.Port = 8088
 	}
-	if err := os.MkdirAll(octopHome(), 0o755); err != nil {
+	if err := os.MkdirAll(voyagestarHome(), 0o755); err != nil {
 		return err
 	}
 	data, err := json.MarshalIndent(next, "", "  ")

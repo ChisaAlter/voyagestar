@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/readme-banner.png" alt="Octop Banner" width="600" />
+  <img src="docs/assets/readme-banner.png" alt="Voyagestar Banner" width="600" />
 </p>
 
 <p align="center">
@@ -8,18 +8,18 @@
 
 <p align="center">
   <a href="https://trendshift.io/repositories/95504?utm_source=repository-badge&utm_medium=badge&utm_campaign=badge-repository-95504" target="_blank" rel="noopener noreferrer">
-    <img src="https://trendshift.io/api/badge/repositories/95504" alt="TencentCloud/Octop | Trendshift" width="250" height="55" />
+    <img src="https://trendshift.io/api/badge/repositories/95504" alt="ChisaAlter/voyagestar | Trendshift" width="250" height="55" />
   </a>
 </p>
 
 <p align="center">
   <a href="https://www.python.org/downloads/"><img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white" /></a>
-  <a href="https://github.com/TencentCloud/Octop/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="https://github.com/TencentCloud/Octop/releases"><img alt="Version" src="https://img.shields.io/badge/version-1.0.1-orange" /></a>
-  <a href="https://pypi.org/project/octop/"><img src="https://img.shields.io/pypi/v/octop" alt="PyPI" /></a>
+  <a href="https://github.com/ChisaAlter/voyagestar/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
+  <a href="https://github.com/ChisaAlter/voyagestar/releases"><img alt="Version" src="https://img.shields.io/badge/version-1.0.1-orange" /></a>
+  <a href="https://pypi.org/project/voyagestar/"><img src="https://img.shields.io/pypi/v/voyagestar" alt="PyPI" /></a>
   <a href="https://github.com/astral-sh/ruff"><img alt="Code Style: Ruff" src="https://img.shields.io/badge/code%20style-ruff-000000?logo=ruff&logoColor=white" /></a>
-  <a href="https://github.com/TencentCloud/Octop"><img alt="GitHub stars" src="https://img.shields.io/github/stars/TencentCloud/Octop?style=social" /></a>
-  <a href="https://github.com/TencentCloud/Octop/fork"><img alt="GitHub forks" src="https://img.shields.io/github/forks/TencentCloud/Octop?style=social" /></a>
+  <a href="https://github.com/ChisaAlter/voyagestar"><img alt="GitHub stars" src="https://img.shields.io/github/stars/ChisaAlter/voyagestar?style=social" /></a>
+  <a href="https://github.com/ChisaAlter/voyagestar/fork"><img alt="GitHub forks" src="https://img.shields.io/github/forks/ChisaAlter/voyagestar?style=social" /></a>
   <a href="https://discord.gg/jPas5J8Ua"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20Us-5865F2?logo=discord&logoColor=white" /></a>
 </p>
 
@@ -39,7 +39,7 @@
 
 ---
 
-**Octop** is an open-source, self-hosted AI assistant. It's not just a tool — it's a digital life form that can operate in parallel. Through its multi-agent architecture, it builds an intelligent environment that is both independent and collaborative for teams, families, and individuals. Best of all, it runs entirely on your machine — the fully self-hosted design means privacy is never a compromise, while single-process startup makes the powerful web console, CLI, and IM integrations readily accessible.
+**Voyagestar Sanctum** is an open-source, self-hosted AI assistant. It's not just a tool — it's a digital life form that can operate in parallel. Through its multi-agent architecture, it builds an intelligent environment that is both independent and collaborative for teams, families, and individuals. Best of all, it runs entirely on your machine — the fully self-hosted design means privacy is never a compromise, while single-process startup makes the powerful web console, CLI, and IM integrations readily accessible.
 
 Chat through the Web Dashboard, Feishu, DingTalk, QQ, Discord, WeCom, or programmatic HTTP/SSE/WebSocket. Extend capabilities with the **expert library**, **Connectors** (OAuth + MCP), and **ACP** integration for IDE workflows.
 
@@ -54,21 +54,21 @@ Chat through the Web Dashboard, Feishu, DingTalk, QQ, Discord, WeCom, or program
 | 💾 | **Pluggable backends** | Local disk, Docker containers, PostgreSQL, or COS/S3 — AI operates inside isolated boundaries |
 | 🧠 | **Portable memory** | Powered by harness-memory; memory migrates with the workspace |
 | 📚 | **Knowledge base** | RAG over your documents; semantic retrieval grounds agent answers in your private corpus |
-| 🧩 | **Plugins** | Extend Octop with third-party plugins; bundled plugins are seeded and toggled on demand |
-| ↔️ | **ACP bidirectional** | `octop acp` for IDE/terminal AI; delegate to OpenCode / Claude Code with permission gates |
+| 🧩 | **Plugins** | Extend Voyagestar with third-party plugins; bundled plugins are seeded and toggled on demand |
+| ↔️ | **ACP bidirectional** | `voyagestar acp` for IDE/terminal AI; delegate to OpenCode / Claude Code with permission gates |
 | 💻 | **Terminal AI+** | Interactive shell in the browser — AI-assisted command execution and troubleshooting |
 | 🌐 | **Browser AI+** | Headless Chromium sessions for web automation, screenshots, and remote browsing |
 | 🖥️ | **Remote desktop** | Live screen and input from the dashboard on Linux, Windows, and macOS — remote office work and GUI apps; one-click isolated desktop on headless Linux |
-| 🏠 | **Self-hosted** | Dashboard, CLI, IM channels, and cron in one `octop run` — all data under `~/.octop/` |
+| 🏠 | **Self-hosted** | Dashboard, CLI, IM channels, and cron in one `voyagestar run` — all data under `~/.voyagestar/` |
 
 ## 📌 Overview
 
-Octop is a self-hosted AI assistant platform for households and small teams. It runs a single process that serves a web dashboard, a CLI, IM channels (Feishu, DingTalk, QQ, Discord, WeCom, and more), and cron automation — all sharing one control-plane database under `~/.octop/` (SQLite by default; PostgreSQL optional).
+Voyagestar is a self-hosted AI assistant platform for households and small teams. It runs a single process that serves a web dashboard, a CLI, IM channels (Feishu, DingTalk, QQ, Discord, WeCom, and more), and cron automation — all sharing one control-plane database under `~/.voyagestar/` (SQLite by default; PostgreSQL optional).
 
-> Octop's design goal: keep every conversation, workspace, and credential on your own machine, while giving each user a personal team of specialized agents they can switch between per task.
+> Voyagestar's design goal: keep every conversation, workspace, and credential on your own machine, while giving each user a personal team of specialized agents they can switch between per task.
 
 <details>
-<summary>🐾 What can you do with Octop</summary>
+<summary>🐾 What can you do with Voyagestar</summary>
 
 - **Personal assistant** — let a dedicated agent write weekly reports, organize notes, and manage your schedule; memory persists with the workspace.
 - **Family sharing** — one admin account, the whole household; assign different agents and experts per member.
@@ -93,20 +93,20 @@ Octop is a self-hosted AI assistant platform for households and small teams. It 
 | **ACP** | agent-client-protocol |
 | **Build / quality** | hatchling · ruff · mypy · pytest |
 
-Octop is built on the Harness stack — a set of focused runtimes that Octop composes into one process:
+Voyagestar is built on the Harness stack — a set of focused runtimes that Voyagestar composes into one process:
 
 - **harness-agent** — Agent runtime: model routing, tools, skills, and conversation checkpointing.
 - **harness-gateway** — multi-platform IM channel bridge that normalizes incoming messages into a single processing pipeline.
 - **harness-memory** — hierarchical recall with full-text search, so an agent's memory travels with its workspace.
 - **harness-browser** — CDP-based browser automation with persistent profiles for web tasks.
 
-Instead of an external queue or message broker, Octop routes every surface — Web UI, IM, and cron — through one in-process `HarnessProcessor`. The result is a single, restart-safe process whose entire state is rebuilt from the control-plane database on boot (local SQLite by default; PostgreSQL optional).
+Instead of an external queue or message broker, Voyagestar routes every surface — Web UI, IM, and cron — through one in-process `HarnessProcessor`. The result is a single, restart-safe process whose entire state is rebuilt from the control-plane database on boot (local SQLite by default; PostgreSQL optional).
 
 ## 🤔 Features
 
 ### Server & auth
 - Multi-user JWT authentication with admin role
-- First-run setup wizard (`octop init`)
+- First-run setup wizard (`voyagestar init`)
 - Interactive API docs at `/api/docs` (off by default — set `"enable_api_docs": true` in `config.json` to enable)
 
 ### Agents
@@ -122,23 +122,23 @@ Instead of an external queue or message broker, Octop routes every surface — W
 
 ### Surfaces
 - **Web dashboard** — chat, agents, connectors, channels, cron, settings
-- **CLI** — `octop run`, `octop chat`, `octop acp`, admin commands
+- **CLI** — `voyagestar run`, `voyagestar chat`, `voyagestar acp`, admin commands
 - **HTTP/SSE/WebSocket API** — full programmatic access
 
 ### Knowledge & plugins
 - **Knowledge base** — RAG over your documents; upload files and let semantic retrieval ground agent answers in your private corpus
-- **Plugins** — install and manage third-party plugins (`octop plugin`); bundled plugins are seeded and toggled on demand from the dashboard
+- **Plugins** — install and manage third-party plugins (`voyagestar plugin`); bundled plugins are seeded and toggled on demand from the dashboard
 
 ### ACP (Agent Client Protocol)
 
-Octop supports ACP in two directions:
+Voyagestar supports ACP in two directions:
 
-1. **Inbound** — external tools use **your** Octop agent
+1. **Inbound** — external tools use **your** Voyagestar agent
    ```bash
-   octop acp --agent main   # stdio ACP server for Zed, OpenCode, …
+   voyagestar acp --agent main   # stdio ACP server for Zed, OpenCode, …
    ```
 
-2. **Outbound** — Octop delegates to external coding agents
+2. **Outbound** — Voyagestar delegates to external coding agents
    - Dashboard → **ACP** (`/acp`): configure runners (global per user)
    - Enable **acp_runner** per agent, then delegate in chat
 
@@ -164,7 +164,7 @@ This roadmap may shift as the community grows; treat it as indicative only.
 ### Prerequisites
 
 - **macOS / Linux / Windows**
-- No pre-installed Python required — the installer uses [uv](https://docs.astral.sh/uv/) to provision Python 3.12 in an isolated venv under `~/.octop/`
+- No pre-installed Python required — the installer uses [uv](https://docs.astral.sh/uv/) to provision Python 3.12 in an isolated venv under `~/.voyagestar/`
 - A modern multi-core CPU with a few GB of RAM for the process plus model/embedding caches; enough disk for the database, agent workspaces, and document corpora
 
 ### 1. Install
@@ -196,7 +196,7 @@ source ~/.zshrc   # Zsh
 source ~/.bashrc  # Bash
 ```
 
-The installer places `octop` on your PATH via `~/.octop/bin`. Optional extras:
+The installer places `voyagestar` on your PATH via `~/.voyagestar/bin`. Optional extras:
 
 ```bash
 # Browser automation (Playwright Chromium)
@@ -208,24 +208,24 @@ curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install
 
 See [scripts/README.md](scripts/README.md) for all install options (`--version`, `--from-source`, `--mirror`, Windows flags).
 
-**Desktop app** (GUI, no terminal) — grab the artifact for your platform from [GitHub Releases](https://github.com/TencentCloud/Octop/releases/latest):
+**Desktop app** (GUI, no terminal) — grab the artifact for your platform from [GitHub Releases](https://github.com/ChisaAlter/voyagestar/releases/latest):
 
 | Platform | Artifact |
 |----------|----------|
-| Windows | `Octop-desktop-windows-amd64-<version>.exe` (64-bit) / `Octop-desktop-windows-arm64-<version>.exe` (ARM64) — NSIS installer |
-| macOS | `Octop-desktop-darwin-arm64-<version>.dmg` (Apple Silicon) / `Octop-desktop-darwin-amd64-<version>.dmg` (Intel) |
-| Linux | `Octop-desktop-linux-amd64-<version>.tar.gz` / `Octop-desktop-linux-arm64-<version>.tar.gz` |
-| FnOS NAS | `Octop-fnos-docker-<version>.fpk` (Docker-backed) / `Octop-fnos-native-<version>.fpk` (no Docker) — install via App Center |
+| Windows | `Voyagestar-desktop-windows-amd64-<version>.exe` (64-bit) / `Voyagestar-desktop-windows-arm64-<version>.exe` (ARM64) — NSIS installer |
+| macOS | `Voyagestar-desktop-darwin-arm64-<version>.dmg` (Apple Silicon) / `Voyagestar-desktop-darwin-amd64-<version>.dmg` (Intel) |
+| Linux | `Voyagestar-desktop-linux-amd64-<version>.tar.gz` / `Voyagestar-desktop-linux-arm64-<version>.tar.gz` |
+| FnOS NAS | `Voyagestar-fnos-docker-<version>.fpk` (Docker-backed) / `Voyagestar-fnos-native-<version>.fpk` (no Docker) — install via App Center |
 
 See [desktop/README.md](desktop/README.md) for the desktop shell and [fnos/README.md](fnos/README.md) for the FnOS packaging guide.
 
 **Alternative — PyPI** (if you already manage Python yourself):
 
 ```bash
-pip install octop
-# optional: pip install "octop[browser]"
-# optional local ONNX embedding model cache (Models → Local): pip install "octop[local-embedding]"
-# Downloads catalog weights under ~/.octop/embedding_models; not chat, not Memory.
+pip install voyagestar
+# optional: pip install "voyagestar[browser]"
+# optional local ONNX embedding model cache (Models → Local): pip install "voyagestar[local-embedding]"
+# Downloads catalog weights under ~/.voyagestar/embedding_models; not chat, not Memory.
 ```
 
 From a source checkout with uv:
@@ -237,25 +237,25 @@ uv sync --extra local-embedding
 ### 2. Initialize
 
 ```bash
-octop init
+voyagestar init
 ```
 
-The interactive wizard creates the SQLite database, JWT secret, and first admin account under `~/.octop/`.
+The interactive wizard creates the SQLite database, JWT secret, and first admin account under `~/.voyagestar/`.
 
 ### 3. Run
 
 ```bash
 # Foreground (API + Web dashboard)
-octop run
+voyagestar run
 
 # Custom host / port
-octop run --host 0.0.0.0 --port 8088
+voyagestar run --host 0.0.0.0 --port 8088
 
 # Register as a system service (systemd / launchd / Windows service)
-octop service start
+voyagestar service start
 ```
 
-Open **http://127.0.0.1:8088**. With Docker, the first init generates a random admin password (written to `/data/.octop/credential.txt`) unless `OCTOP_DEFAULT_PASSWORD` is set. Interactive `octop init` / the setup wizard asks you to choose a password (≥8 characters, letters and digits).
+Open **http://127.0.0.1:8088**. With Docker, the first init generates a random admin password (written to `/data/.voyagestar/credential.txt`) unless `VOYAGESTAR_DEFAULT_PASSWORD` is set. Interactive `voyagestar init` / the setup wizard asks you to choose a password (≥8 characters, letters and digits).
 
 ### Docker (recommended for production)
 
@@ -267,22 +267,22 @@ docker compose -f docker/docker-compose.yml up -d
 bash docker/docker_build.sh
 docker run -d \
   -p 8088:8088 \
-  -v octop-data:/data/.octop \
+  -v voyagestar-data:/data/.voyagestar \
   -e HOME=/data \
-  -e OCTOP_DEFAULT_PASSWORD="<strong-password-or-omit-for-random>" \
-  octop:latest
+  -e VOYAGESTAR_DEFAULT_PASSWORD="<strong-password-or-omit-for-random>" \
+  voyagestar:latest
 ```
 
-Open `http://localhost:8088`. First boot creates the admin account and writes the credentials to `/data/.octop/credential.txt` in the container. With `OCTOP_DEFAULT_PASSWORD` unset a strong random password is generated; a password you set must be ≥8 characters with letters and digits (weak/common passwords are rejected by the app password policy and fall back to a random one). Override the username via `OCTOP_ADMIN_USERNAME`.
+Open `http://localhost:8088`. First boot creates the admin account and writes the credentials to `/data/.voyagestar/credential.txt` in the container. With `VOYAGESTAR_DEFAULT_PASSWORD` unset a strong random password is generated; a password you set must be ≥8 characters with letters and digits (weak/common passwords are rejected by the app password policy and fall back to a random one). Override the username via `VOYAGESTAR_ADMIN_USERNAME`.
 
 > **Password policy:** at least 8 characters with letters and digits.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OCTOP_PORT` | `8088` | HTTP listen port |
-| `OCTOP_DEFAULT_PASSWORD` | _(unset)_ | First-run admin password (Docker bootstrap). Unset = random password written to `credential.txt` |
-| `OCTOP_ADMIN_USERNAME` | `admin` | First-run admin username |
-| `OCTOP_DATA` | `~/.octop` | Host data directory (compose bind mount) |
+| `VOYAGESTAR_PORT` | `8088` | HTTP listen port |
+| `VOYAGESTAR_DEFAULT_PASSWORD` | _(unset)_ | First-run admin password (Docker bootstrap). Unset = random password written to `credential.txt` |
+| `VOYAGESTAR_ADMIN_USERNAME` | `admin` | First-run admin username |
+| `VOYAGESTAR_DATA` | `~/.voyagestar` | Host data directory (compose bind mount) |
 
 See [`.env.example`](.env.example) for the full list.
 
@@ -316,52 +316,52 @@ See [`.env.example`](.env.example) for the full list.
 
 | Method | Platform | Description |
 |--------|----------|-------------|
-| Remote one-liner | macOS / Linux | `curl …/octop/install.sh \| bash` |
-| Remote one-liner | Windows | `irm …/octop/install.ps1 \| iex` or `install.bat` |
+| Remote one-liner | macOS / Linux | `curl …/voyagestar/install.sh \| bash` |
+| Remote one-liner | Windows | `irm …/voyagestar/install.ps1 \| iex` or `install.bat` |
 | Local script | macOS / Linux | `bash scripts/install.sh` |
 | Local script | Windows | `scripts\install.bat` or `install.ps1` |
-| PyPI | Any | `pip install octop` or `pip install "octop[browser]"` |
+| PyPI | Any | `pip install voyagestar` or `pip install "voyagestar[browser]"` |
 | Docker | Any | `docker/docker-compose.yml` |
 
-All install scripts provision an isolated environment at `~/.octop/venv` and a `~/.octop/bin/octop` wrapper — they do not touch system Python.
+All install scripts provision an isolated environment at `~/.voyagestar/venv` and a `~/.voyagestar/bin/voyagestar` wrapper — they do not touch system Python.
 
 ### Upgrade
 
-`octop update` replaces only the wheel/binary — your `~/.octop/` database, workspaces, secrets, and `config.json` are preserved:
+`voyagestar update` replaces only the wheel/binary — your `~/.voyagestar/` database, workspaces, secrets, and `config.json` are preserved:
 
 ```bash
-octop update          # fetch and install the latest octop, then restart the service if one is registered
+voyagestar update          # fetch and install the latest voyagestar, then restart the service if one is registered
 ```
 
-The schema migrates automatically on next boot; run `octop init` only if the setup wizard prompts for a migration. Always back up first (`octop backup`) before a cross-version upgrade.
+The schema migrates automatically on next boot; run `voyagestar init` only if the setup wizard prompts for a migration. Always back up first (`voyagestar backup`) before a cross-version upgrade.
 
 ## ⚙️ Configuration
 
-All runtime state lives in `~/.octop/`. Manage it via CLI or edit files directly.
+All runtime state lives in `~/.voyagestar/`. Manage it via CLI or edit files directly.
 
 ```bash
 # LLM providers and models
-octop models
-octop provider list
+voyagestar models
+voyagestar provider list
 
 # IM channels
-octop channel list
-octop channel install
+voyagestar channel list
+voyagestar channel install
 
 # Skills (per agent)
-octop skills list --agent main
+voyagestar skills list --agent main
 
 # Cron jobs
-octop cron list
-octop cron create --help
+voyagestar cron list
+voyagestar cron create --help
 
 # Users (admin)
-octop user list
+voyagestar user list
 ```
 
 ### Supported LLM providers
 
-OpenAI-compatible APIs, DashScope (Qwen), Ollama, and other presets — configure per agent in the dashboard or via `octop provider`.
+OpenAI-compatible APIs, DashScope (Qwen), Ollama, and other presets — configure per agent in the dashboard or via `voyagestar provider`.
 
 ### Supported channels
 
@@ -378,30 +378,30 @@ OpenAI-compatible APIs, DashScope (Qwen), Ollama, and other presets — configur
 
 | Command | Description |
 |---------|-------------|
-| `octop init` | Bootstrap `~/.octop/` (DB, admin, JWT secret) |
-| `octop run` | Start Octop in the foreground |
-| `octop service start` | Install and start as a system service |
-| `octop service stop` | Stop the system service |
-| `octop agent` | Create, list, start/stop agents |
-| `octop channel` | Install and manage IM channels |
-| `octop chats` | REPL and session management |
-| `octop acp` | Stdio ACP server for IDE integration |
-| `octop cron` | Manage scheduled tasks |
-| `octop models` | Provider presets and model resolution |
-| `octop skills` | Enable/disable per-agent skills |
-| `octop plugin` | Install and manage third-party plugins |
-| `octop backup` | Export / restore backups |
-| `octop clean` | Remove CLI state or wipe `~/.octop/` |
-| `octop update` | Check for and install updates |
+| `voyagestar init` | Bootstrap `~/.voyagestar/` (DB, admin, JWT secret) |
+| `voyagestar run` | Start Voyagestar in the foreground |
+| `voyagestar service start` | Install and start as a system service |
+| `voyagestar service stop` | Stop the system service |
+| `voyagestar agent` | Create, list, start/stop agents |
+| `voyagestar channel` | Install and manage IM channels |
+| `voyagestar chats` | REPL and session management |
+| `voyagestar acp` | Stdio ACP server for IDE integration |
+| `voyagestar cron` | Manage scheduled tasks |
+| `voyagestar models` | Provider presets and model resolution |
+| `voyagestar skills` | Enable/disable per-agent skills |
+| `voyagestar plugin` | Install and manage third-party plugins |
+| `voyagestar backup` | Export / restore backups |
+| `voyagestar clean` | Remove CLI state or wipe `~/.voyagestar/` |
+| `voyagestar update` | Check for and install updates |
 
 Full reference: **[docs/cli.md](docs/cli.md)**.
 
 ## 🖥️ Web dashboard
 
-After `octop run`, open **http://127.0.0.1:8088**.
+After `voyagestar run`, open **http://127.0.0.1:8088**.
 
 <p align="center">
-  <img src="docs/assets/readme-chat.png" alt="Octop Web Dashboard" width="800" />
+  <img src="docs/assets/readme-chat.png" alt="Voyagestar Web Dashboard" width="800" />
 </p>
 
 - **Chat** — real-time conversation with agents
@@ -419,25 +419,25 @@ Interactive API docs: **http://127.0.0.1:8088/api/docs** (disabled by default �
 ## 📁 Data directory
 
 ```
-~/.octop/                          ← install & data root
+~/.voyagestar/                          ← install & data root
 ├── config.json                    # process config (optional database section)
-├── octop.db                       # SQLite — users, agents, channels, cron, …
+├── voyagestar.db                       # SQLite — users, agents, channels, cron, …
 ├── secrets/                       # JWT secret, channel tokens
 ├── agents/<agent_id>/             # per-agent workspace (SOUL.md, skills, …)
 ├── security/tool_guard/           # shell command allow/deny rules
 ├── logs/                          # runtime logs
 ├── venv/                          # uv-managed Python (installer layout)
-└── bin/octop                      # PATH wrapper → venv/bin/octop
+└── bin/voyagestar                      # PATH wrapper → venv/bin/voyagestar
 ```
 
-The control plane can also use PostgreSQL — set `database` in `config.json`, or `OCTOP_DATABASE_*` / the first-run wizard. With PostgreSQL, agent memory reuses the same DSN by default (per-agent schema); to keep file-based memory, set `"memory": { "backend": { "type": "sqlite" } }` in the agent config. See [docs/configuration.md](docs/configuration.md) and [docs/adr/002-database-backends.md](docs/adr/002-database-backends.md).
+The control plane can also use PostgreSQL — set `database` in `config.json`, or `VOYAGESTAR_DATABASE_*` / the first-run wizard. With PostgreSQL, agent memory reuses the same DSN by default (per-agent schema); to keep file-based memory, set `"memory": { "backend": { "type": "sqlite" } }` in the agent config. See [docs/configuration.md](docs/configuration.md) and [docs/adr/002-database-backends.md](docs/adr/002-database-backends.md).
 
 See [docs/configuration.md](docs/configuration.md) for env vars and `config.json`.
 
 ## 🏗️ Architecture
 
 ```
-OctopServer
+VoyagestarServer
  ├─ DatabasePool            SQLite (WAL) or PostgreSQL
  ├─ SharedServices       DI root — every repo + config
  ├─ ExpertCatalog        scans agents/experts/library/ at boot
@@ -458,9 +458,9 @@ See [docs/architecture.md](docs/architecture.md), [docs/adr/001-single-process-m
 ## 📁 Project layout
 
 ```
-src/octop/
+src/voyagestar/
   config.py    env-var config
-  launch.py    OctopServer boot + uvicorn
+  launch.py    VoyagestarServer boot + uvicorn
   infra/       business core (agents, gateway, cron, db, users, …)
   api/         HTTP layer — FastAPI app, routers, JWT, SSE
   cli/         CLI layer — Click commands
@@ -483,7 +483,7 @@ make all              # format-all + lint + typecheck + test (ship bar)
 
 # Frontend (separate terminal)
 make dev-frontend     # Vite dev server on :5173 (override with VITE_DEV_PORT)
-make build-frontend   # production build → src/octop/dashboard/
+make build-frontend   # production build → src/voyagestar/dashboard/
 cd dashboard && npx tsc -b
 ```
 
@@ -491,10 +491,10 @@ Individual targets: `make test`, `make lint`, `make typecheck`, `make format`.
 
 ## 🔒 Security & privacy
 
-- **Local-first**: Config, chats, workspaces, and credentials live under `~/.octop/` on your machine.
+- **Local-first**: Config, chats, workspaces, and credentials live under `~/.voyagestar/` on your machine.
 - **Multi-user isolation**: JWT auth with per-user agents and workspaces.
 - **PII redaction & tool approval**: sensitive data is redacted before it leaves the workspace, and risky tools or shell commands require explicit approval under the guardrail rules.
-- **Tool guardrails**: User-editable shell command rules under `~/.octop/security/tool_guard/`.
+- **Tool guardrails**: User-editable shell command rules under `~/.voyagestar/security/tool_guard/`.
 - **No vendor lock-in**: Swap LLM providers, storage backends, and channels without rewriting agents.
 
 ## 🤝 Contributing
@@ -543,6 +543,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 Thanks to all contributors:
 
-<a href="https://github.com/tencentcloud/octop/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=tencentcloud/octop" />
+<a href="https://github.com/chisaalter/voyagestar/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=chisaalter/voyagestar" />
 </a>

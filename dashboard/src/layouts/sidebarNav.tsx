@@ -19,7 +19,7 @@ import {
   Shield,
   PanelsTopLeft,
 } from "lucide-react";
-import type { OctopUser } from "../api/modules/auth";
+import type { VoyagestarUser } from "../api/modules/auth";
 import { navAllowed, userCan } from "../utils/permissions";
 
 export const EXPANDED_WIDTH = 220;
@@ -72,7 +72,7 @@ export function isGroupedNavKey(key: string): boolean {
 }
 
 export function buildNavSections(
-  user: OctopUser | null,
+  user: VoyagestarUser | null,
   opts?: { mobileEnabled?: boolean },
 ): NavSection[] {
   const sections: NavSection[] = [

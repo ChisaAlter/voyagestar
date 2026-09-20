@@ -10,9 +10,9 @@ from typing import Any
 import httpx
 import pytest
 
-import octop.infra.voice.adapters as voice_adapters
-from octop.infra.db.repos.voice_providers import VoiceProviderRow
-from octop.infra.voice.adapters import (
+import voyagestar.infra.voice.adapters as voice_adapters
+from voyagestar.infra.db.repos.voice_providers import VoiceProviderRow
+from voyagestar.infra.voice.adapters import (
     MIMO_PRESET_VOICES,
     _normalize_mimo_voice,
     _wav_header,

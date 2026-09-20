@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from octop.infra.utils.host_dirs import (
+from voyagestar.infra.utils.host_dirs import (
     assert_safe_host_path,
     host_home_dir,
     is_within_host_home,
@@ -75,10 +75,10 @@ def test_assert_safe_host_path_rejects_private_etc_symlink() -> None:
 def test_assert_safe_host_path_rejects_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Deny /root only when it is not the process home (non-root Octop).
+    # Deny /root only when it is not the process home (non-root Voyagestar).
     home = tmp_path / "os_home"
     home.mkdir()
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: home)
     with pytest.raises(ValueError, match="not allowed"):
         assert_safe_host_path("/root")
 
@@ -87,13 +87,13 @@ def test_assert_safe_host_path_rejects_root(
 def test_assert_safe_host_path_allows_root_when_home(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Octop running as uid 0 uses /root as home; default root_dir must probe OK."""
+    """Voyagestar running as uid 0 uses /root as home; default root_dir must probe OK."""
     root_home = Path("/root")
     if not root_home.is_dir():
         pytest.skip("/root not available")
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: root_home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: root_home)
     assert assert_safe_host_path("/root") == root_home.resolve()
-    nested = root_home / ".octop"
+    nested = root_home / ".voyagestar"
     # Nested path under home is allowed even if the parent is denylisted for others.
     assert assert_safe_host_path(str(nested)) == nested.resolve()
 
@@ -106,7 +106,7 @@ def test_list_host_subdirs_includes_root_home_when_denied_prefix(
     root_home = Path("/root")
     if not root_home.is_dir() or not os.access(root_home, os.R_OK | os.X_OK):
         pytest.skip("/root not readable")
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: root_home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: root_home)
 
     entries = list_host_subdirs("/")
     paths = {item["path"] for item in entries}
@@ -119,7 +119,7 @@ def test_list_host_subdirs_hides_root_when_not_home(
 ) -> None:
     home = tmp_path / "os_home"
     home.mkdir()
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: home)
 
     entries = list_host_subdirs("/")
     paths = {item["path"] for item in entries}
@@ -195,7 +195,7 @@ def test_is_within_host_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     nested.mkdir()
     outside = tmp_path / "other"
     outside.mkdir()
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: home)
 
     assert is_within_host_home(home.resolve())
     assert is_within_host_home(nested.resolve())
@@ -212,7 +212,7 @@ def test_assert_safe_host_path_restrict_to_home(
     nested.mkdir()
     outside = tmp_path / "other"
     outside.mkdir()
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: home)
 
     assert assert_safe_host_path(str(nested), restrict_to_home=True) == nested.resolve()
     with pytest.raises(ValueError, match="path outside home"):
@@ -228,7 +228,7 @@ def test_probe_host_root_dir_rejects_outside_home_when_restricted(
     home.mkdir()
     outside = tmp_path / "other"
     outside.mkdir()
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: home)
 
     result = probe_host_root_dir(str(outside), restrict_to_home=True)
     assert result["ok"] is False
@@ -255,30 +255,30 @@ def test_assert_safe_host_path_restrict_to_root(tmp_path: Path) -> None:
 def test_host_fs_tree_root_admin_posix(monkeypatch: pytest.MonkeyPatch) -> None:
     if os.name != "posix":
         pytest.skip("POSIX tree root")
-    home = Path("/tmp/octop-home-probe")
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: home)
-    from octop.infra.utils.host_dirs import host_fs_tree_root
+    home = Path("/tmp/voyagestar-home-probe")
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: home)
+    from voyagestar.infra.utils.host_dirs import host_fs_tree_root
 
     assert host_fs_tree_root(allow_outside_home=True) == "/"
     assert host_fs_tree_root(allow_outside_home=False) == home.resolve().as_posix()
 
 
 def test_running_in_container_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.infra.utils.host_dirs import running_in_container
+    from voyagestar.infra.utils.host_dirs import running_in_container
 
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "1")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "1")
     assert running_in_container() is True
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "0")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "0")
     assert running_in_container() is False
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "false")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "false")
     assert running_in_container() is False
 
 
 @posix_only
 def test_running_in_container_detects_dockerenv(monkeypatch: pytest.MonkeyPatch) -> None:
-    from octop.infra.utils.host_dirs import running_in_container
+    from voyagestar.infra.utils.host_dirs import running_in_container
 
-    monkeypatch.delenv("OCTOP_IN_CONTAINER", raising=False)
+    monkeypatch.delenv("VOYAGESTAR_IN_CONTAINER", raising=False)
 
     class _FakePath:
         def __init__(self, path: object) -> None:
@@ -287,23 +287,23 @@ def test_running_in_container_detects_dockerenv(monkeypatch: pytest.MonkeyPatch)
         def is_file(self) -> bool:
             return self._path == "/.dockerenv"
 
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path", _FakePath)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path", _FakePath)
     assert running_in_container() is True
 
 
 def test_default_host_root_dir_uses_fs_root_in_container(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from octop.infra.utils.host_dirs import default_host_root_dir, host_fs_tree_root
+    from voyagestar.infra.utils.host_dirs import default_host_root_dir, host_fs_tree_root
 
     home = tmp_path / "os_home"
     home.mkdir()
-    monkeypatch.setattr("octop.infra.utils.host_dirs.Path.home", lambda: home)
+    monkeypatch.setattr("voyagestar.infra.utils.host_dirs.Path.home", lambda: home)
 
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "0")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "0")
     assert default_host_root_dir(allow_outside_home=True) == home.resolve().as_posix()
 
-    monkeypatch.setenv("OCTOP_IN_CONTAINER", "1")
+    monkeypatch.setenv("VOYAGESTAR_IN_CONTAINER", "1")
     assert default_host_root_dir(allow_outside_home=True) == host_fs_tree_root(
         allow_outside_home=True
     )
