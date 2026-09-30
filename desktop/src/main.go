@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"sync"
 	"time"
 
@@ -19,25 +18,33 @@ import (
 //go:embed assets/*
 var assets embed.FS
 
-const trayDoubleClick = 400 * time.Millisecond
+type bootPhase string
+
+const (
+	phaseChecking  bootPhase = "checking"
+	phasePreparing bootPhase = "preparing"
+	phaseStarting  bootPhase = "starting"
+	phaseReady     bootPhase = "ready"
+	phaseError     bootPhase = "error"
+)
 
 // App is the Wails service bound to the shell UI.
 type App struct {
 	app            *application.App
 	window         *application.WebviewWindow
 	settingsWindow *application.WebviewWindow
+	tray           *trayUI
 	store          *settingsStore
 	sleep          *sleepGuard
 	cmd            *exec.Cmd
 	mu             sync.Mutex
 	quitting       bool
+	booting        bool
+	phase          bootPhase
+	bootMessage    string
 
 	windowReady     chan struct{}
 	windowReadyOnce sync.Once
-
-	trayClickMu    sync.Mutex
-	lastTrayClick  time.Time
-	trayClickTimer *time.Timer
 }
 
 func (a *App) ServiceName() string { return "desktop" }
@@ -97,6 +104,7 @@ func (a *App) SaveSettings(next Settings) (Settings, error) {
 	}
 	saved := a.store.get()
 	a.applyDashboardPrefs(saved)
+	a.applyShellLocale()
 	return saved, nil
 }
 
@@ -113,6 +121,33 @@ func (a *App) HideSettings() {
 
 func (a *App) Quit() {
 	a.requestQuit()
+}
+
+// Restart re-runs the boot sequence — wired to the splash error card.
+func (a *App) Restart() {
+	a.mu.Lock()
+	if a.booting {
+		a.mu.Unlock()
+		return
+	}
+	a.booting = true
+	a.mu.Unlock()
+	go func() {
+		defer func() {
+			a.mu.Lock()
+			a.booting = false
+			a.mu.Unlock()
+		}()
+		a.boot()
+	}()
+}
+
+// OpenDataDir reveals ~/.voyagestar in the OS file manager.
+func (a *App) OpenDataDir() error {
+	if a.app == nil {
+		return fmt.Errorf("application is not ready")
+	}
+	return a.app.Env.OpenFileManager(voyagestarHome(), false)
 }
 
 func (a *App) setAutostart(on bool) (bool, error) {
@@ -152,31 +187,58 @@ func jsonString(s string) string {
 	return string(b)
 }
 
-func (a *App) setStatus(msg string) {
+// emitBoot reports the boot phase + localized status to the splash page and
+// the tray status item.
+func (a *App) emitBoot(phase bootPhase, msg string) {
+	a.mu.Lock()
+	a.phase = phase
+	a.bootMessage = msg
+	a.mu.Unlock()
+	a.refreshTrayStatus()
 	if a.app == nil {
 		return
 	}
-	a.app.Event.Emit("desktop:status", msg)
+	a.app.Event.Emit("desktop:boot", map[string]string{
+		"phase":   string(phase),
+		"message": msg,
+	})
+}
+
+func (a *App) currentPhase() bootPhase {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.phase
+}
+
+// GetBootState lets the splash page pull the current boot state — events
+// emitted before its Events.On registration would otherwise be lost.
+func (a *App) GetBootState() map[string]string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return map[string]string{
+		"phase":   string(a.phase),
+		"message": a.bootMessage,
+	}
 }
 
 func (a *App) boot() {
-	locale := LocaleEN
-	if a.store != nil {
-		locale = a.store.get().Locale
-	}
+	s := a.store.get()
+	locale := s.Locale
 	if url := os.Getenv("VOYAGESTAR_DESKTOP_URL"); url != "" {
-		a.setStatus(desktopText(locale, copyStatusConnecting))
+		a.emitBoot(phaseStarting, desktopText(locale, copyStatusConnecting))
 		if err := waitHealth(locale, url, 60*time.Second); err != nil {
-			a.setStatus(err.Error())
+			a.emitBoot(phaseError, err.Error())
 			return
 		}
+		a.emitBoot(phaseReady, desktopText(locale, copyStatusReady))
 		a.showDashboard(url)
 		return
 	}
-	s := a.store.get()
-	a.setStatus(desktopText(locale, copyStatusCheckingRuntime))
-	if err := ensurePortable(locale, a.setStatus); err != nil {
-		a.setStatus(err.Error())
+	a.emitBoot(phaseChecking, desktopText(locale, copyStatusCheckingRuntime))
+	if err := ensurePortable(locale, func(msg string) {
+		a.emitBoot(phasePreparing, msg)
+	}); err != nil {
+		a.emitBoot(phaseError, err.Error())
 		return
 	}
 	root := portableDir()
@@ -186,15 +248,16 @@ func (a *App) boot() {
 	a.cmd = cmd
 	a.mu.Unlock()
 	if err != nil {
-		a.setStatus(err.Error())
+		a.emitBoot(phaseError, err.Error())
 		return
 	}
 	base := dashboardURL(s.Port)
-	a.setStatus(desktopText(locale, copyStatusStartingService))
+	a.emitBoot(phaseStarting, desktopText(locale, copyStatusStartingService))
 	if err := waitHealth(locale, base, 2*time.Minute); err != nil {
-		a.setStatus(err.Error())
+		a.emitBoot(phaseError, err.Error())
 		return
 	}
+	a.emitBoot(phaseReady, desktopText(locale, copyStatusReady))
 	a.showDashboard(base)
 }
 
@@ -234,13 +297,11 @@ func (a *App) showDashboard(base string) {
 		}
 		a.window.SetURL(base)
 	}()
-	a.scheduleDragOverlay()
 	s := a.store.get()
 	go func() {
 		time.Sleep(800 * time.Millisecond)
 		a.applyDashboardPrefs(s)
 	}()
-	a.setStatus(desktopText(s.Locale, copyStatusReady))
 }
 
 func (a *App) hideToTray() {
@@ -261,6 +322,18 @@ func (a *App) showWindow() {
 	a.window.Focus()
 }
 
+func (a *App) showSettings() {
+	if a.settingsWindow == nil {
+		return
+	}
+	if a.settingsWindow.IsMinimised() {
+		a.settingsWindow.UnMinimise()
+	}
+	a.settingsWindow.Show()
+	a.settingsWindow.Center()
+	a.settingsWindow.Focus()
+}
+
 func (a *App) toggleMainWindow() {
 	if a.window == nil {
 		return
@@ -272,48 +345,6 @@ func (a *App) toggleMainWindow() {
 	a.showWindow()
 }
 
-func (a *App) onTrayLeftClick() {
-	a.trayClickMu.Lock()
-	defer a.trayClickMu.Unlock()
-	if a.trayClickTimer != nil {
-		a.trayClickTimer.Stop()
-		a.trayClickTimer = nil
-	}
-	now := time.Now()
-	if !a.lastTrayClick.IsZero() && now.Sub(a.lastTrayClick) < trayDoubleClick {
-		a.lastTrayClick = time.Time{}
-		go a.toggleMainWindow()
-		return
-	}
-	a.lastTrayClick = now
-	a.trayClickTimer = time.AfterFunc(trayDoubleClick, func() {
-		a.trayClickMu.Lock()
-		a.trayClickTimer = nil
-		a.trayClickMu.Unlock()
-		a.showWindow()
-	})
-}
-
-func (a *App) installDragOverlay() {
-	if a.window == nil {
-		return
-	}
-	a.window.ExecJS(dragOverlayJS())
-}
-
-func (a *App) scheduleDragOverlay() {
-	go func() {
-		for range 40 {
-			time.Sleep(250 * time.Millisecond)
-			if !a.isWindowReady() {
-				continue
-			}
-			a.installDragOverlay()
-			a.installExternalLinks()
-		}
-	}()
-}
-
 func (a *App) requestQuit() {
 	a.mu.Lock()
 	a.quitting = true
@@ -323,12 +354,133 @@ func (a *App) requestQuit() {
 	}
 }
 
+// applyShellLocale re-applies window titles and tray copy after a locale change.
+func (a *App) applyShellLocale() {
+	locale := a.store.get().Locale
+	if a.window != nil {
+		a.window.SetTitle(desktopText(locale, copyAppName))
+	}
+	if a.settingsWindow != nil {
+		a.settingsWindow.SetTitle(desktopText(locale, copySettingsTitle))
+	}
+	a.refreshTrayCopy()
+}
+
+func shellBackground(dark bool) application.RGBA {
+	if dark {
+		return application.NewRGB(14, 14, 14)
+	}
+	return application.NewRGB(245, 246, 248)
+}
+
+func settingsBackground(dark bool) application.RGBA {
+	if dark {
+		return application.NewRGB(20, 20, 20)
+	}
+	return application.NewRGB(255, 255, 255)
+}
+
+func (a *App) applyTheme(dark bool) {
+	if a.window != nil {
+		a.window.SetBackgroundColour(shellBackground(dark))
+	}
+	if a.settingsWindow != nil {
+		a.settingsWindow.SetBackgroundColour(settingsBackground(dark))
+	}
+}
+
+func (a *App) watchTheme() {
+	onChange := func(_ *application.ApplicationEvent) {
+		if a.app != nil {
+			a.applyTheme(a.app.Env.IsDarkMode())
+		}
+	}
+	a.app.Event.OnApplicationEvent(events.Common.ThemeChanged, onChange)
+	a.app.Event.OnApplicationEvent(events.Windows.SystemThemeChanged, onChange)
+	a.app.Event.OnApplicationEvent(events.Mac.ApplicationDidChangeTheme, onChange)
+	a.app.Event.OnApplicationEvent(events.Linux.SystemThemeChanged, onChange)
+}
+
+// createWindows builds both webview windows once the app is running so the
+// frameless background can match the live system theme (Env.IsDarkMode needs
+// the platform impl, which only exists after Run()).
+func (a *App) createWindows() {
+	locale := a.store.get().Locale
+	dark := a.app.Env.IsDarkMode()
+
+	win := a.app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:                desktopText(locale, copyAppName),
+		Width:                1200,
+		Height:               800,
+		URL:                  "/",
+		Frameless:            true,
+		AllowSimpleEventEmit: true,
+		BackgroundColour:     shellBackground(dark),
+	})
+	a.window = win
+	a.app.Event.On("desktop:toggle-maximise", func(_ *application.CustomEvent) {
+		win.ToggleMaximise()
+	})
+	a.app.Event.On("desktop:minimise", func(_ *application.CustomEvent) {
+		win.Minimise()
+	})
+	a.app.Event.On("desktop:close", func(_ *application.CustomEvent) {
+		a.hideToTray()
+	})
+	markReady := func(_ *application.WindowEvent) {
+		a.markWindowReady()
+	}
+	win.OnWindowEvent(events.Mac.WebViewDidFinishNavigation, markReady)
+	win.OnWindowEvent(events.Windows.WebViewNavigationCompleted, markReady)
+	win.OnWindowEvent(events.Linux.WindowLoadFinished, markReady)
+
+	settingsWin := a.app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:            desktopText(locale, copySettingsTitle),
+		Width:            settingsWindowWidth,
+		Height:           settingsWindowOuterHeight(),
+		URL:              "/settings.html",
+		Hidden:           true,
+		Frameless:        true,
+		DisableResize:    true,
+		BackgroundColour: settingsBackground(dark),
+		Windows: application.WindowsWindow{
+			HiddenOnTaskbar: true,
+		},
+	})
+	a.settingsWindow = settingsWin
+	a.app.Event.RegisterApplicationEventHook(events.Mac.ApplicationShouldHandleReopen, func(event *application.ApplicationEvent) {
+		event.Cancel()
+		restoreMainAfterDockClick(a.window, a.settingsWindow)
+	})
+
+	win.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
+		a.mu.Lock()
+		quit := a.quitting
+		a.mu.Unlock()
+		if quit {
+			return
+		}
+		e.Cancel()
+		a.hideToTray()
+	})
+	win.OnWindowEvent(events.Common.WindowMinimise, func(_ *application.WindowEvent) {
+		if a.store.get().MinimizeToTray {
+			a.hideToTray()
+		}
+	})
+	settingsWin.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
+		e.Cancel()
+		settingsWin.Hide()
+	})
+}
+
 func main() {
 	store := &settingsStore{cur: loadSettings()}
 	api := &App{
 		store:       store,
 		sleep:       &sleepGuard{},
 		windowReady: make(chan struct{}),
+		phase:       phaseChecking,
 	}
 
 	app := application.New(application.Options{
@@ -352,100 +504,20 @@ func main() {
 	})
 	api.app = app
 	attachOpenURLEventListener(app, api.OpenExternal)
+
 	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(_ *application.ApplicationEvent) {
 		applyAppIcon(app)
-	})
-
-	win := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:                "远航星Sanctum",
-		Width:                1200,
-		Height:               800,
-		URL:                  "/",
-		Frameless:            true,
-		AllowSimpleEventEmit: true,
-		BackgroundColour:     application.NewRGB(247, 248, 250),
-	})
-	api.window = win
-	app.Event.On("desktop:toggle-maximise", func(_ *application.CustomEvent) {
-		win.ToggleMaximise()
-	})
-	app.Event.On("desktop:minimise", func(_ *application.CustomEvent) {
-		win.Minimise()
-	})
-	app.Event.On("desktop:close", func(_ *application.CustomEvent) {
-		api.hideToTray()
-	})
-	installDragOverlay := func(_ *application.WindowEvent) {
-		api.markWindowReady()
-		api.scheduleDragOverlay()
-	}
-	win.OnWindowEvent(events.Mac.WebViewDidFinishNavigation, installDragOverlay)
-	win.OnWindowEvent(events.Windows.WebViewNavigationCompleted, installDragOverlay)
-	win.OnWindowEvent(events.Linux.WindowLoadFinished, installDragOverlay)
-	settingsWin := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "远航星Sanctum 设置",
-		Width:            settingsWindowWidth,
-		Height:           settingsWindowOuterHeight(),
-		URL:              "/?settings=1",
-		Hidden:           true,
-		Frameless:        true,
-		AlwaysOnTop:      true,
-		DisableResize:    true,
-		BackgroundColour: application.NewRGB(255, 255, 255),
-		Windows: application.WindowsWindow{
-			HiddenOnTaskbar: true,
-		},
-	})
-	api.settingsWindow = settingsWin
-	app.Event.RegisterApplicationEventHook(events.Mac.ApplicationShouldHandleReopen, func(event *application.ApplicationEvent) {
-		event.Cancel()
-		restoreMainAfterDockClick(api.window, api.settingsWindow)
-	})
-
-	win.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
-		api.mu.Lock()
-		quit := api.quitting
-		api.mu.Unlock()
-		if quit {
-			return
+		api.createWindows()
+		api.installTray()
+		api.watchTheme()
+		if _, err := api.setAutostart(store.get().Autostart); err != nil {
+			log.Printf("sync autostart: %v", err)
 		}
-		e.Cancel()
-		api.hideToTray()
-	})
-	win.OnWindowEvent(events.Common.WindowMinimise, func(_ *application.WindowEvent) {
-		if api.store.get().MinimizeToTray {
-			api.hideToTray()
+		if err := api.sleep.set(store.get().PreventSleep); err != nil {
+			log.Printf("enable sleep prevention: %v", err)
 		}
+		api.Restart()
 	})
-	settingsWin.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
-		e.Cancel()
-		settingsWin.Hide()
-	})
-	settingsWin.OnWindowEvent(events.Common.WindowLostFocus, func(_ *application.WindowEvent) {
-		settingsWin.Hide()
-	})
-
-	tray := app.SystemTray.New()
-	applyTrayIcon(tray)
-	tray.SetTooltip("远航星Sanctum")
-	tray.AttachWindow(settingsWin).WindowOffset(6)
-	showSettings := func() { tray.ShowWindow() }
-	if trayLeftClickShowsSettings(runtime.GOOS) {
-		tray.OnClick(showSettings)
-	} else {
-		tray.OnClick(func() { api.onTrayLeftClick() })
-	}
-	tray.OnRightClick(showSettings)
-
-	if _, err := api.setAutostart(store.get().Autostart); err != nil {
-		log.Printf("sync autostart: %v", err)
-	}
-	if err := api.sleep.set(store.get().PreventSleep); err != nil {
-		log.Printf("enable sleep prevention: %v", err)
-	}
-
-	api.scheduleDragOverlay()
-	go api.boot()
 
 	if err := app.Run(); err != nil {
 		log.Fatal(err)

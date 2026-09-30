@@ -10,8 +10,6 @@ import shutil
 import subprocess
 import sys
 import time
-import urllib.error
-import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -21,7 +19,6 @@ from voyagestar.infra.utils.paths import PathLayout
 logger = logging.getLogger(__name__)
 
 _PACKAGE_NAME = "voyagestar"
-_PYPI_URL = f"https://pypi.org/pypi/{_PACKAGE_NAME}/json"
 _GREEN_PACKAGES_ENV = "VOYAGESTAR_GREEN_PACKAGES"
 
 _MIRRORS = [
@@ -136,26 +133,6 @@ def fetch_latest_pypi_version(
     return info.latest_stable
 
 
-def _usable_release_versions(data: dict[str, Any]) -> list[str]:
-    """Return PyPI ``releases`` keys that are not fully yanked."""
-    releases = data.get("releases")
-    if not isinstance(releases, dict):
-        return []
-    versions: list[str] = []
-    for raw_ver, files in releases.items():
-        ver = str(raw_ver)
-        if not ver:
-            continue
-        if (
-            isinstance(files, list)
-            and files
-            and all(isinstance(item, dict) and item.get("yanked") for item in files)
-        ):
-            continue
-        versions.append(ver)
-    return versions
-
-
 def pick_latest_versions(versions: list[str]) -> tuple[str | None, str | None]:
     """Return ``(latest_any, latest_stable)`` using PEP 440 order."""
     usable = [ver for ver in versions if ver]
@@ -168,37 +145,13 @@ def pick_latest_versions(versions: list[str]) -> tuple[str | None, str | None]:
 
 
 def fetch_pypi_info(timeout: int = 10) -> PyPIInfo | None:
-    """Fetch version and long description from the PyPI JSON API.
+    """Upstream release feed removed — always reports no update info.
 
     ``version`` is the newest release including pre-releases. ``latest_stable``
     is the newest non-pre-release (None when the index only has pre-releases).
     Returns None on any network or parse failure.
     """
-    try:
-        req = urllib.request.Request(
-            _PYPI_URL,
-            headers={"User-Agent": f"{_PACKAGE_NAME}-updater/1.0"},
-        )
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        info = data["info"]
-        versions = _usable_release_versions(data)
-        info_version = str(info["version"])
-        if info_version and info_version not in versions:
-            versions.append(info_version)
-        latest_any, latest_stable = pick_latest_versions(versions)
-        if latest_any is None:
-            latest_any = info_version
-            latest_stable = info_version if not is_prerelease(info_version) else None
-        return PyPIInfo(
-            version=latest_any,
-            latest_stable=latest_stable,
-            description=info.get("description"),
-            source="pypi.org",
-        )
-    except (urllib.error.URLError, TimeoutError, KeyError, json.JSONDecodeError) as exc:
-        logger.warning("failed to fetch PyPI info: %s", exc)
-        return None
+    return None
 
 
 def parse_changelog_for_version(description: str | None, version: str) -> str | None:

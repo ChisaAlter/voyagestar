@@ -37,4 +37,14 @@ describe("resolveChatSidebarDefaultOpen", () => {
     expect(resolveChatSidebarDefaultOpen("", 1400)).toBe(true);
     expect(resolveChatSidebarDefaultOpen("", 900)).toBe(false);
   });
+
+  it("defaults closed under amis palette when no preference", () => {
+    expect(resolveChatSidebarDefaultOpen(null, 1600, true)).toBe(false);
+    expect(resolveChatSidebarDefaultOpen(null, 768, true)).toBe(false);
+  });
+
+  it("stored preference still wins under amis palette", () => {
+    expect(resolveChatSidebarDefaultOpen("true", 1600, true)).toBe(true);
+    expect(resolveChatSidebarDefaultOpen("false", 1600, true)).toBe(false);
+  });
 });

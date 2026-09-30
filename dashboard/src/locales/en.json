@@ -3332,6 +3332,8 @@
     "themeSystem": "Follow System",
     "themeLight": "Light",
     "themeDark": "Dark",
+    "themeMist": "Pink Mist",
+    "themeStarry": "Starry Sky",
     "palette": {
       "rose": "Rose",
       "tech": "Tech",
@@ -3828,7 +3830,8 @@
     "description": "Terminal and browser surfaces for live interaction with your agents",
     "tabs": {
       "terminal": "Terminal",
-      "browser": "Browser"
+      "browser": "Browser",
+      "files": "Files"
     }
   },
   "remoteDesktopHub": {

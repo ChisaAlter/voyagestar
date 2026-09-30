@@ -689,6 +689,14 @@
     0 22px 46px var(--fn-color-brand-shadow);
 }
 
+/* Bundled amis themes: pink→blue gradient border while composing. */
+:global(html[data-palette="amis"]) .inputWrapper:focus-within {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--fn-bg-elevated), var(--fn-bg-elevated)) padding-box,
+    var(--fn-brand-gradient) border-box;
+}
+
 .textarea {
   min-height: 64px;
   font-size: 14px;
@@ -967,5 +975,203 @@
   &:hover {
     color: var(--fn-text-primary);
     background: var(--fn-bg-hover);
+  }
+}
+
+/* ---------- Amis (Ardot) surface pass ----------
+   The whole chat page floats on the mist/starry scene: main surfaces go
+   transparent, the history rail turns to glass, and the send button becomes
+   the circular pink control from the design. */
+:global(html[data-palette="amis"]) {
+  .chatPage,
+  .chatMain,
+  .chatContent,
+  .chatInput,
+  .askQuestionDock,
+  .chatTitleBar {
+    background: transparent;
+  }
+
+  .sidebarWrapper,
+  .sidebarWrapper.sidebarWrapperLayoutRail {
+    background: transparent;
+  }
+
+  .sidebar {
+    background: var(--fn-bg-glass);
+    backdrop-filter: blur(16px) saturate(1.15);
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  }
+
+  .inputWrapper {
+    background: var(--fn-bg-glass);
+    backdrop-filter: blur(16px) saturate(1.15);
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  }
+
+  .sendBtn {
+    border-radius: 50%;
+  }
+
+  /* Design header: clean (no divider) with persistent ghost edit/more
+     (pink @8% tint, r8) and the agent capsule pill on the right. */
+  .chatTitleBar::after {
+    display: none;
+  }
+
+  .chatTitleEditBtn {
+    opacity: 1;
+    pointer-events: auto;
+    border-radius: 8px;
+    background: rgba(223, 126, 153, 0.08);
+  }
+
+  .chatTitleAgentPill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 13px;
+    border-radius: 14px;
+    background: linear-gradient(
+      135deg,
+      rgba(223, 126, 153, 0.22),
+      rgba(122, 158, 206, 0.22)
+    );
+    flex-shrink: 0;
+  }
+
+  .chatTitleAgentDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #7a9ece;
+    flex-shrink: 0;
+  }
+
+  .chatTitleAgentName {
+    font-size: 12px;
+    color: var(--fn-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+
+  /* Card composer (design board 71:155): textarea fills the top of the
+     card; a toolbar row sits at the bottom — [+] [attach] [voice]
+     [reasoning pill] on the left, [model pill] [ring] [send] on the
+     right. Grid places the flattened actionsRow clusters explicitly. */
+  .inputWrapperCapsule {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    border-radius: 16px;
+    padding: 10px 12px 8px;
+
+    .imagePreviewBar {
+      grid-column: 1 / -1;
+    }
+
+    .mentionMenu,
+    .slashMenu {
+      grid-column: 1 / -1;
+    }
+
+    .actionsRow {
+      display: contents;
+    }
+
+    .inputRow {
+      grid-column: 1 / -1;
+      min-width: 0;
+      align-items: flex-start;
+    }
+
+    .secondaryActions {
+      grid-column: 1;
+      padding: 0;
+      gap: 6px;
+    }
+
+    .inputActions {
+      grid-column: 2;
+      justify-self: end;
+    }
+
+    .textarea {
+      min-height: 48px;
+      padding: 2px 4px 4px;
+    }
+
+    /* Design board: ghost icon buttons (no chrome) inside the card. */
+    .secondaryBtn {
+      width: 26px;
+      height: 26px;
+      border-color: transparent;
+      background: transparent;
+      border-radius: 13px;
+    }
+
+    .sendBtn {
+      width: 30px;
+      height: 30px;
+      border-radius: 15px;
+    }
+  }
+
+  /* Card toolbar pills (reasoning mode / model), board 89:8 / 89:11. */
+  .capsulePill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 8px 0 10px;
+    border: none;
+    border-radius: 13px;
+    background: var(--fn-color-brand-bg);
+    color: var(--fn-text-secondary);
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      color var(--fn-transition-fast),
+      background var(--fn-transition-fast);
+
+    &:hover {
+      color: var(--fn-text-brand);
+    }
+  }
+
+  .capsulePillLabel {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .capsulePlusBtn {
+    background: var(--fn-color-brand-bg);
+    color: var(--fn-color-brand);
+
+    &:hover {
+      background: var(--fn-color-brand-bg);
+      color: var(--fn-color-brand);
+    }
+  }
+
+  /* Blue-dot assistant avatar (board 71:136) and no user-side avatar. */
+  .avatarCol .expertAgentAvatar {
+    width: 28px !important;
+    height: 28px !important;
+    background: #7a9ece !important;
+
+    > * {
+      display: none;
+    }
+  }
+
+  .userBubble .avatarCol {
+    display: none;
   }
 }

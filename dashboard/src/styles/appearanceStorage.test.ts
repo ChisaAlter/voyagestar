@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 describe("appearanceStorage", () => {
-  it("defaults to system preference and rose palette", () => {
+  it("defaults to system preference and the default palette", () => {
     expect(readStoredAppearance().preference).toBe("system");
     expect(readStoredAppearance().palette).toBe(DEFAULT_PALETTE);
   });
@@ -86,6 +86,34 @@ describe("appearanceStorage", () => {
       palette: "custom",
       customColor: "#00aa55",
     });
+  });
+
+  it("normalizes a stored amis palette back to the default", () => {
+    // "amis" is pinned by the bundled mist/starry preferences and is not a
+    // pickable palette — a stored value only exists from the rebrand window
+    // where it was the default; light/dark must fall back to the original
+    // default palette.
+    localStorage.setItem(
+      THEME_STORAGE_KEY,
+      JSON.stringify({ preference: "light", palette: "amis" }),
+    );
+
+    const appearance = readStoredAppearance();
+    expect(appearance.preference).toBe("light");
+    expect(appearance.palette).toBe(DEFAULT_PALETTE);
+    expect(appearance.palette).not.toBe("amis");
+  });
+
+  it("round-trips bundled mist/starry preferences", () => {
+    writeStoredAppearance({ preference: "mist", palette: "teal" });
+    let appearance = readStoredAppearance();
+    expect(appearance.preference).toBe("mist");
+    expect(appearance.palette).toBe("teal");
+
+    writeStoredAppearance({ preference: "starry", palette: "rose" });
+    appearance = readStoredAppearance();
+    expect(appearance.preference).toBe("starry");
+    expect(appearance.palette).toBe("rose");
   });
 
   it("loadAppearanceOnBoot migrates legacy keys into unified JSON", () => {

@@ -9,6 +9,7 @@ export type ThemePalette =
   | "emerald"
   | "amber"
   | "slate"
+  | "amis"
   | "custom";
 
 export const VALID_PALETTES: ThemePalette[] = [
@@ -52,6 +53,7 @@ export const PALETTE_SWATCH: Record<ThemePalette, string> = {
   emerald: "#10B981",
   amber: "#F59E0B",
   slate: "#64748B",
+  amis: "#DF7E99",
   custom: DEFAULT_CUSTOM_COLOR, // live swatch is provided by the picker UI
 };
 
@@ -240,6 +242,27 @@ export const ANTD_BRAND_TOKENS: Record<
       colorPrimaryTextHover: "#CBD5E1",
       colorPrimaryTextActive: "#64748B",
       colorLink: "#94A3B8",
+    },
+  },
+  amis: {
+    light: {
+      colorPrimary: "#DF7E99",
+      colorPrimaryHover: "#D0698A",
+      colorPrimaryActive: "#BC5A75",
+      colorLink: "#7A9ECE",
+    },
+    dark: {
+      colorPrimary: "#EE9FB8",
+      colorPrimaryBg: "rgba(238, 159, 184, 0.14)",
+      colorPrimaryBgHover: "rgba(238, 159, 184, 0.2)",
+      colorPrimaryBorder: "rgba(238, 159, 184, 0.3)",
+      colorPrimaryBorderHover: "rgba(238, 159, 184, 0.4)",
+      colorPrimaryHover: "#F5BACB",
+      colorPrimaryActive: "#DF7E99",
+      colorPrimaryText: "#EE9FB8",
+      colorPrimaryTextHover: "#F5BACB",
+      colorPrimaryTextActive: "#EE9FB8",
+      colorLink: "#9FBCE8",
     },
   },
 };

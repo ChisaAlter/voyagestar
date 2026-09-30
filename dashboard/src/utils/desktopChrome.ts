@@ -14,7 +14,8 @@ export const WINDOW_CONTROLS_INSET: Record<DesktopChromeStyle, number> = {
 
 /** Right-edge overlay chrome (dock toolbar, etc.) to keep clear of caption buttons. */
 export const CHROME_END_PAD_ATTR = "data-voyagestar-chrome-end-pad";
-export const WINDOW_CONTROLS_SPACER_ATTR = "data-voyagestar-window-controls-spacer";
+export const WINDOW_CONTROLS_SPACER_ATTR =
+  "data-voyagestar-window-controls-spacer";
 
 /**
  * Dock toolbar already has 12px end padding. Subtract that plus 6px so the
@@ -109,6 +110,86 @@ export function shouldArmDesktopDrag(
   if (value === "no-drag") return false;
   if (value === "drag") return true;
   return event.clientY <= DESKTOP_TITLEBAR_DRAG_HEIGHT;
+}
+
+const OPEN_URL_EVENT_PREFIX = "wails:event:emit:desktop:open-url:";
+const EXTERNAL_LINK_DEDUPE_MS = 800;
+const EXTERNAL_LINKS_FLAG = "__VOYAGESTAR_EXTERNAL_LINKS_INSTALLED__";
+
+/** http/https/mailto URLs we may hand to the system browser. */
+export function isOpenableExternalUrl(raw: string, base: string): boolean {
+  if (!String(raw).trim()) return false;
+  try {
+    const parsed = new URL(String(raw), base);
+    const scheme = parsed.protocol.replace(":", "").toLowerCase();
+    if (scheme === "mailto") {
+      return Boolean(parsed.pathname || parsed.href.slice("mailto:".length));
+    }
+    return scheme === "http" || scheme === "https";
+  } catch {
+    return false;
+  }
+}
+
+function externalLinkFromEvent(event: Event): HTMLAnchorElement | null {
+  let node = event.target as Node | null;
+  if (node && node.nodeType === 3) node = node.parentNode;
+  if (!(node instanceof Element)) return null;
+  const link = node.closest("a[href][target]");
+  if (!link) return null;
+  const anchor = link as HTMLAnchorElement;
+  if (String(anchor.getAttribute("target")).toLowerCase() !== "_blank") {
+    return null;
+  }
+  if (anchor.hasAttribute("download")) return null;
+  return anchor;
+}
+
+/**
+ * Route `target="_blank"` activations (clicks and window.open) to the shell's
+ * `desktop:open-url:` event so links open in the system browser instead of a
+ * webview popup. Installed by the dashboard itself — the shell no longer
+ * injects this via ExecJS.
+ */
+export function installDesktopExternalLinks(
+  win: DesktopWindow = window as DesktopWindow,
+): boolean {
+  const invoke = win._wails?.invoke;
+  if (typeof invoke !== "function") return false;
+  const flagged = win as DesktopWindow & Record<string, unknown>;
+  if (flagged[EXTERNAL_LINKS_FLAG]) return false;
+  flagged[EXTERNAL_LINKS_FLAG] = true;
+
+  let lastUrl = "";
+  let lastAt = 0;
+  const openExternal = (url: string): boolean => {
+    if (!isOpenableExternalUrl(url, win.location?.href ?? "")) return false;
+    const now = Date.now();
+    if (url === lastUrl && now - lastAt < EXTERNAL_LINK_DEDUPE_MS) return true;
+    lastUrl = url;
+    lastAt = now;
+    invoke(OPEN_URL_EVENT_PREFIX + encodeURIComponent(url));
+    return true;
+  };
+  const onActivate = (event: Event) => {
+    const mouse = event as MouseEvent;
+    if (mouse.button != null && mouse.button !== 0) return;
+    const link = externalLinkFromEvent(event);
+    if (!link) return;
+    if (!openExternal(link.href)) return;
+    event.preventDefault();
+  };
+  win.document.addEventListener("click", onActivate, true);
+  win.document.addEventListener("pointerdown", onActivate, true);
+  const origOpen = win.open?.bind(win);
+  win.open = (url?: string | URL, target?: string, features?: string) => {
+    const name = target == null ? "_blank" : String(target);
+    if (url && name.toLowerCase() === "_blank" && openExternal(String(url))) {
+      return null;
+    }
+    return origOpen ? origOpen(url, target, features) : null;
+  };
+  return true;
 }
 
 /**

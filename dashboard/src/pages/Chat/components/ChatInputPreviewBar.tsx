@@ -29,6 +29,8 @@ interface ChatInputPreviewBarProps {
   onConnectorsChange?: (names: string[]) => void;
   onKnowledgeBaseIdsChange?: (ids: string[]) => void;
   onModelChange?: (model: string | null) => void;
+  /** Capsule composer: model already shows as a toolbar pill — skip the chip. */
+  hideModelChip?: boolean;
 }
 
 function ComposerImagePreview({
@@ -99,12 +101,14 @@ export default function ChatInputPreviewBar({
   onKnowledgeBaseIdsChange,
   selectedModel,
   onModelChange,
+  hideModelChip = false,
 }: ChatInputPreviewBarProps) {
   // Show the chip whenever a model is explicitly selected, mirroring how
   // connectors behave — not only when it differs from the
   // agent default (that was the old "override" behavior).
   const selectedModelValue = (selectedModel || "").trim();
-  const showModelChip = selectedModelValue.length > 0 && !!onModelChange;
+  const showModelChip =
+    !hideModelChip && selectedModelValue.length > 0 && !!onModelChange;
 
   const hasContent =
     attachments.length > 0 ||

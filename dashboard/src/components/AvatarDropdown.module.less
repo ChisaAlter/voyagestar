@@ -130,11 +130,27 @@
   transition: background var(--fn-transition-fast);
 }
 
-.triggerName {
+.triggerNameBlock {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.triggerName {
   min-width: 0;
   font-size: 13px;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.triggerRole {
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--fn-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   applyDesktopChrome,
+  installDesktopExternalLinks,
   installDesktopWindowDrag,
   isDesktopShell,
   resolveDesktopChromeStyle,
@@ -27,6 +28,7 @@ export function useDesktopChrome(): DesktopChromeStyle | null {
       const next = resolveDesktopChromeStyle();
       applyDesktopChrome(next);
       installDesktopWindowDrag();
+      installDesktopExternalLinks();
       setStyle(next);
       return true;
     };

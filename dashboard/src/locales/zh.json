@@ -3329,6 +3329,8 @@
     "themeSystem": "跟随系统",
     "themeLight": "浅色",
     "themeDark": "深色",
+    "themeMist": "雾面粉蓝",
+    "themeStarry": "星空粉蓝",
     "palette": {
       "rose": "玫瑰",
       "tech": "科技",
@@ -3968,7 +3970,8 @@
     "description": "终端与浏览器合一，实时查看并接管 Agent 的执行面",
     "tabs": {
       "terminal": "终端",
-      "browser": "浏览器"
+      "browser": "浏览器",
+      "files": "文件"
     }
   },
   "remoteDesktopHub": {

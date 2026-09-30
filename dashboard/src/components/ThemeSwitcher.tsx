@@ -1,14 +1,15 @@
-import { Monitor, Sun, Moon } from "lucide-react";
+import { Monitor, Sun, Moon, CloudSun, Stars } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { Tooltip } from "antd";
 import { useTranslation } from "react-i18next";
-
-type ThemePreference = "system" | "light" | "dark";
+import type { ThemePreference } from "../context/ThemeContext";
 
 const options: { key: ThemePreference; Icon: typeof Monitor }[] = [
   { key: "system", Icon: Monitor },
   { key: "light", Icon: Sun },
   { key: "dark", Icon: Moon },
+  { key: "mist", Icon: CloudSun },
+  { key: "starry", Icon: Stars },
 ];
 
 interface ThemeSwitcherProps {
@@ -23,6 +24,8 @@ export default function ThemeSwitcher({ compact }: ThemeSwitcherProps) {
     system: t("header.themeSystem"),
     light: t("header.themeLight"),
     dark: t("header.themeDark"),
+    mist: t("header.themeMist"),
+    starry: t("header.themeStarry"),
   };
 
   const btnSize = compact ? 26 : 32;

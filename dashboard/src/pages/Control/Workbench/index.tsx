@@ -1,24 +1,29 @@
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Globe, TerminalSquare } from "lucide-react";
+import { FolderOpen, Globe, TerminalSquare } from "lucide-react";
 import PageShell from "../../../layouts/PageShell";
 import { usePathTabs } from "../../../hooks/usePathTabs";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
-import { userCan } from "../../../utils/permissions";
+import { useAgent } from "../../../context/AgentContext";
+import { userCan, userCanAny, PERM } from "../../../utils/permissions";
+import { useTheme } from "../../../context/ThemeContext";
 import TerminalPage from "../Terminal";
 import RemoteBrowserPage from "../RemoteBrowser";
+import WorkspaceDrawer from "../../Agent/Workspace/components/WorkspaceDrawer";
 import styles from "./index.module.less";
 
-export type WorkbenchTab = "terminal" | "browser";
+export type WorkbenchTab = "terminal" | "browser" | "files";
 
 const WORKBENCH_TABS = [
-  "browser",
   "terminal",
+  "browser",
+  "files",
 ] as const satisfies readonly WorkbenchTab[];
 
 const TAB_ICONS = {
   browser: Globe,
   terminal: TerminalSquare,
+  files: FolderOpen,
 } as const;
 
 interface WorkbenchPageProps {
@@ -31,13 +36,19 @@ export default function WorkbenchPage({
 }: WorkbenchPageProps) {
   const { t } = useTranslation();
   const user = useCurrentUser();
+  const { activeAgentId } = useAgent();
+  const { palette } = useTheme();
+  const amis = palette === "amis";
   const isAllowed = useCallback(
-    (tab: WorkbenchTab) => userCan(user, tab),
+    (tab: WorkbenchTab) =>
+      tab === "files" ? userCanAny(user, PERM.workbench) : userCan(user, tab),
     [user],
   );
-  const defaultTab: WorkbenchTab = userCan(user, "browser")
+  const defaultTab: WorkbenchTab = userCan(user, "terminal")
+    ? "terminal"
+    : userCan(user, "browser")
     ? "browser"
-    : "terminal";
+    : "files";
 
   const { activeTab, handleTabChange, isMounted } = usePathTabs({
     basePath: "/workbench",
@@ -57,26 +68,28 @@ export default function WorkbenchPage({
           return {
             value,
             label: t(`workbench.tabs.${value}`),
-            icon: <Icon size={14} strokeWidth={2} />,
+            icon: amis ? null : <Icon size={14} strokeWidth={2} />,
           };
         },
       ),
     }),
-    [activeTab, handleTabChange, isAllowed, t],
+    [activeTab, handleTabChange, isAllowed, t, amis],
   );
 
   const browserVisible = isVisible && activeTab === "browser";
   const terminalVisible = isVisible && activeTab === "terminal";
-  const pageTitle = `${t("workbench.title")} / ${t(
-    `workbench.tabs.${activeTab}`,
-  )}`;
+  const pageTitle = amis
+    ? t("workbench.title")
+    : `${t("workbench.title")} / ${t(`workbench.tabs.${activeTab}`)}`;
 
   return (
     <PageShell
       title={pageTitle}
-      subtitle={t("workbench.description")}
+      subtitle={amis ? undefined : t("workbench.description")}
       fill
       pathTabs={pathTabs}
+      tabsBelowTitle={amis}
+      contentBare={amis}
     >
       <div className={styles.panels}>
         {isMounted("browser") && (
@@ -95,6 +108,17 @@ export default function WorkbenchPage({
             aria-hidden={activeTab !== "terminal"}
           >
             <TerminalPage embedded isVisible={terminalVisible} />
+          </div>
+        )}
+        {isMounted("files") && (
+          <div
+            className={styles.panel}
+            style={{ display: activeTab === "files" ? "flex" : "none" }}
+            aria-hidden={activeTab !== "files"}
+          >
+            {activeAgentId ? (
+              <WorkspaceDrawer embedded agentId={activeAgentId} />
+            ) : null}
           </div>
         )}
       </div>

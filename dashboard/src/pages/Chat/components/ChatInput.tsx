@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { App } from "antd";
 
 import { useIsMobile } from "../../../hooks/useIsMobile";
+import { useTheme } from "../../../context/ThemeContext";
 import { useSlashCommands } from "../../../hooks/useSlashCommands";
 import SlashCommandMenu from "./SlashCommandMenu";
 import { agentChatApi } from "../../../api/modules/agentChat";
@@ -174,6 +175,8 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
     const { commands: slashCommands, labelFor } = useSlashCommands("ui");
     const skillDisplayName = useSkillDisplayName();
     const isMobile = useIsMobile();
+    const { palette } = useTheme();
+    const composerMinimal = palette === "amis" && !isMobile;
     useKeyboardOffset();
     const [text, setText] = useState(
       () => initialText || readInputDraft(agentId, threadId),
@@ -708,7 +711,11 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
             onReclaim={handleReclaimQueued}
           />
         )}
-        <div className={styles.inputWrapper}>
+        <div
+          className={`${styles.inputWrapper} ${
+            composerMinimal ? styles.inputWrapperCapsule : ""
+          }`}
+        >
           <ChatInputPreviewBar
             attachments={attachments}
             uploading={uploading}
@@ -721,6 +728,7 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
             selectedKnowledgeBaseIds={selectedKnowledgeBaseIds}
             onKnowledgeBaseIdsChange={onKnowledgeBaseIdsChange}
             onModelChange={onModelChange}
+            hideModelChip={composerMinimal}
           />
 
           <div className={styles.inputRow} style={{ position: "relative" }}>
@@ -821,6 +829,7 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
 
           <ChatInputActionsRow
             isMobile={isMobile}
+            minimalControls={composerMinimal}
             isStreaming={isStreaming}
             disabled={disabled}
             canSend={canSend}

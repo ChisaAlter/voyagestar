@@ -6,8 +6,10 @@ import {
   CHROME_END_PAD_ATTR,
   chromeEndPadValue,
   emitDesktopWindowAction,
+  installDesktopExternalLinks,
   installDesktopWindowDrag,
   isDesktopShell,
+  isOpenableExternalUrl,
   resolveDesktopChromeStyle,
   shouldArmDesktopDrag,
   titleRowEndPadding,
@@ -18,10 +20,23 @@ import {
   DOCK_WINDOW_CONTROLS_PAD_PX,
 } from "./desktopChrome";
 
+const OPEN_URL_PREFIX = "wails:event:emit:desktop:open-url:";
+const EXTERNAL_LINKS_FLAG = "__VOYAGESTAR_EXTERNAL_LINKS_INSTALLED__";
+
+function stubWailsBridge(): ReturnType<typeof vi.fn> {
+  const invoke = vi.fn();
+  Object.defineProperty(window, "_wails", {
+    configurable: true,
+    value: { invoke },
+  });
+  return invoke;
+}
+
 describe("desktopChrome", () => {
   afterEach(() => {
     applyDesktopChrome(null);
     delete document.documentElement.dataset.voyagestarDragReady;
+    delete (window as Record<string, unknown>)[EXTERNAL_LINKS_FLAG];
     vi.unstubAllGlobals();
   });
 
@@ -105,7 +120,9 @@ describe("desktopChrome", () => {
 
   it("writes the inset token on <html> and can clear it", () => {
     applyDesktopChrome("mac");
-    expect(document.documentElement.dataset.voyagestarDesktopChrome).toBe("mac");
+    expect(document.documentElement.dataset.voyagestarDesktopChrome).toBe(
+      "mac",
+    );
     expect(
       document.documentElement.style.getPropertyValue(
         "--window-controls-inset-end",
@@ -113,7 +130,9 @@ describe("desktopChrome", () => {
     ).toBe(`${WINDOW_CONTROLS_INSET.mac}px`);
 
     applyDesktopChrome(null);
-    expect(document.documentElement.dataset.voyagestarDesktopChrome).toBeUndefined();
+    expect(
+      document.documentElement.dataset.voyagestarDesktopChrome,
+    ).toBeUndefined();
     expect(
       document.documentElement.style.getPropertyValue(
         "--window-controls-inset-end",
@@ -190,6 +209,109 @@ describe("desktopChrome", () => {
     region.remove();
     delete document.documentElement.dataset.voyagestarDragReady;
     delete (window as Window & { _wails?: unknown })._wails;
+  });
+
+  it("accepts only http/https/mailto as openable external URLs", () => {
+    const base = "http://127.0.0.1:8088/";
+    expect(isOpenableExternalUrl("https://example.com", base)).toBe(true);
+    expect(isOpenableExternalUrl("http://example.com", base)).toBe(true);
+    expect(isOpenableExternalUrl("mailto:a@b.c", base)).toBe(true);
+    expect(isOpenableExternalUrl("javascript:alert(1)", base)).toBe(false);
+    expect(isOpenableExternalUrl("file:///etc/passwd", base)).toBe(false);
+    expect(isOpenableExternalUrl("mailto:", base)).toBe(false);
+    expect(isOpenableExternalUrl("", base)).toBe(false);
+  });
+
+  it("routes target=_blank clicks to the shell open-url event", () => {
+    const invoke = stubWailsBridge();
+    expect(installDesktopExternalLinks()).toBe(true);
+    expect(installDesktopExternalLinks()).toBe(false);
+
+    const link = document.createElement("a");
+    link.href = "https://example.com/docs";
+    link.target = "_blank";
+    document.body.appendChild(link);
+    const ev = new MouseEvent("click", {
+      button: 0,
+      bubbles: true,
+      cancelable: true,
+    });
+    link.dispatchEvent(ev);
+
+    expect(invoke).toHaveBeenCalledWith(
+      OPEN_URL_PREFIX + encodeURIComponent(link.href),
+    );
+    expect(ev.defaultPrevented).toBe(true);
+    link.remove();
+  });
+
+  it("ignores same-tab links, downloads, and secondary buttons", () => {
+    const invoke = stubWailsBridge();
+    installDesktopExternalLinks();
+
+    const sameTab = document.createElement("a");
+    sameTab.href = "https://example.com/a";
+    document.body.appendChild(sameTab);
+    const download = document.createElement("a");
+    download.href = "https://example.com/b";
+    download.target = "_blank";
+    download.setAttribute("download", "");
+    document.body.appendChild(download);
+    const blank = document.createElement("a");
+    blank.href = "https://example.com/c";
+    blank.target = "_blank";
+    document.body.appendChild(blank);
+
+    sameTab.dispatchEvent(
+      new MouseEvent("click", { button: 0, bubbles: true }),
+    );
+    download.dispatchEvent(
+      new MouseEvent("click", { button: 0, bubbles: true }),
+    );
+    blank.dispatchEvent(new MouseEvent("click", { button: 2, bubbles: true }));
+    expect(invoke).not.toHaveBeenCalled();
+
+    sameTab.remove();
+    download.remove();
+    blank.remove();
+  });
+
+  it("dedupes the pointerdown and click pair for one activation", () => {
+    const invoke = stubWailsBridge();
+    installDesktopExternalLinks();
+
+    const link = document.createElement("a");
+    link.href = "https://example.com/dedupe";
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.dispatchEvent(
+      new MouseEvent("pointerdown", { button: 0, bubbles: true }),
+    );
+    link.dispatchEvent(new MouseEvent("click", { button: 0, bubbles: true }));
+
+    expect(invoke).toHaveBeenCalledTimes(1);
+    link.remove();
+  });
+
+  it("intercepts window.open(_blank) and passes other targets through", () => {
+    const passthrough = vi.fn().mockReturnValue(null);
+    vi.stubGlobal("open", passthrough);
+    const invoke = stubWailsBridge();
+    installDesktopExternalLinks();
+
+    expect(window.open("https://example.com/popup", "_blank")).toBeNull();
+    expect(invoke).toHaveBeenCalledWith(
+      OPEN_URL_PREFIX + encodeURIComponent("https://example.com/popup"),
+    );
+
+    invoke.mockClear();
+    window.open("https://example.com/self", "_self");
+    expect(invoke).not.toHaveBeenCalled();
+    expect(passthrough).toHaveBeenCalledWith(
+      "https://example.com/self",
+      "_self",
+      undefined,
+    );
   });
 });
 

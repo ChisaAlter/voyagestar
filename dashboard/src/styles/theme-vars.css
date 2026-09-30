@@ -808,6 +808,181 @@ html[data-palette="slate"][data-theme="dark"] {
   --fn-sidebar-item-active-text: #94a3b8;
 }
 
+/* ---------- AMIS · 雾面粉蓝 (#DF7E99 × #7A9ECE) ----------
+   Bundled "mist"/"starry" themes: unified mist surface — layout and
+   sidebar go transparent so the body pink/blue collision gradient
+   shows through the whole app as one continuous surface. */
+html[data-palette="amis"]:not([data-theme="dark"]) {
+  --fn-bg-primary: rgba(255, 255, 255, 0.72);
+  --fn-bg-secondary: rgba(255, 255, 255, 0.52);
+  --fn-bg-tertiary: rgba(255, 255, 255, 0.6);
+  --fn-bg-elevated: rgba(255, 255, 255, 0.9);
+  --fn-bg-page-card: rgba(255, 255, 255, 0.72);
+  --fn-bg-layout: transparent;
+  --fn-bg-sidebar: transparent;
+  --fn-bg-glass: rgba(255, 255, 255, 0.62);
+  --fn-bg-toolbar: rgba(250, 251, 252, 0.6);
+  --fn-bg-hover: rgba(223, 126, 153, 0.06);
+  --fn-bg-active: rgba(223, 126, 153, 0.1);
+  --fn-bg-selected: rgba(223, 126, 153, 0.08);
+  --fn-text-brand: #c2607c;
+  --fn-logo-color: #df7e99;
+  --fn-border-focus: #df7e99;
+  --fn-color-brand: #df7e99;
+  --fn-color-brand-hover: #d0698a;
+  --fn-color-brand-soft: #7a9ece;
+  --fn-color-brand-bg: rgba(223, 126, 153, 0.07);
+  --fn-color-brand-light: #fbe9ee;
+  --fn-color-brand-shadow: rgba(223, 126, 153, 0.18);
+  --fn-color-brand-glow: rgba(223, 126, 153, 0.1);
+  --fn-brand-gradient: linear-gradient(
+    135deg,
+    #df7e99 0%,
+    #df7e99 55%,
+    #7a9ece 105%
+  );
+  --fn-color-info: #5f87c4;
+  --fn-color-info-border: #b4c9e8;
+  --fn-bg-info-light: #edf3fc;
+  --fn-assistant-bubble-bg-gradient: linear-gradient(
+    135deg,
+    rgba(251, 233, 238, 0.65) 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(237, 243, 252, 0.55) 100%
+  );
+  --fn-assistant-bubble-border: rgba(223, 126, 153, 0.14);
+  --fn-assistant-glow-color: 223, 126, 153;
+  --fn-tag-channel-text: #df7e99;
+  --fn-shadow-brand: 0 4px 14px rgba(223, 126, 153, 0.2);
+  --fn-shadow-brand-lg: 0 8px 24px rgba(223, 126, 153, 0.26);
+  --fn-row-selected-bg: rgba(223, 126, 153, 0.06);
+  --fn-row-selected-hover: rgba(223, 126, 153, 0.1);
+  --fn-row-selected-alt-bg: rgba(223, 126, 153, 0.05);
+  --fn-row-selected-alt-hover: rgba(223, 126, 153, 0.09);
+  --fn-row-selected-border: #df7e99;
+  --fn-sidebar-bg: transparent;
+  --fn-sidebar-border: transparent;
+  --fn-chat-divider: transparent;
+  --fn-sidebar-item-active-bg: rgba(223, 126, 153, 0.14);
+  --fn-sidebar-item-active: rgba(223, 126, 153, 0.12);
+  --fn-sidebar-item-active-text: #bc5a75;
+}
+
+html[data-palette="amis"][data-theme="dark"] {
+  --fn-bg-primary: rgba(19, 18, 42, 0.72);
+  --fn-bg-secondary: rgba(19, 18, 42, 0.5);
+  --fn-bg-tertiary: rgba(30, 30, 58, 0.55);
+  --fn-bg-elevated: rgba(24, 23, 52, 0.92);
+  --fn-bg-page-card: rgba(24, 23, 52, 0.8);
+  --fn-bg-layout: transparent;
+  --fn-bg-sidebar: transparent;
+  --fn-bg-glass: rgba(20, 18, 46, 0.62);
+  --fn-bg-toolbar: rgba(26, 25, 54, 0.6);
+  --fn-bg-code: rgba(10, 12, 30, 0.6);
+  --fn-bg-hover: rgba(238, 159, 184, 0.1);
+  --fn-bg-active: rgba(238, 159, 184, 0.16);
+  --fn-bg-selected: rgba(238, 159, 184, 0.12);
+  --fn-text-brand: #ee9fb8;
+  --fn-logo-color: #ee9fb8;
+  --fn-border-focus: #ee9fb8;
+  --fn-color-brand: #ee9fb8;
+  --fn-color-brand-hover: #f5bacb;
+  --fn-color-brand-soft: #9fbce8;
+  --fn-color-brand-bg: rgba(238, 159, 184, 0.14);
+  --fn-color-brand-light: rgba(238, 159, 184, 0.18);
+  --fn-color-brand-shadow: rgba(238, 159, 184, 0.28);
+  --fn-color-brand-glow: rgba(238, 159, 184, 0.1);
+  --fn-brand-gradient: linear-gradient(
+    135deg,
+    #ee9fb8 0%,
+    #ee9fb8 55%,
+    #9fbce8 105%
+  );
+  --fn-color-info: #9fbce8;
+  --fn-color-info-border: rgba(159, 188, 232, 0.35);
+  --fn-assistant-bubble-bg-gradient: linear-gradient(
+    135deg,
+    rgba(238, 159, 184, 0.12) 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(159, 188, 232, 0.1) 100%
+  );
+  --fn-assistant-bubble-border: rgba(238, 159, 184, 0.16);
+  --fn-assistant-glow-color: 238, 159, 184;
+  --fn-tag-channel-text: #ee9fb8;
+  --fn-shadow-brand: 0 4px 14px rgba(238, 159, 184, 0.24);
+  --fn-shadow-brand-lg: 0 8px 24px rgba(238, 159, 184, 0.32);
+  --fn-row-selected-bg: rgba(238, 159, 184, 0.12);
+  --fn-row-selected-hover: rgba(238, 159, 184, 0.18);
+  --fn-row-selected-alt-bg: rgba(238, 159, 184, 0.1);
+  --fn-row-selected-alt-hover: rgba(238, 159, 184, 0.15);
+  --fn-row-selected-border: #ee9fb8;
+  --fn-sidebar-bg: transparent;
+  --fn-sidebar-border: transparent;
+  --fn-chat-divider: transparent;
+  --fn-sidebar-item-active-bg: rgba(238, 159, 184, 0.16);
+  --fn-sidebar-item-active: rgba(238, 159, 184, 0.16);
+  --fn-sidebar-item-active-text: #ee9fb8;
+}
+
+/* Mist surface: white base, pink ~70% from top-left colliding with
+   blue ~30% at bottom-right along the ~1 o'clock diagonal. */
+html[data-palette="amis"]:not([data-theme="dark"]) body {
+  background: radial-gradient(
+      52rem 36rem at 16% 10%,
+      rgba(223, 126, 153, 0.3),
+      transparent 62%
+    ),
+    radial-gradient(
+      46rem 34rem at 42% 28%,
+      rgba(223, 126, 153, 0.14),
+      transparent 60%
+    ),
+    radial-gradient(
+      50rem 36rem at 88% 84%,
+      rgba(122, 158, 206, 0.32),
+      transparent 62%
+    ),
+    radial-gradient(
+      40rem 30rem at 68% 96%,
+      rgba(122, 158, 206, 0.16),
+      transparent 60%
+    ),
+    linear-gradient(
+      122deg,
+      #fdf3f5 0%,
+      #fbe6ec 38%,
+      #efe7f3 60%,
+      #dde8f8 82%,
+      #d3e1f6 100%
+    );
+}
+
+/* Dark surface: deep-space base + pink/blue nebulae (smooth, per the
+   Ardot dark boards — no star texture). */
+html[data-palette="amis"][data-theme="dark"] body {
+  background: radial-gradient(
+      50rem 36rem at 15% 10%,
+      rgba(238, 159, 184, 0.22),
+      transparent 60%
+    ),
+    radial-gradient(
+      46rem 34rem at 40% 25%,
+      rgba(238, 159, 184, 0.1),
+      transparent 58%
+    ),
+    radial-gradient(
+      52rem 38rem at 85% 80%,
+      rgba(159, 188, 232, 0.2),
+      transparent 62%
+    ),
+    linear-gradient(180deg, #0a0e24 0%, #141031 55%, #0d0a1f 100%);
+}
+
+/* Ardot brand area: wordmark only — version chips live in Settings/updates. */
+html[data-palette="amis"] .voyagestar-brand-badges {
+  display: none;
+}
+
 /* ---------- GLOBAL RESET & TRANSITIONS ---------- */
 html,
 body,
@@ -826,4 +1001,104 @@ html[data-theme="dark"] body {
 ::selection {
   background: var(--fn-color-brand);
   color: #ffffff;
+}
+
+/* ===================================================================
+   AMIS component skin — gradient controls + glass surfaces.
+   Only active while a bundled theme ("mist"/"starry") is selected.
+   =================================================================== */
+
+/* Gradient primary buttons */
+html[data-palette="amis"] .voyagestar-btn-primary {
+  background: var(--fn-brand-gradient);
+  border-color: transparent;
+  box-shadow: var(--fn-shadow-brand);
+}
+
+html[data-palette="amis"] .voyagestar-btn-primary:not(:disabled):hover {
+  background: var(--fn-brand-gradient);
+  border-color: transparent;
+  filter: brightness(1.07);
+}
+
+html[data-palette="amis"] .voyagestar-btn-primary:disabled {
+  opacity: 0.55;
+}
+
+/* Gradient switch */
+html[data-palette="amis"] .voyagestar-switch.voyagestar-switch-checked {
+  background: var(--fn-brand-gradient);
+}
+
+html[data-palette="amis"]
+  .voyagestar-switch.voyagestar-switch-checked:not(:disabled):hover {
+  background: var(--fn-brand-gradient);
+  filter: brightness(1.07);
+}
+
+/* Gradient progress bars */
+html[data-palette="amis"]
+  .voyagestar-progress
+  .voyagestar-progress-inner
+  .voyagestar-progress-bg {
+  background: var(--fn-brand-gradient);
+}
+
+/* Gradient slider track */
+html[data-palette="amis"] .voyagestar-slider .voyagestar-slider-track {
+  background: var(--fn-brand-gradient);
+}
+
+html[data-palette="amis"] .voyagestar-slider .voyagestar-slider-handle::after {
+  box-shadow: 0 0 0 2px var(--fn-color-brand);
+}
+
+/* Checkbox / radio */
+html[data-palette="amis"]
+  .voyagestar-checkbox-checked
+  .voyagestar-checkbox-inner {
+  background: var(--fn-brand-gradient);
+  border-color: transparent;
+}
+
+html[data-palette="amis"]
+  .voyagestar-radio-checked
+  .voyagestar-radio-inner::after {
+  background: var(--fn-brand-gradient);
+}
+
+/* Tabs ink bar + segmented selection */
+html[data-palette="amis"] .voyagestar-tabs-ink-bar {
+  background: var(--fn-brand-gradient);
+}
+
+html[data-palette="amis"]
+  .voyagestar-segmented
+  .voyagestar-segmented-item-selected {
+  background: var(--fn-brand-gradient);
+  color: #ffffff;
+}
+
+/* Gradient-bordered inputs on focus (border-box trick keeps glass fill) */
+html[data-palette="amis"] .voyagestar-input-outlined:focus,
+html[data-palette="amis"] .voyagestar-input-outlined.voyagestar-input-focused,
+html[data-palette="amis"] .voyagestar-input-affix-wrapper:focus-within,
+html[data-palette="amis"]
+  .voyagestar-select-focused
+  .voyagestar-select-selector,
+html[data-palette="amis"] .voyagestar-picker-focused {
+  border-color: transparent !important;
+  background:
+    linear-gradient(var(--fn-bg-elevated), var(--fn-bg-elevated)) padding-box,
+    var(--fn-brand-gradient) border-box !important;
+}
+
+/* Tag accents lean two-tone: pink brand tag + blue info tag already
+   come from tokens; keep selection chips on the pink side. */
+html[data-palette="amis"] .voyagestar-pagination-item-active {
+  border-color: var(--fn-color-brand);
+}
+
+html[data-palette="amis"] .voyagestar-pagination-item-active a {
+  color: var(--fn-color-brand);
 }

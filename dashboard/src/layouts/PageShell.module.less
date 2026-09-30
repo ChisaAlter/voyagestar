@@ -39,6 +39,34 @@
 }
 
 /**
+ * Desktop path tabs rendered as a strip between the title row and the
+ * content surface (Ardot layout: tabs sit directly above the card).
+ */
+.pathTabsTop {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+/* Ardot tab strip: items float on the canvas — no track behind them. */
+:global(html[data-palette="amis"]) .pathTabsTop :global(.voyagestar-segmented) {
+  background: transparent;
+  padding: 0;
+}
+
+:global(html[data-palette="amis"])
+  .pathTabsTop
+  :global(.voyagestar-segmented-item) {
+  padding: 0 18px;
+}
+
+:global(html[data-palette="amis"])
+  .pathTabsTop
+  :global(.voyagestar-segmented-item-label) {
+  font-size: 12px;
+  line-height: 29px;
+}
+
+/**
  * Pin Ant Design Tabs nav; only the active pane scrolls.
  * Use inside PageShell with `fill` (desktop).
  */

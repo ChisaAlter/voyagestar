@@ -174,6 +174,7 @@ export const routeConfigs: RouteConfig[] = [
   { path: "/workbench", element: null },
   { path: "/workbench/terminal", element: null },
   { path: "/workbench/browser", element: null },
+  { path: "/workbench/files", element: null },
   {
     path: "/terminal",
     element: <RedirectPreserveSearch to="/workbench/terminal" />,
@@ -254,7 +255,10 @@ export const routeConfigs: RouteConfig[] = [
     element: <Navigate to="/admin/security?tab=audit" replace />,
   },
   { path: "/voyagestar/cron", element: <Navigate to="/tasks" replace /> },
-  { path: "/voyagestar/channels", element: <Navigate to="/channels" replace /> },
+  {
+    path: "/voyagestar/channels",
+    element: <Navigate to="/channels" replace />,
+  },
   {
     path: "/voyagestar/admin/users",
     element: <Navigate to="/admin/users" replace />,

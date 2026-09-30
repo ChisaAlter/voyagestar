@@ -249,15 +249,20 @@ function toTreeNodes(infos: FileInfo[]): TreeDataNode[] {
 
 interface WorkspaceDrawerProps {
   agentId: string;
-  open: boolean;
-  onClose: () => void;
+  open?: boolean;
+  onClose?: () => void;
+  /** Render as an inline panel (Workbench files tab) instead of a Drawer. */
+  embedded?: boolean;
 }
 
 export default function WorkspaceDrawer({
   agentId,
-  open,
+  open: openProp,
   onClose,
+  embedded = false,
 }: WorkspaceDrawerProps) {
+  // Embedded panels are always "open" — the host controls visibility.
+  const open = embedded || openProp === true;
   const { t } = useTranslation();
   const { modal, message } = App.useApp();
   const isMobile = useIsMobile();
@@ -1146,22 +1151,8 @@ export default function WorkspaceDrawer({
     </div>
   );
 
-  return (
-    <Drawer
-      title={drawerTitle}
-      open={open}
-      onClose={onClose}
-      width={isMobile ? "100%" : "80vw"}
-      styles={{
-        body: {
-          padding: 0,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        },
-      }}
-      destroyOnHidden
-    >
+  const body = (
+    <>
       <Modal
         title={t("workspace.archiveImportTitle")}
         open={archiveImportOpen}
@@ -1551,6 +1542,35 @@ export default function WorkspaceDrawer({
           )}
         </div>
       )}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className={styles.workspaceEmbed}>
+        <div className={styles.embeddedHeader}>{drawerTitle}</div>
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <Drawer
+      title={drawerTitle}
+      open={open}
+      onClose={onClose}
+      width={isMobile ? "100%" : "80vw"}
+      styles={{
+        body: {
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        },
+      }}
+      destroyOnHidden
+    >
+      {body}
     </Drawer>
   );
 }

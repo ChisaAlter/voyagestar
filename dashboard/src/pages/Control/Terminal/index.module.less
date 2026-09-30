@@ -421,3 +421,20 @@
     }
   }
 }
+
+/* Amis (Ardot) — the terminal card is a dark rounded surface floating on the
+   scene gradient. Recolor the chrome-tab strip via the shared fn vars. */
+:global(html[data-palette="amis"]) {
+  .tabsCard {
+    --fn-bg-primary: #1c1e33;
+    --fn-bg-secondary: rgba(255, 255, 255, 0.05);
+    --fn-text-primary: rgba(240, 242, 255, 0.92);
+    --fn-text-secondary: rgba(240, 242, 255, 0.55);
+    --fn-text-tertiary: rgba(240, 242, 255, 0.4);
+    --fn-border-primary: rgba(255, 255, 255, 0.09);
+    --fn-border-secondary: rgba(255, 255, 255, 0.09);
+    background: #171a2e;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+  }
+}

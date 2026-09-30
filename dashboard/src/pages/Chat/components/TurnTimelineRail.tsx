@@ -222,12 +222,23 @@ export default function TurnTimelineRail({
   useEffect(() => {
     const scroller = getScroller();
     if (!scroller) return;
+    // Coalesce scroll events into one measurement per frame — measureActive
+    // does a getBoundingClientRect per turn bubble, so running it on every
+    // raw scroll event makes long conversations stutter.
+    let raf = 0;
     const onScroll = () => {
-      measureActive();
+      if (raf !== 0) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        measureActive();
+      });
     };
     measureActive();
     scroller.addEventListener("scroll", onScroll, { passive: true });
-    return () => scroller.removeEventListener("scroll", onScroll);
+    return () => {
+      scroller.removeEventListener("scroll", onScroll);
+      if (raf !== 0) window.cancelAnimationFrame(raf);
+    };
   }, [getScroller, measureActive, messages.length, useVirtual]);
 
   const activeIndex = useMemo(() => {

@@ -15,10 +15,12 @@ import type { Session } from "../hooks/useSessions";
 import SessionChannelIcon from "./SessionChannelIcon";
 import styles from "../index.module.less";
 import { DESKTOP_DRAG_REGION_CLASS } from "../../../utils/desktopChrome";
+import { useTheme } from "../../../context/ThemeContext";
 
 interface ChatTitleBarProps {
   session: Session;
   title: string;
+  agentName?: string;
   onRename: (id: string, name: string) => void;
   onPin: (id: string, pinned: boolean) => void;
   onFork: (id: string) => void;
@@ -30,6 +32,7 @@ interface ChatTitleBarProps {
 export default function ChatTitleBar({
   session,
   title,
+  agentName,
   onRename,
   onPin,
   onFork,
@@ -38,6 +41,7 @@ export default function ChatTitleBar({
   forkDisabledHint,
 }: ChatTitleBarProps) {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -177,6 +181,12 @@ export default function ChatTitleBar({
           </div>
         )}
       </div>
+      {palette === "amis" && agentName ? (
+        <div className={styles.chatTitleAgentPill} title={agentName}>
+          <span className={styles.chatTitleAgentDot} aria-hidden />
+          <span className={styles.chatTitleAgentName}>{agentName}</span>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Segmented, Typography } from "antd";
 import AgentSelector from "../components/AgentSelector";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { useTheme } from "../context/ThemeContext";
 import {
   titleRowEndPadding,
   DESKTOP_DRAG_REGION_CLASS,
@@ -38,6 +39,10 @@ interface PageShellProps {
   agentScoped?: boolean;
   /** When true, the content area does not scroll; children fill remaining height. */
   fill?: boolean;
+  /** Path tabs render as a strip between the title row and the content card. */
+  tabsBelowTitle?: boolean;
+  /** No card chrome on the content area — children provide their own surface. */
+  contentBare?: boolean;
   children: React.ReactNode;
 }
 
@@ -93,9 +98,13 @@ function PageShell({
   pathTabs,
   agentScoped,
   fill,
+  tabsBelowTitle,
+  contentBare,
   children,
 }: PageShellProps) {
   const isMobile = useIsMobile();
+  const { palette } = useTheme();
+  const amis = palette === "amis";
   const outerPad = isMobile ? 12 : 32;
   const outerPadTop = isMobile ? 12 : 24;
   const contentPad = isMobile ? 12 : 24;
@@ -103,7 +112,7 @@ function PageShell({
   const pinBody = Boolean(fill || (isMobile && pathTabs));
 
   const titleActions =
-    !isMobile && pathTabs ? (
+    !isMobile && pathTabs && !tabsBelowTitle ? (
       <>
         <PathTabsSegmented pathTabs={pathTabs} isMobile={false} />
         {actions}
@@ -137,17 +146,26 @@ function PageShell({
         }}
       >
         <div>
-          <Title
-            level={4}
+          <div
             style={{
-              margin: 0,
-              lineHeight: "28px",
-              fontSize: 20,
-              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
             }}
           >
-            {title}
-          </Title>
+            <Title
+              level={4}
+              style={{
+                margin: 0,
+                lineHeight: amis ? "22px" : "28px",
+                fontSize: amis ? 15 : 20,
+                fontWeight: 600,
+                flexShrink: 0,
+              }}
+            >
+              {title}
+            </Title>
+          </div>
           {subtitle && (
             <Text
               type="secondary"
@@ -175,9 +193,11 @@ function PageShell({
         className={DESKTOP_NO_DRAG_CLASS}
         style={{
           flex: 1,
-          background: "var(--fn-bg-container, var(--fn-bg-elevated))",
-          borderRadius: 8,
-          padding: contentPad,
+          background: contentBare
+            ? "transparent"
+            : "var(--fn-bg-page-card, var(--fn-bg-container, var(--fn-bg-elevated)))",
+          borderRadius: contentBare ? 0 : amis ? 14 : 8,
+          padding: contentBare ? 0 : contentPad,
           // Mobile: never create a page-level horizontal scrollbar; wide
           // tables scroll via antd scroll.x inside their own wrapper.
           overflowX: pinBody || isMobile ? "hidden" : "auto",
@@ -191,6 +211,11 @@ function PageShell({
         {isMobile && pathTabs && (
           <div className={styles.pathTabsMobile}>
             <PathTabsSegmented pathTabs={pathTabs} isMobile />
+          </div>
+        )}
+        {!isMobile && tabsBelowTitle && pathTabs && (
+          <div className={styles.pathTabsTop}>
+            <PathTabsSegmented pathTabs={pathTabs} isMobile={false} />
           </div>
         )}
         {children}

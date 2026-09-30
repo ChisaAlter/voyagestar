@@ -206,22 +206,10 @@ async def check_for_updates(
     server: Any = Depends(get_server),
 ) -> dict[str, Any]:
     stable_only = _read_stable_only(server)
-    pypi_info = await asyncio.to_thread(fetch_pypi_info)
-    if pypi_info is None:
-        return await asyncio.to_thread(
-            _build_status,
-            latest=None,
-            error="could not reach PyPI",
-            error_code="pypi_unreachable",
-            stable_only=stable_only,
-            include_prerelease=True,
-        )
+    # Upstream release feed removed: a manual check can never find a newer
+    # release, so report a clean up-to-date status instead of a fetch error.
     return await asyncio.to_thread(
         _build_status,
-        latest_any=pypi_info.version,
-        latest_stable=pypi_info.latest_stable,
-        source=pypi_info.source,
-        description=pypi_info.description,
         stable_only=stable_only,
         include_prerelease=True,
     )

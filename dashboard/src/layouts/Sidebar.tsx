@@ -167,10 +167,9 @@ function NavItemButton({
         }}
       >
         <span
+          className={styles.navIcon}
+          data-active={active || undefined}
           style={{
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
             color: active
               ? "var(--fn-sidebar-item-active-text)"
               : "var(--fn-text-tertiary)",
@@ -470,10 +469,10 @@ export default function Sidebar({
         }}
       />
       {!isRailCollapsed && !isMobile && (
-        <>
+        <span className="voyagestar-brand-badges">
           <CurrentVersionBadge isMobile={isMobile} />
           <AppVersionBadge isMobile={isMobile} />
-        </>
+        </span>
       )}
     </>
   );

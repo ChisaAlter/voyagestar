@@ -63,7 +63,17 @@ function resolveMode(pref: ThemePreference): ThemeMode {
       ? "dark"
       : "light";
   }
+  if (pref === "mist") return "light";
+  if (pref === "starry") return "dark";
   return pref;
+}
+
+/**
+ * Bundled theme preferences ("mist" / "starry") pin the amis palette while
+ * active; the stored palette is preserved and restored on exit.
+ */
+export function isBundledPreference(pref: ThemePreference): boolean {
+  return pref === "mist" || pref === "starry";
 }
 
 export function isDarkMode(mode: ThemeMode): boolean {
@@ -73,7 +83,10 @@ export function isDarkMode(mode: ThemeMode): boolean {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(() => {
     const stored = loadAppearanceOnBoot();
-    document.documentElement.setAttribute("data-palette", stored.palette);
+    document.documentElement.setAttribute(
+      "data-palette",
+      isBundledPreference(stored.preference) ? "amis" : stored.palette,
+    );
     return stored.preference;
   });
 
@@ -87,6 +100,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 
   const [mode, setMode] = useState<ThemeMode>(() => resolveMode(preference));
+
+  // Bundled themes override the stored palette with "amis" while active.
+  const effectivePalette: ThemePalette = isBundledPreference(preference)
+    ? "amis"
+    : palette;
 
   // Listen for system color scheme changes when preference is "system"
   useEffect(() => {
@@ -108,8 +126,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Persist preference + palette together (mode is derived, not stored)
   useEffect(() => {
     writeStoredAppearance({ preference, palette, customColor });
-    document.documentElement.setAttribute("data-palette", palette);
-  }, [preference, palette, customColor]);
+    document.documentElement.setAttribute("data-palette", effectivePalette);
+  }, [preference, palette, customColor, effectivePalette]);
 
   // Inject the runtime-derived CSS variables for the custom palette. The
   // style element is reused across renders; content updates on change.
@@ -137,13 +155,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     // Keep the PWA theme-color meta tag in sync with the resolved mode so
     // the browser chrome (address bar, status bar, PWA title bar) matches.
-    const themeColor = mode === "dark" ? "#1a1c28" : "#ffffff";
+    const themeColor =
+      mode === "dark"
+        ? effectivePalette === "amis"
+          ? "#0a0e24"
+          : "#1a1c28"
+        : effectivePalette === "amis"
+        ? "#fdf3f5"
+        : "#ffffff";
     document
       .querySelectorAll<HTMLMetaElement>("meta[name='theme-color']")
       .forEach((el) => {
         el.content = themeColor;
       });
-  }, [mode]);
+  }, [mode, effectivePalette]);
 
   const setPreference = useCallback((p: ThemePreference) => {
     setPreferenceState(p);
@@ -151,6 +176,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setPalette = useCallback((p: ThemePalette) => {
     setPaletteState(p);
+    // Picking a brand palette exits a bundled theme, keeping its mode.
+    setPreferenceState((prev) =>
+      isBundledPreference(prev) ? resolveMode(prev) : prev,
+    );
   }, []);
 
   const setCustomColor = useCallback((hex: string) => {
@@ -158,6 +187,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (normalized) {
       setCustomColorState(normalized);
       setPaletteState("custom");
+      setPreferenceState((prev) =>
+        isBundledPreference(prev) ? resolveMode(prev) : prev,
+      );
     }
   }, []);
 
@@ -165,6 +197,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setPreferenceState((prev) => {
       if (prev === "light") return "dark";
       if (prev === "dark") return "light";
+      if (prev === "mist") return "starry";
+      if (prev === "starry") return "mist";
       return mode === "light" ? "dark" : "light";
     });
   }, [mode]);
@@ -175,7 +209,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         mode,
         preference,
         setPreference,
-        palette,
+        palette: effectivePalette,
         setPalette,
         customColor,
         setCustomColor,

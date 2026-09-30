@@ -1093,6 +1093,7 @@ function ChatPageInner() {
               <ChatTitleBar
                 session={activeSession}
                 title={activeSessionTitle}
+                agentName={activeAgent?.name}
                 onRename={renameSession}
                 onPin={pinSession}
                 onFork={handleForkSession}

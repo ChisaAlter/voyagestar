@@ -8,7 +8,7 @@ import {
   type ThemePalette,
 } from "./themePalettes";
 
-export type ThemePreference = "system" | "light" | "dark";
+export type ThemePreference = "system" | "light" | "dark" | "mist" | "starry";
 
 export type StoredAppearance = {
   preference: ThemePreference;
@@ -17,7 +17,13 @@ export type StoredAppearance = {
   customColor?: string;
 };
 
-const VALID_PREFERENCES: ThemePreference[] = ["system", "light", "dark"];
+const VALID_PREFERENCES: ThemePreference[] = [
+  "system",
+  "light",
+  "dark",
+  "mist",
+  "starry",
+];
 
 function isPreference(value: unknown): value is ThemePreference {
   return (

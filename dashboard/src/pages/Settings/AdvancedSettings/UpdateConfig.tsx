@@ -27,8 +27,8 @@ import styles from "./UpdateConfig.module.less";
 
 /** Shell snippets shown in the manual upgrade guide (commands are locale-agnostic). */
 const UPGRADE_GUIDE_CODE = {
-  installerUnix: `curl -fsSL https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.sh | bash`,
-  installerWin: `irm https://finnie-1258344699.cos.ap-guangzhou.myqcloud.com/octop/install.ps1 | iex`,
+  installerUnix: `curl -fsSL https://raw.githubusercontent.com/ChisaAlter/voyagestar/main/scripts/install.sh | bash`,
+  installerWin: `irm https://raw.githubusercontent.com/ChisaAlter/voyagestar/main/scripts/install.ps1 | iex`,
   cli: `voyagestar update
 # or non-interactive:
 voyagestar update --yes

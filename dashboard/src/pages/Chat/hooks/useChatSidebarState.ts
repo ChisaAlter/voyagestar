@@ -11,14 +11,18 @@ export const CHAT_SIDEBAR_WIDE_BREAKPOINT = 1200;
 
 /**
  * Resolve initial open state: explicit localStorage preference wins;
- * otherwise default open on wide viewports only. Does not react to resize.
+ * otherwise default open on wide viewports only — except under the amis
+ * palette, where the design keeps the rail collapsed until toggled.
+ * Does not react to resize.
  */
 export function resolveChatSidebarDefaultOpen(
   stored: string | null,
   viewportWidth: number,
+  amisActive = false,
 ): boolean {
   if (stored === "true") return true;
   if (stored === "false") return false;
+  if (amisActive) return false;
   return viewportWidth >= CHAT_SIDEBAR_WIDE_BREAKPOINT;
 }
 
@@ -40,7 +44,10 @@ function loadSidebarWidth(): number {
   return SIDEBAR_WIDTH_DEFAULT;
 }
 
-let sidebarOpen = (() => {
+let sidebarOpen: boolean | null = null;
+
+function ensureSidebarInit(): boolean {
+  if (sidebarOpen !== null) return sidebarOpen;
   let stored: string | null = null;
   try {
     stored = localStorage.getItem(CHAT_SIDEBAR_KEY);
@@ -51,14 +58,19 @@ let sidebarOpen = (() => {
     typeof window !== "undefined" && typeof window.innerWidth === "number"
       ? window.innerWidth
       : 0;
-  return resolveChatSidebarDefaultOpen(stored, width);
-})();
+  const amisActive =
+    typeof document !== "undefined" &&
+    document.documentElement.dataset.palette === "amis";
+  sidebarOpen = resolveChatSidebarDefaultOpen(stored, width, amisActive);
+  return sidebarOpen;
+}
 
 const sidebarListeners = new Set<() => void>();
 
 function setSidebarOpenGlobal(value: boolean | ((prev: boolean) => boolean)) {
-  const next = typeof value === "function" ? value(sidebarOpen) : value;
-  if (next === sidebarOpen) return;
+  const prev = ensureSidebarInit();
+  const next = typeof value === "function" ? value(prev) : value;
+  if (next === prev) return;
   sidebarOpen = next;
   try {
     localStorage.setItem(CHAT_SIDEBAR_KEY, String(next));
@@ -82,7 +94,7 @@ function subscribeSidebar(listener: () => void) {
 }
 
 function getSidebarSnapshot() {
-  return sidebarOpen;
+  return ensureSidebarInit();
 }
 
 export function useChatSidebarOpen(): [

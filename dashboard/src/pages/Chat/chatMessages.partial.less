@@ -33,19 +33,24 @@
      thinking/tool rows grow and causes visible up/down jitter. */
   overflow-anchor: none;
 
-  /* Custom scrollbar for visual polish */
+  /* Custom scrollbar for visual polish. The transparent padding-box border
+     keeps the thumb visually ~6px while giving a 12px grab target. */
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 12px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
     background: var(--fn-border-primary);
-    border-radius: 3px;
+    border: 3px solid transparent;
+    border-radius: 6px;
+    background-clip: padding-box;
 
     &:hover {
       background: var(--fn-text-quaternary);
+      border: 3px solid transparent;
+      background-clip: padding-box;
     }
   }
 }
@@ -1144,6 +1149,15 @@
   }
 }
 
+.processSummaryLiveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--fn-color-brand, var(--fn-text-tertiary));
+  animation: thinkingPulse 1.4s ease-in-out infinite;
+}
+
 .processSummaryText {
   flex: 1;
   min-width: 0;
@@ -1269,8 +1283,8 @@
 
 /* ---------- Message timestamp & usage ---------- */
 .msgTime {
-  font-size: 10px;
-  color: var(--fn-text-quaternary);
+  font-size: 11px;
+  color: var(--fn-text-tertiary);
   margin-top: 0;
   padding: 0;
   user-select: none;
@@ -1291,12 +1305,12 @@
   flex-wrap: wrap;
   margin-top: 6px;
   padding: 0 4px;
-  opacity: 0.5;
-  font-size: 10px;
+  opacity: 0.85;
+  font-size: 11px;
   transition: opacity 0.2s;
 
   .messageBubble:hover & {
-    opacity: 0.9;
+    opacity: 1;
   }
 }
 
@@ -1306,8 +1320,8 @@
 }
 
 .msgUsage {
-  font-size: 10px;
-  color: var(--fn-text-quaternary);
+  font-size: 11px;
+  color: var(--fn-text-tertiary);
   user-select: none;
 }
 

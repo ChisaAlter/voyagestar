@@ -83,6 +83,29 @@
   transition: color var(--fn-transition-fast);
 }
 
+.navIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Amis (Ardot) nav icons: tinted tile + brand glyph; active row inverts to a
+   gradient tile with a white glyph. Other palettes keep bare line icons. */
+:global(html[data-palette="amis"]) .navIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--fn-color-brand-bg);
+  color: var(--fn-color-brand) !important;
+}
+
+:global(html[data-palette="amis"]) .navIcon[data-active] {
+  background: var(--fn-brand-gradient);
+  color: #fff !important;
+  box-shadow: 0 1px 4px var(--fn-color-brand-shadow);
+}
+
 .chatRailExpandBtn {
   display: flex;
   align-items: center;

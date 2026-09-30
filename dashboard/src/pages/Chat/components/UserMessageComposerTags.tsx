@@ -1,5 +1,4 @@
 import { useMemo, type ReactNode } from "react";
-import { Cpu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { UserComposerContext } from "../hooks/useChat";
 import type { SkillSpec } from "../../Agent/Skills/useSkills";
@@ -11,7 +10,6 @@ import { ConnectorLogo } from "../../Agent/Connectors/connectorDefs";
 import { knowledgeIconForName } from "../../KnowledgeBases/knowledgeIcons";
 import ContextChip, { type ContextChipVariant } from "./ContextChip";
 import { skillChipIcon } from "../utils/skillChipIcon";
-import { modelShortLabel } from "../../../utils/modelOptions";
 import styles from "../index.module.less";
 
 export interface ComposerTagLookups {
@@ -32,8 +30,7 @@ export function hasUserComposerTags(context?: UserComposerContext): boolean {
     context.skills?.length ||
       context.connectors?.length ||
       context.knowledgeBaseIds?.length ||
-      context.targetAgents?.length ||
-      context.model,
+      context.targetAgents?.length,
   );
 }
 
@@ -112,15 +109,6 @@ export default function UserMessageComposerTags({
           />
         ),
         label: agent?.name || id,
-      });
-    }
-
-    if (context.model) {
-      items.push({
-        key: `model-${context.model}`,
-        variant: "model",
-        icon: <Cpu size={11} strokeWidth={2.2} aria-hidden />,
-        label: modelShortLabel(context.model),
       });
     }
 

@@ -358,7 +358,7 @@ export default function AvatarDropdown({
 
       <a
         className={styles.menuItem}
-        href="https://tencentcloud.github.io/Octop/"
+        href={GITHUB_URL}
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => setMenuOpen(false)}
@@ -428,7 +428,10 @@ export default function AvatarDropdown({
         }}
       >
         {avatar}
-        <span className={styles.triggerName}>{displayName}</span>
+        <span className={styles.triggerNameBlock}>
+          <span className={styles.triggerName}>{displayName}</span>
+          <span className={styles.triggerRole}>{roleLabel}</span>
+        </span>
         {menuOpen ? (
           <ChevronUp
             size={14}

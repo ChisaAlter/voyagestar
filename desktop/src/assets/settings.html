@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voyagestar Sanctum Settings</title>
+    <link rel="stylesheet" href="/shell.css" />
+    <style>
+      html,
+      body {
+        overflow: hidden;
+      }
+
+      h1 {
+        font-size: 15px;
+      }
+
+      .row + .row {
+        border-top: none;
+      }
+
+      .actions .primary {
+        flex: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window-chrome voyagestar-desktop-drag"></div>
+
+    <div class="wrap">
+      <h1 id="title"></h1>
+      <div class="rows">
+        <div class="row">
+          <div class="label" id="l-lang"></div>
+          <select id="locale">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="label" id="l-auto"></div>
+          <label class="switch">
+            <input type="checkbox" id="autostart" />
+            <span></span>
+          </label>
+        </div>
+        <div class="row">
+          <div class="label" id="l-tray"></div>
+          <label class="switch">
+            <input type="checkbox" id="tray" />
+            <span></span>
+          </label>
+        </div>
+        <div class="row">
+          <div class="label" id="l-sleep"></div>
+          <label class="switch">
+            <input type="checkbox" id="sleep" />
+            <span></span>
+          </label>
+        </div>
+        <div class="row">
+          <div class="label" id="l-port"></div>
+          <input
+            type="number"
+            id="port"
+            min="1"
+            max="65535"
+            step="1"
+            inputmode="numeric"
+          />
+        </div>
+        <div class="row">
+          <div class="label" id="l-project"></div>
+          <button type="button" class="link" id="project-link"></button>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" id="show-main"></button>
+        <button type="button" class="ghost" id="quit"></button>
+      </div>
+      <p class="status hidden" id="settings-status"></p>
+    </div>
+
+    <script type="module">
+      import {
+        applyControlsCopy,
+        call,
+        installWindowControls,
+        openExternal,
+        t,
+      } from "/shell.js";
+
+      const PROJECT_URL = "https://github.com/ChisaAlter/voyagestar";
+
+      const errEl = document.getElementById("settings-status");
+      let locale = "en";
+
+      function applyLocale(next) {
+        locale = next;
+        document.getElementById("title").textContent = t(locale, "settingsTitle");
+        document.getElementById("l-lang").textContent = t(locale, "lang");
+        document.getElementById("l-auto").textContent = t(locale, "auto");
+        document.getElementById("l-tray").textContent = t(locale, "tray");
+        document.getElementById("l-sleep").textContent = t(locale, "sleep");
+        document.getElementById("l-port").textContent = t(locale, "port");
+        document.getElementById("l-project").textContent =
+          t(locale, "project");
+        document.getElementById("project-link").textContent =
+          PROJECT_URL.replace(/^https?:\/\//, "");
+        document.getElementById("show-main").textContent =
+          t(locale, "showMain");
+        document.getElementById("quit").textContent = t(locale, "quit");
+        applyControlsCopy(locale);
+      }
+
+      function readPort() {
+        const raw = document.getElementById("port").value.trim();
+        if (raw === "") return 0;
+        const value = Number(raw);
+        if (!Number.isInteger(value) || value < 1 || value > 65535) {
+          return null;
+        }
+        return value;
+      }
+
+      async function persist() {
+        const port = readPort();
+        if (port === null) {
+          errEl.textContent = t(locale, "portInvalid");
+          errEl.classList.remove("hidden");
+          return;
+        }
+        let savedBefore;
+        try {
+          savedBefore = await call("GetSettingsStatus");
+          const saved = await call("SaveSettings", {
+            ...savedBefore,
+            locale: document.getElementById("locale").value,
+            autostart: document.getElementById("autostart").checked,
+            minimizeToTray: document.getElementById("tray").checked,
+            preventSleep: document.getElementById("sleep").checked,
+            ...(port ? { port } : {}),
+          });
+          document.getElementById("autostart").checked = !!saved.autostart;
+          document.getElementById("sleep").checked = !!saved.preventSleep;
+          errEl.classList.add("hidden");
+          applyLocale(saved.locale);
+        } catch (error) {
+          if (savedBefore) {
+            document.getElementById("autostart").checked =
+              !!savedBefore.autostart;
+            document.getElementById("sleep").checked =
+              !!savedBefore.preventSleep;
+          }
+          errEl.textContent = String(error);
+          errEl.classList.remove("hidden");
+        }
+      }
+
+      installWindowControls({
+        settings: true,
+        onClose: () => call("HideSettings"),
+      });
+
+      // Paint copy immediately so the window isn't blank if the bridge is
+      // still coming up; the saved settings refine it right after.
+      applyLocale(
+        (navigator.language || "").toLowerCase().startsWith("zh")
+          ? "zh"
+          : "en",
+      );
+
+      let s = {};
+      try {
+        s = await call("GetSettingsStatus");
+      } catch (error) {
+        errEl.textContent = String(error);
+        errEl.classList.remove("hidden");
+      }
+      applyLocale(s.locale || locale);
+      document.getElementById("locale").value = s.locale || locale;
+      document.getElementById("autostart").checked = !!s.autostart;
+      document.getElementById("tray").checked = s.minimizeToTray !== false;
+      document.getElementById("sleep").checked = !!s.preventSleep;
+      document.getElementById("port").value = s.port || 8088;
+
+      for (const id of ["locale", "autostart", "tray", "sleep", "port"]) {
+        document.getElementById(id).addEventListener("change", persist);
+      }
+      document
+        .getElementById("show-main")
+        .addEventListener("click", () => call("ShowMain"));
+      document
+        .getElementById("quit")
+        .addEventListener("click", () => call("Quit"));
+      document
+        .getElementById("project-link")
+        .addEventListener("click", () => openExternal(PROJECT_URL));
+    </script>
+  </body>
+</html>

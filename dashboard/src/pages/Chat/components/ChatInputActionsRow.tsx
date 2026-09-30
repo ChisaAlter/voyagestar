@@ -20,7 +20,9 @@ import {
   BookOpen,
   Bot,
   MoreHorizontal,
+  Plus,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -70,6 +72,11 @@ const _sttAvailable = isSttAvailable();
 
 interface ChatInputActionsRowProps {
   isMobile: boolean;
+  /**
+   * Amis capsule composer: collapse every secondary control into a single
+   * "+" popover so the pill reads [+] [input] [send] per the design board.
+   */
+  minimalControls?: boolean;
   isStreaming: boolean;
   disabled?: boolean;
   canSend: boolean;
@@ -127,6 +134,7 @@ interface ChatInputActionsRowProps {
 
 export default function ChatInputActionsRow({
   isMobile,
+  minimalControls = false,
   isStreaming,
   disabled,
   canSend,
@@ -186,6 +194,7 @@ export default function ChatInputActionsRow({
   const [knowledgePickerOpen, setKnowledgePickerOpen] = useState(false);
   const [shortcutOpen, setShortcutOpen] = useState(false);
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
+  const [reasoningPillOpen, setReasoningPillOpen] = useState(false);
   const [reasoningModelRef, setReasoningModelRef] = useState<string | null>(
     null,
   );
@@ -199,7 +208,8 @@ export default function ChatInputActionsRow({
   );
 
   const modelOverride = resolveTurnModelOverride(selectedModel, defaultModel);
-  const useCompactControls = isMobile || isCompact;
+  const minimal = minimalControls && !isMobile;
+  const useCompactControls = isMobile || isCompact || minimal;
 
   useEffect(() => {
     if (isMobile) {
@@ -503,6 +513,78 @@ export default function ChatInputActionsRow({
     </div>
   );
 
+  const reasoningPillMenu = reasoningCapability ? (
+    <div className={styles.reasoningMenuPanel}>
+      {reasoningIsStatusOnly ? (
+        <div className={styles.reasoningStatusRow}>
+          <Brain size={16} />
+          <span>{t("chat.reasoningAlways", "始终推理")}</span>
+          <Check size={16} />
+        </div>
+      ) : (
+        <>
+          <div className={styles.reasoningMenuSectionLabel}>
+            {t("chat.reasoningMode", "思考模式")}
+          </div>
+          {(reasoningCapability.toggle
+            ? (["auto", "enabled", "disabled"] as const)
+            : (["auto", "enabled"] as const)
+          ).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              className={`${styles.reasoningMenuChoice} ${
+                reasoningMode === mode ? styles.reasoningMenuChoiceActive : ""
+              }`}
+              onClick={() => {
+                onReasoningChange?.(mode, reasoningEffort);
+                setReasoningPillOpen(false);
+              }}
+            >
+              <span>{reasoningModeLabel(mode)}</span>
+              {reasoningMode === mode && <Check size={16} />}
+            </button>
+          ))}
+          {reasoningCapability.efforts.length > 0 && (
+            <>
+              <div className={styles.reasoningMenuDivider} />
+              <div className={styles.reasoningMenuSectionLabel}>
+                {t("chat.reasoningEffort", "思考强度")}
+              </div>
+              {reasoningCapability.efforts.map((effort) => (
+                <button
+                  key={effort}
+                  type="button"
+                  className={`${styles.reasoningMenuChoice} ${
+                    reasoningEffort === effort
+                      ? styles.reasoningMenuChoiceActive
+                      : ""
+                  }`}
+                  onClick={() => {
+                    onReasoningChange?.(
+                      reasoningMode === "disabled" ? "enabled" : reasoningMode,
+                      effort,
+                    );
+                    setReasoningPillOpen(false);
+                  }}
+                >
+                  <span>{effort}</span>
+                  {reasoningEffort === effort && <Check size={16} />}
+                </button>
+              ))}
+            </>
+          )}
+        </>
+      )}
+    </div>
+  ) : null;
+
+  const modelPillLabel = selectedModelInfo
+    ? modelOptionLabel(selectedModelInfo)
+    : effectiveModelRef
+      ? modelShortLabel(effectiveModelRef)
+      : t("chat.modelAuto", "Auto");
+
   const shortcutMenu = (
     <div className={styles.shortcutPickerPanel}>
       <div className={styles.skillPickerList}>
@@ -659,6 +741,144 @@ export default function ChatInputActionsRow({
     </div>
   );
 
+  const closeMinimalMenu = () => {
+    setOverflowPopoverOpen(false);
+    closeCompactPicker();
+  };
+
+  /** Amis capsule "+" menu: model/attach/voice/actions plus picker entries. */
+  const renderMinimalMenu = () => (
+    <div className={styles.mobileOverflowMenu}>
+      {showModelPicker && (
+        <button
+          type="button"
+          className={styles.mobileOverflowItem}
+          onClick={() => openCompactPicker("model")}
+        >
+          <span className={styles.mobileOverflowItemMain}>
+            <Cpu size={18} />
+            <span>{t("chat.selectModel", "Select model")}</span>
+          </span>
+          <span className={styles.mobileOverflowItemMeta}>
+            {selectedModel && (
+              <span className={styles.toolbarBadge}>
+                {modelShortLabel(selectedModel)}
+              </span>
+            )}
+            <ChevronRight size={16} />
+          </span>
+        </button>
+      )}
+      <button
+        type="button"
+        className={styles.mobileOverflowItem}
+        disabled={uploading}
+        onClick={() => {
+          closeMinimalMenu();
+          onFileSelect();
+        }}
+      >
+        <span className={styles.mobileOverflowItemMain}>
+          <Paperclip size={18} />
+          <span>{t("upload.fileTooltip", "Upload attachment")}</span>
+        </span>
+      </button>
+      <button
+        type="button"
+        className={styles.mobileOverflowItem}
+        disabled={disabled || isStreaming || transcribing || !_sttAvailable}
+        onClick={() => {
+          closeMinimalMenu();
+          onToggleVoice();
+        }}
+      >
+        <span className={styles.mobileOverflowItemMain}>
+          <Mic size={18} />
+          <span>
+            {recording
+              ? t("voice.stopRecording", "停止录音")
+              : t("voice.startRecording", "语音输入")}
+          </span>
+        </span>
+      </button>
+      <button
+        type="button"
+        className={styles.mobileOverflowItem}
+        disabled={
+          !text.trim() || polishing || isStreaming || disabled || !agentId
+        }
+        onClick={() => {
+          closeMinimalMenu();
+          onPolish();
+        }}
+      >
+        <span className={styles.mobileOverflowItemMain}>
+          <Wand2 size={18} />
+          <span>{t("chat.polish.tooltip")}</span>
+        </span>
+      </button>
+      <button
+        type="button"
+        className={styles.mobileOverflowItem}
+        onClick={() => {
+          closeMinimalMenu();
+          onNewChat();
+        }}
+      >
+        <span className={styles.mobileOverflowItemMain}>
+          <MessageSquarePlus size={18} />
+          <span>{t("chatWelcome.newChat")}</span>
+        </span>
+      </button>
+      {(onStartBrowserRecording || onStopBrowserRecording) && (
+        <button
+          type="button"
+          className={styles.mobileOverflowItem}
+          disabled={disabled || browserReplayBusy}
+          onClick={() => {
+            closeMinimalMenu();
+            (browserRecording
+              ? onStopBrowserRecording
+              : onStartBrowserRecording)?.();
+          }}
+        >
+          <span className={styles.mobileOverflowItemMain}>
+            <CircleDot size={18} />
+            <span>
+              {browserRecording
+                ? t("browser.recordReplay.stop", "停止浏览器录制")
+                : t("browser.recordReplay.start", "开始浏览器录制")}
+            </span>
+          </span>
+        </button>
+      )}
+      {onReplayBrowserRecording && (
+        <button
+          type="button"
+          className={styles.mobileOverflowItem}
+          disabled={
+            disabled ||
+            browserRecording ||
+            browserReplayBusy ||
+            !browserLastRecordingId
+          }
+          onClick={() => {
+            closeMinimalMenu();
+            onReplayBrowserRecording();
+          }}
+        >
+          <span className={styles.mobileOverflowItemMain}>
+            <Play size={18} />
+            <span>
+              {t("browser.recordReplay.replay", "回放最近一次浏览器录制")}
+            </span>
+          </span>
+        </button>
+      )}
+      {renderMobileOverflowMenu()}
+    </div>
+  );
+
   const renderCompactPickerContent = () => {
     switch (compactPicker) {
       case "model":
@@ -734,7 +954,132 @@ export default function ChatInputActionsRow({
     renderMobileOverflowMenu()
   );
 
+  const minimalPickerContent = compactPicker ? (
+    <div className={styles.compactPickerPanel}>
+      <button
+        type="button"
+        className={styles.compactPickerBack}
+        onClick={closeCompactPicker}
+        aria-label={t("common.back", "返回")}
+      >
+        <ChevronLeft size={16} />
+        <span>{compactPickerTitle[compactPicker]}</span>
+      </button>
+      {renderCompactPickerContent()}
+    </div>
+  ) : (
+    renderMinimalMenu()
+  );
+
   const renderSecondaryActions = () => {
+    if (minimal) {
+      return (
+        <>
+        <Popover
+          trigger="click"
+          placement="topLeft"
+          open={overflowPopoverOpen}
+          overlayClassName={styles.skillPickerPopover}
+          content={minimalPickerContent}
+          onOpenChange={(open) => {
+            setOverflowPopoverOpen(open);
+            if (open) {
+              setModelPickerOpen(false);
+              setCompactPicker(null);
+              setReasoningModelRef(null);
+            } else {
+              closeCompactPicker();
+            }
+          }}
+        >
+          <button
+            className={`${styles.secondaryBtn} ${styles.capsulePlusBtn} ${
+              overflowBadgeCount > 0 ||
+              modelOverride ||
+              reasoningMode !== "auto" ||
+              reasoningEffort
+                ? styles.secondaryBtnActive
+                : ""
+            }`}
+            type="button"
+            aria-label={t("chat.composerMore", "更多工具")}
+          >
+            <Plus size={16} />
+            {overflowBadgeCount > 0 && (
+              <span className={styles.toolbarBadge}>{overflowBadgeCount}</span>
+            )}
+          </button>
+        </Popover>
+        <Tooltip
+          title={t("upload.fileTooltip", "Upload attachment")}
+          mouseEnterDelay={0.4}
+        >
+          <button
+            className={styles.secondaryBtn}
+            onClick={onFileSelect}
+            type="button"
+            disabled={uploading}
+            aria-label={t("upload.fileTooltip", "Upload attachment")}
+          >
+            <Paperclip size={16} />
+          </button>
+        </Tooltip>
+        <Tooltip
+          title={
+            !_sttAvailable
+              ? t(
+                  "voice.sttNotAvailable",
+                  "此设备不支持语音输入（需要 HTTPS）",
+                )
+              : recording
+              ? t("voice.stopRecording", "停止录音")
+              : transcribing
+              ? t("voice.transcribing", "识别中…")
+              : t("voice.startRecording", "语音输入")
+          }
+          mouseEnterDelay={0.4}
+        >
+          <button
+            className={`${styles.secondaryBtn} ${
+              recording || transcribing ? styles.secondaryBtnActive : ""
+            }`}
+            type="button"
+            disabled={disabled || isStreaming || transcribing || !_sttAvailable}
+            onClick={onToggleVoice}
+            aria-label={t("voice.startRecording", "语音输入")}
+          >
+            <Mic size={16} />
+          </button>
+        </Tooltip>
+        {reasoningCapability && onReasoningChange && (
+          <Popover
+            trigger="click"
+            placement="topLeft"
+            open={reasoningPillOpen}
+            overlayClassName={styles.modelPopover}
+            content={reasoningPillMenu}
+            onOpenChange={(open) => {
+              setReasoningPillOpen(open);
+              if (open) setOverflowPopoverOpen(false);
+            }}
+          >
+            <button
+              className={styles.capsulePill}
+              type="button"
+              aria-label={t("chat.reasoningMode", "思考模式")}
+            >
+              <span>
+                {reasoningIsStatusOnly
+                  ? t("chat.reasoningAlways", "始终推理")
+                  : reasoningEffort || reasoningModeLabel(reasoningMode)}
+              </span>
+              <ChevronDown size={12} />
+            </button>
+          </Popover>
+        )}
+        </>
+      );
+    }
     if (useCompactControls) {
       const modelButton = (
         <button
@@ -1123,141 +1468,183 @@ export default function ChatInputActionsRow({
     <div ref={actionsRowRef} className={styles.actionsRow}>
       <div className={styles.secondaryActions}>{renderSecondaryActions()}</div>
       <div className={styles.inputActions}>
-        <ContextWindowRing
-          usedTokens={contextUsedTokens}
-          maxTokens={contextMaxTokens}
-          agentId={agentId}
-          threadId={threadId}
-          selectedConnectors={selectedConnectors}
-          isMobile={isMobile}
-        />
-        {/* Desktop: dedicated newChatBtn; mobile: replace polish with new-chat */}
-        {useCompactControls ? (
-          <Tooltip title={t("chatWelcome.newChat")} mouseEnterDelay={0.4}>
+        {minimal && showModelPicker && (
+          <Popover
+            trigger="click"
+            placement="topRight"
+            open={modelPickerOpen}
+            overlayClassName={styles.modelPopover}
+            content={modelMenu}
+            onOpenChange={(open) => {
+              setModelPickerOpen(open);
+              if (open) setOverflowPopoverOpen(false);
+              if (!open) setReasoningModelRef(null);
+            }}
+          >
             <button
-              className={styles.newChatBtn}
-              onClick={onNewChat}
+              className={styles.capsulePill}
               type="button"
+              aria-label={t("chat.selectModel", "Select model")}
             >
-              <MessageSquarePlus size={16} strokeWidth={1.75} />
+              <span className={styles.capsulePillLabel}>{modelPillLabel}</span>
+              <ChevronDown size={12} />
             </button>
-          </Tooltip>
-        ) : (
+          </Popover>
+        )}
+        {minimal && (
+          <ContextWindowRing
+            usedTokens={contextUsedTokens}
+            maxTokens={contextMaxTokens}
+            agentId={agentId}
+            threadId={threadId}
+            selectedConnectors={selectedConnectors}
+            isMobile={isMobile}
+          />
+        )}
+        {!minimal && (
           <>
-            <Tooltip title={t("chatWelcome.newChat")} mouseEnterDelay={0.4}>
+            <ContextWindowRing
+              usedTokens={contextUsedTokens}
+              maxTokens={contextMaxTokens}
+              agentId={agentId}
+              threadId={threadId}
+              selectedConnectors={selectedConnectors}
+              isMobile={isMobile}
+            />
+            {/* Desktop: dedicated newChatBtn; mobile: replace polish with new-chat */}
+            {useCompactControls ? (
+              <Tooltip title={t("chatWelcome.newChat")} mouseEnterDelay={0.4}>
+                <button
+                  className={styles.newChatBtn}
+                  onClick={onNewChat}
+                  type="button"
+                >
+                  <MessageSquarePlus size={16} strokeWidth={1.75} />
+                </button>
+              </Tooltip>
+            ) : (
+              <>
+                <Tooltip title={t("chatWelcome.newChat")} mouseEnterDelay={0.4}>
+                  <button
+                    className={styles.newChatBtn}
+                    onClick={onNewChat}
+                    type="button"
+                  >
+                    <MessageSquarePlus size={16} strokeWidth={1.75} />
+                  </button>
+                </Tooltip>
+                <Tooltip title={t("chat.polish.tooltip")} mouseEnterDelay={0.4}>
+                  <button
+                    className={styles.secondaryBtn}
+                    onClick={onPolish}
+                    type="button"
+                    disabled={
+                      !text.trim() ||
+                      polishing ||
+                      isStreaming ||
+                      disabled ||
+                      !agentId
+                    }
+                  >
+                    <Wand2
+                      size={16}
+                      className={polishing ? styles.spinIcon : undefined}
+                    />
+                  </button>
+                </Tooltip>
+              </>
+            )}
+            <Tooltip
+              title={
+                !_sttAvailable
+                  ? t(
+                      "voice.sttNotAvailable",
+                      "此设备不支持语音输入（需要 HTTPS）",
+                    )
+                  : recording
+                  ? t("voice.stopRecording", "停止录音")
+                  : transcribing
+                  ? t("voice.transcribing", "识别中…")
+                  : t("voice.startRecording", "语音输入")
+              }
+              mouseEnterDelay={0.4}
+            >
               <button
-                className={styles.newChatBtn}
-                onClick={onNewChat}
-                type="button"
-              >
-                <MessageSquarePlus size={16} strokeWidth={1.75} />
-              </button>
-            </Tooltip>
-            <Tooltip title={t("chat.polish.tooltip")} mouseEnterDelay={0.4}>
-              <button
-                className={styles.secondaryBtn}
-                onClick={onPolish}
+                className={`${styles.secondaryBtn} ${
+                  recording || transcribing ? styles.secondaryBtnActive : ""
+                }`}
                 type="button"
                 disabled={
-                  !text.trim() ||
-                  polishing ||
-                  isStreaming ||
-                  disabled ||
-                  !agentId
+                  disabled || isStreaming || transcribing || !_sttAvailable
                 }
+                onClick={onToggleVoice}
               >
-                <Wand2
-                  size={16}
-                  className={polishing ? styles.spinIcon : undefined}
-                />
+                <Mic size={16} />
               </button>
             </Tooltip>
+            {(onStartBrowserRecording || onStopBrowserRecording) && (
+              <Tooltip
+                title={
+                  browserRecording
+                    ? t("browser.recordReplay.stop", "停止浏览器录制")
+                    : t("browser.recordReplay.start", "开始浏览器录制")
+                }
+                mouseEnterDelay={0.4}
+              >
+                <button
+                  className={`${styles.secondaryBtn} ${
+                    browserRecording ? styles.secondaryBtnRecording : ""
+                  }`}
+                  type="button"
+                  disabled={disabled || browserReplayBusy}
+                  onClick={
+                    browserRecording
+                      ? onStopBrowserRecording
+                      : onStartBrowserRecording
+                  }
+                >
+                  {browserRecording ? (
+                    <Square size={15} />
+                  ) : (
+                    <CircleDot size={16} />
+                  )}
+                </button>
+              </Tooltip>
+            )}
+            {onReplayBrowserRecording && (
+              <Tooltip
+                title={
+                  browserLastRecordingId
+                    ? t("browser.recordReplay.replay", "回放最近一次浏览器录制")
+                    : t(
+                        "browser.recordReplay.noRecording",
+                        "请先完成一次浏览器录制",
+                      )
+                }
+                mouseEnterDelay={0.4}
+              >
+                <button
+                  className={`${styles.secondaryBtn} ${
+                    browserReplayBusy ? styles.secondaryBtnActive : ""
+                  }`}
+                  type="button"
+                  disabled={
+                    disabled ||
+                    browserRecording ||
+                    browserReplayBusy ||
+                    !browserLastRecordingId
+                  }
+                  onClick={onReplayBrowserRecording}
+                >
+                  {browserReplayBusy ? (
+                    <Loader2 size={16} className={styles.spinIcon} />
+                  ) : (
+                    <Play size={16} />
+                  )}
+                </button>
+              </Tooltip>
+            )}
           </>
-        )}
-        <Tooltip
-          title={
-            !_sttAvailable
-              ? t("voice.sttNotAvailable", "此设备不支持语音输入（需要 HTTPS）")
-              : recording
-              ? t("voice.stopRecording", "停止录音")
-              : transcribing
-              ? t("voice.transcribing", "识别中…")
-              : t("voice.startRecording", "语音输入")
-          }
-          mouseEnterDelay={0.4}
-        >
-          <button
-            className={`${styles.secondaryBtn} ${
-              recording || transcribing ? styles.secondaryBtnActive : ""
-            }`}
-            type="button"
-            disabled={disabled || isStreaming || transcribing || !_sttAvailable}
-            onClick={onToggleVoice}
-          >
-            <Mic size={16} />
-          </button>
-        </Tooltip>
-        {(onStartBrowserRecording || onStopBrowserRecording) && (
-          <Tooltip
-            title={
-              browserRecording
-                ? t("browser.recordReplay.stop", "停止浏览器录制")
-                : t("browser.recordReplay.start", "开始浏览器录制")
-            }
-            mouseEnterDelay={0.4}
-          >
-            <button
-              className={`${styles.secondaryBtn} ${
-                browserRecording ? styles.secondaryBtnRecording : ""
-              }`}
-              type="button"
-              disabled={disabled || browserReplayBusy}
-              onClick={
-                browserRecording
-                  ? onStopBrowserRecording
-                  : onStartBrowserRecording
-              }
-            >
-              {browserRecording ? (
-                <Square size={15} />
-              ) : (
-                <CircleDot size={16} />
-              )}
-            </button>
-          </Tooltip>
-        )}
-        {onReplayBrowserRecording && (
-          <Tooltip
-            title={
-              browserLastRecordingId
-                ? t("browser.recordReplay.replay", "回放最近一次浏览器录制")
-                : t(
-                    "browser.recordReplay.noRecording",
-                    "请先完成一次浏览器录制",
-                  )
-            }
-            mouseEnterDelay={0.4}
-          >
-            <button
-              className={`${styles.secondaryBtn} ${
-                browserReplayBusy ? styles.secondaryBtnActive : ""
-              }`}
-              type="button"
-              disabled={
-                disabled ||
-                browserRecording ||
-                browserReplayBusy ||
-                !browserLastRecordingId
-              }
-              onClick={onReplayBrowserRecording}
-            >
-              {browserReplayBusy ? (
-                <Loader2 size={16} className={styles.spinIcon} />
-              ) : (
-                <Play size={16} />
-              )}
-            </button>
-          </Tooltip>
         )}
         {isStreaming ? (
           canSend ? (

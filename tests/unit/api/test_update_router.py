@@ -303,7 +303,7 @@ def test_build_status_failure_via_check_keeps_error_code(
 
 
 @pytest.mark.asyncio
-async def test_check_endpoint_reports_error_code_when_pypi_unreachable(
+async def test_check_endpoint_reports_up_to_date_without_upstream(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(update_router, "fetch_pypi_info", lambda: None)
@@ -311,8 +311,9 @@ async def test_check_endpoint_reports_error_code_when_pypi_unreachable(
     result = await update_router.check_for_updates(_=None, server=_settings_server())
 
     assert result["latest_version"] is None
-    assert result["error"] == "could not reach PyPI"
-    assert result["error_code"] == "pypi_unreachable"
+    assert result["has_update"] is False
+    assert result["error"] is None
+    assert result["error_code"] is None
 
 
 @pytest.mark.asyncio

@@ -3,13 +3,13 @@ package main
 import "testing"
 
 func TestDesktopTextLooksUpLocaleWithEnglishDefault(t *testing.T) {
-	if got := desktopText(LocaleZH, copyStatusReady); got != "Voyagestar 已就绪" {
+	if got := desktopText(LocaleZH, copyStatusReady); got != "远航星 Sanctum 已就绪" {
 		t.Fatalf("zh: %s", got)
 	}
-	if got := desktopText(LocaleEN, copyStatusReady); got != "Voyagestar is ready" {
+	if got := desktopText(LocaleEN, copyStatusReady); got != "Voyagestar Sanctum is ready" {
 		t.Fatalf("en: %s", got)
 	}
-	if got := desktopText(Locale(""), copyStatusReady); got != "Voyagestar is ready" {
+	if got := desktopText(Locale(""), copyStatusReady); got != "Voyagestar Sanctum is ready" {
 		t.Fatalf("unknown locale should fall back to English: %s", got)
 	}
 	if got := desktopText(LocaleZH, "missing.key"); got != "missing.key" {

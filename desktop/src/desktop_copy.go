@@ -3,18 +3,20 @@ package main
 import "fmt"
 
 const (
+	copyAppName                = "app.name"
+	copySettingsTitle          = "settings.title"
 	copyStatusConnecting       = "status.connecting"
 	copyStatusCheckingRuntime  = "status.checking_runtime"
 	copyStatusStartingService  = "status.starting_service"
 	copyStatusReady            = "status.ready"
 	copyStatusUsingRuntime     = "status.using_runtime"
 	copyStatusBackupDatabase   = "status.backup_database"
-	copyStatusInstallingUpdate  = "status.installing_update"
-	copyStatusUpdatingRuntime   = "status.updating_runtime"
-	copyStatusFirstExtract      = "status.first_extract"
-	copyStatusUpdateFailedKeep  = "status.update_failed_keep"
-	copyErrorBackupFailed       = "error.backup_failed"
-	copyErrorUpgradeFailed      = "error.upgrade_failed"
+	copyStatusInstallingUpdate = "status.installing_update"
+	copyStatusUpdatingRuntime  = "status.updating_runtime"
+	copyStatusFirstExtract     = "status.first_extract"
+	copyStatusUpdateFailedKeep = "status.update_failed_keep"
+	copyErrorBackupFailed      = "error.backup_failed"
+	copyErrorUpgradeFailed     = "error.upgrade_failed"
 	copyWait1Minute            = "wait.1_minute"
 	copyWaitNMinutes           = "wait.n_minutes"
 	copyWait1Second            = "wait.1_second"
@@ -22,10 +24,18 @@ const (
 	copyHealthNotReady5xx      = "health.not_ready_5xx"
 	copyHealthNotReadyConnect  = "health.not_ready_connect"
 	copyHealthNotReady         = "health.not_ready"
+	copyTrayStatusStarting     = "tray.status.starting"
+	copyTrayStatusRunning      = "tray.status.running"
+	copyTrayStatusFailed       = "tray.status.failed"
+	copyTrayShow               = "tray.show"
+	copyTraySettings           = "tray.settings"
+	copyTrayQuit               = "tray.quit"
 )
 
 var desktopCopy = map[Locale]map[string]string{
 	LocaleEN: {
+		copyAppName:                "Voyagestar Sanctum",
+		copySettingsTitle:          "Voyagestar Sanctum — Settings",
 		copyStatusConnecting:       "Connecting to Voyagestar Sanctum…",
 		copyStatusCheckingRuntime:  "Checking the runtime…",
 		copyStatusStartingService:  "Starting the Voyagestar Sanctum service…",
@@ -45,12 +55,20 @@ var desktopCopy = map[Locale]map[string]string{
 		copyHealthNotReady5xx:      "Voyagestar Sanctum did not become ready within %s (%s). The service responded but is not ready yet. Try again, or check the terminal logs.",
 		copyHealthNotReadyConnect:  "Voyagestar Sanctum did not become ready within %s (%s). Could not connect — make sure Voyagestar Sanctum is running.",
 		copyHealthNotReady:         "Voyagestar Sanctum did not become ready within %s (%s). Make sure Voyagestar Sanctum is running at this address, or check the terminal logs.",
+		copyTrayStatusStarting:     "Starting…",
+		copyTrayStatusRunning:      "Running",
+		copyTrayStatusFailed:       "Failed to start",
+		copyTrayShow:               "Show Voyagestar",
+		copyTraySettings:           "Settings…",
+		copyTrayQuit:               "Quit",
 	},
 	LocaleZH: {
-		copyStatusConnecting:       "正在连接远航星Sanctum…",
+		copyAppName:                "远航星 Sanctum",
+		copySettingsTitle:          "远航星 Sanctum 设置",
+		copyStatusConnecting:       "正在连接远航星 Sanctum…",
 		copyStatusCheckingRuntime:  "正在检查运行环境…",
-		copyStatusStartingService:  "正在启动远航星Sanctum 服务…",
-		copyStatusReady:            "远航星Sanctum 已就绪",
+		copyStatusStartingService:  "正在启动远航星 Sanctum 服务…",
+		copyStatusReady:            "远航星 Sanctum 已就绪",
 		copyStatusUsingRuntime:     "正在使用已有运行环境…",
 		copyStatusBackupDatabase:   "发现客户端新版 %s，正在备份数据库…",
 		copyStatusInstallingUpdate: "正在安装客户端内置新版…",
@@ -63,9 +81,15 @@ var desktopCopy = map[Locale]map[string]string{
 		copyWaitNMinutes:           "%d 分钟",
 		copyWait1Second:            "1 秒",
 		copyWaitNSeconds:           "%d 秒",
-		copyHealthNotReady5xx:      "远航星Sanctum 服务未在%s内就绪（%s）。服务已响应但尚未就绪，请稍后再试，或查看终端日志。",
-		copyHealthNotReadyConnect:  "远航星Sanctum 服务未在%s内就绪（%s）。目前无法连接该地址，请确认远航星Sanctum 正在运行。",
-		copyHealthNotReady:         "远航星Sanctum 服务未在%s内就绪（%s）。请确认本机已启动远航星Sanctum，且地址、端口正确；也可查看终端日志。",
+		copyHealthNotReady5xx:      "远航星 Sanctum 服务未在%s内就绪（%s）。服务已响应但尚未就绪，请稍后再试，或查看终端日志。",
+		copyHealthNotReadyConnect:  "远航星 Sanctum 服务未在%s内就绪（%s）。目前无法连接该地址，请确认远航星 Sanctum 正在运行。",
+		copyHealthNotReady:         "远航星 Sanctum 服务未在%s内就绪（%s）。请确认本机已启动远航星 Sanctum，且地址、端口正确；也可查看终端日志。",
+		copyTrayStatusStarting:     "正在启动…",
+		copyTrayStatusRunning:      "运行中",
+		copyTrayStatusFailed:       "启动失败",
+		copyTrayShow:               "显示 Voyagestar",
+		copyTraySettings:           "设置…",
+		copyTrayQuit:               "退出",
 	},
 }
 

@@ -723,3 +723,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Embedded variant — Workbench「文件」tab hosts the browser inline. */
+.workspaceEmbed {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.embeddedHeader {
+  flex-shrink: 0;
+  padding: 4px 0 12px;
+}
